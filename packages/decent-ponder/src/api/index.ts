@@ -1,11 +1,7 @@
 import { db } from "ponder:api";
 import schema from "ponder:schema";
 import { Hono } from "hono";
-import {
-  eq,
-  graphql,
-  replaceBigInts,
-} from "ponder";
+import { eq, graphql } from "ponder";
 
 const app = new Hono();
 
@@ -22,9 +18,13 @@ app.get("/dao/:dao", async (c) => {
     return c.json({ error: "DAO not found" }, 404);
   }
 
-  return c.json(
-    replaceBigInts(dao[0], (x) => x.toString())
-  );
+  return c.json(dao[0]);
+});
+
+app.get("/count", async (c) => {
+  const count = await db.$count(schema.keyValuePair);
+
+  return c.json({ count });
 });
 
 export default app;

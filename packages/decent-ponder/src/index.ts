@@ -1,9 +1,10 @@
 import { ponder } from "ponder:registry";
 import { keyValuePair } from "ponder:schema";
 import { chainIdToPrefix } from "./networks";
+
 ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
   const { theAddress: dao, key, value } = event.args;
-  const timestamp = event.block.timestamp;
+  const timestamp = Number(event.block.timestamp);
   const prefix = chainIdToPrefix(context.network.chainId);
   const entry = { dao: `${prefix}:${dao}`, createdAt: timestamp };
 
@@ -14,8 +15,8 @@ ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
   
   } else if (key === "proposalTemplates") {
     await context.db.insert(keyValuePair)
-      .values({ ...entry, proposalTemplates: value })
-      .onConflictDoUpdate({ proposalTemplates: value, updatedAt: timestamp });
+      .values({ ...entry, proposalTemplatesCID: value })
+      .onConflictDoUpdate({ proposalTemplatesCID: value, updatedAt: timestamp });
   
   } else if (key === "snapshotENS" || key === "snapshotURL") {
     await context.db.insert(keyValuePair)
@@ -26,5 +27,17 @@ ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
     console.log("Unknown key:", key);
     console.log(value);
   }
+});
+
+ponder.on("FractalRegistry:FractalNameUpdated", async ({ event, context }) => {
+  const { daoAddress, daoName } = event.args;
+  const timestamp = Number(event.block.timestamp);
+  const prefix = chainIdToPrefix(context.network.chainId);
+  const entry = { dao: `${prefix}:${daoAddress}`, createdAt: timestamp };
+
+  await context.db.insert(keyValuePair)
+    .values({ ...entry, daoName })
+    .onConflictDoUpdate({ daoName, updatedAt: timestamp });
+  
 });
 
