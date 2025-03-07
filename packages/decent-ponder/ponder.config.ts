@@ -1,7 +1,7 @@
 import { createConfig } from "ponder";
 import { http } from "viem";
 import { KeyValuePairsAbi } from "./abis/KeyValuePairsAbi";
-
+import { FractalRegistryAbi } from "./abis/FractalRegistry";
 export default createConfig({
   networks: {
     sepolia: {
@@ -48,6 +48,31 @@ export default createConfig({
         polygon: {
           address: "0x68e3b985B93eA0a10178c7ae919299699559Aaab",
           startBlock: 43952879,
+        },
+      },
+    },
+    FractalRegistry: {
+      abi: FractalRegistryAbi,
+      network: {
+        sepolia: {
+          address: "0x4791FF2a6E84F012402c0679C12Cb1d9260450A6",
+          startBlock: 4916634,
+        },
+        mainnet: {
+          address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
+          startBlock: 17389302,
+        },
+        base: {
+          address: "0x023bdaefeddddd5b43af125caa8007a99a886fd3",
+          startBlock: 12996617,
+        },
+        optimism: {
+          address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
+          startBlock: 118640391,
+        },
+        polygon: {
+          address: "0xfE5950B4975a19679be7c31a0A03D626d237f37C",
+          startBlock: 43952847,
         },
       },
     },
