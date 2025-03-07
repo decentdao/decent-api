@@ -1,12 +1,11 @@
 import { ponder } from "ponder:registry";
 import { keyValuePair } from "ponder:schema";
-
+import { chainIdToPrefix } from "./networks";
 ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
   const { theAddress: dao, key, value } = event.args;
-  const chainId = context.network.chainId.toString();
   const timestamp = event.block.timestamp;
-
-  const entry = { dao, chainId, createdAt: timestamp };
+  const prefix = chainIdToPrefix(context.network.chainId);
+  const entry = { dao: `${prefix}:${dao}`, createdAt: timestamp };
 
   if (key === "daoName") {
     await context.db.insert(keyValuePair)
