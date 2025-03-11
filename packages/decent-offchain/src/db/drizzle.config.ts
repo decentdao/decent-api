@@ -6,7 +6,7 @@ export default defineConfig({
   schema: "./src/db/schema/*",
   out: "./drizzle",
   dbCredentials: {
-    url: "../decent-ponder/.ponder/pglite",
+    url: process.env.DATABASE_URL ?? "",
   },
   strict: true,
   schemaFilter: ["offchain"],
