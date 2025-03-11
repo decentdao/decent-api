@@ -1,6 +1,5 @@
-import { pgSchema, serial, text, timestamp } from "drizzle-orm/pg-core";
-
-export const offchainSchema = pgSchema("offchain");
+import { serial, text, timestamp } from "drizzle-orm/pg-core";
+import { offchainSchema } from "./schema";
 
 export const proposals = offchainSchema.table("proposals", {
   id: serial("id").primaryKey(),

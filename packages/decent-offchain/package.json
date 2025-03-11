@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "studio": "drizzle-kit studio --config=./src/db/drizzle.config.ts",
-    "push": "drizzle-kit push --config=./src/db/drizzle.config.ts"
+    "push": "drizzle-kit push --config=./src/db/drizzle.config.ts",
+    "dev": "bun run src/api/index.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",
-    "drizzle-orm": "^0.40.0"
+    "drizzle-orm": "^0.40.0",
+    "hono": "^4.7.4"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.5",
     "drizzle-kit": "^0.30.5"
   }
 }
