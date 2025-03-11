@@ -1,10 +1,11 @@
 {
-  "name": "decent-db",
+  "name": "decent-offchain",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
-
+    "studio": "drizzle-kit studio --config=./src/db/drizzle.config.ts",
+    "push": "drizzle-kit push --config=./src/db/drizzle.config.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",
