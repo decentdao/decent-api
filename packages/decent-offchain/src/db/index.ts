@@ -1,10 +1,9 @@
-import { drizzle } from "drizzle-orm/pglite";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import { proposals } from "./schema/proposals";
-import { PGlite } from "@electric-sql/pglite";
 
-const client = new PGlite({
-  dataDir: Bun.env.DATABASE_URL ?? "",
-});
+const connectionString = process.env.DATABASE_URL;
+const client = new Pool({ connectionString });
 
 export const db = drizzle({
   client,
