@@ -19,7 +19,13 @@
     "target": "ES2022",
 
     // Skip type checking for node modules
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@decent-ponder/*": ["../decent-ponder/*"]
+    }
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules"]
