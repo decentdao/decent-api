@@ -1,15 +1,22 @@
 import { Hono } from "hono";
-import { db } from "../db";
-import { proposals } from "../db/schema/proposals";
+import jsonf from "@/api/utils/responseFormatter";
+import meta from "@/api/routes/meta";
+import proposals from "@/api/routes/proposals";
 
 const app = new Hono();
 
-app.get("/", (c) => c.text("Hello, World!"));
-
-app.post("/proposals", async (c) => {
-  const { title, body, dao } = await c.req.json();
-  const proposal = await db.insert(proposals).values({ title, body, dao });
-  return c.json(proposal);
+app.onError((err, c) => {
+  return jsonf(c, err);
 });
+
+app.notFound((c) => {
+  const error = new Error("Not found");
+  return jsonf(c, error);
+});
+
+// Routes
+app.route("/", meta);
+app.route("/proposal", proposals);
+
 
 export default app;

@@ -1,13 +1,13 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { proposals } from "./schema/proposals";
+import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
+const hosted = process.env.DATABASE_URL;
+
+export const connectionString =
+  hosted ||
+  `postgres://${process.env.USER}@localhost:5432/decent`;
+
 const client = new Pool({ connectionString });
 
-export const db = drizzle({
-  client,
-  schema: {
-    proposals,
-  },
-});
+export const db = drizzle({ client, schema });
