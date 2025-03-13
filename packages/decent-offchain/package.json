@@ -6,6 +6,7 @@
   "scripts": {
     "studio": "drizzle-kit studio --config=./src/db/drizzle.config.ts",
     "push": "drizzle-kit push --config=./src/db/drizzle.config.ts",
+    "pull": "drizzle-kit pull --config=./src/db/drizzle.config.ts",
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts"
   },
