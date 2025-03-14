@@ -3,11 +3,13 @@ import { connectionString } from ".";
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: "./src/db/schema/*",
+  schema: [
+    "./src/db/schema/proposals.ts"
+  ],
   out: "./drizzle",
   dbCredentials: {
     url: connectionString,
   },
-  strict: true,
+  casing: "snake_case",
   schemaFilter: ["offchain"],
 });

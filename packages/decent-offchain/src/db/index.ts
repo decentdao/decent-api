@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 const hosted = process.env.DATABASE_URL;
+console.log(!!hosted && "DB HOSTED");
 
 export const connectionString =
   hosted ||
@@ -10,4 +11,4 @@ export const connectionString =
 
 const client = new Pool({ connectionString });
 
-export const db = drizzle({ client, schema });
+export const db = drizzle({ client, schema, casing: "snake_case" });

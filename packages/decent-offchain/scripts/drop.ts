@@ -5,6 +5,7 @@ import { Client } from 'pg';
 
 async function dropAllTablesAndSchemas() {
     const client = new Client({
+        // connectionString: process.env.DATABASE_URL,
         user: process.env.USER,
         host: 'localhost',
         database: 'decent',
@@ -31,7 +32,7 @@ async function dropAllTablesAndSchemas() {
         const schemasResult = await client.query(`
             SELECT schema_name
             FROM information_schema.schemata
-            WHERE schema_name NOT LIKE 'pg_%';
+            WHERE schema_name = 'onchain' OR schema_name = 'offchain';
         `);
 
         for (const row of schemasResult.rows) {
