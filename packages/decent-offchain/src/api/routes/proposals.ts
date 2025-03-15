@@ -1,13 +1,15 @@
 import { Hono } from "hono";
 import { db } from "@/db";
-import * as schema from "@/db/schema";
-import jsonf from "@/api/utils/responseFormatter";
+import { schema } from "@/db/schema";
+import resf from "@/api/utils/responseFormatter";
+
 const app = new Hono();
 
 app.get("/", async (c) => {
   const proposals = await db.select().from(schema.proposals);
 
-  return jsonf(c, proposals);
+  return resf(c, proposals);
 });
 
 export default app;
+ 

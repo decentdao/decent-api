@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import jsonf from "@/api/utils/responseFormatter";
+import resf from "@/api/utils/responseFormatter";
 
 const app = new Hono();
 
@@ -9,12 +9,12 @@ app.get("/", (c) => {
     name: "decent-offchain",
     version,
   };
-  return jsonf(c, info);
+  return resf(c, info);
 });
 
 app.get("/health", (c) => {
   const status = "ok"
-  return jsonf(c, status);
+  return resf(c, status);
 });
 
 export default app;

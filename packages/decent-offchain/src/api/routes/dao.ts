@@ -1,22 +1,22 @@
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import jsonf from "@/api/utils/responseFormatter";
-import { daos } from "@/db/schema";
+import { schema } from "@/db/schema";
+import resf from "@/api/utils/responseFormatter";
 const app = new Hono();
 
 app.get("/", async (c) => {
-  const query = await db.select().from(daos);
-  return jsonf(c, query);
+  const query = await db.select().from(schema.daos);
+  return resf(c, query);
 });
 
-app.get("/:dao", async (c) => {
-  const dao = c.req.param("dao");
-  const query = await db.select().from(daos).where(eq(daos.dao, dao));
+app.get("/:slug", async (c) => {
+  const slug = c.req.param("slug");
+  const query = await db.select().from(schema.daos).where(eq(schema.daos.slug, slug));
   if (query.length === 0) {
     throw new Error("DAO not found");
   }
-  return jsonf(c, query[0]);
+  return resf(c, query[0]);
 });
 
 export default app;

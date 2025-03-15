@@ -12,7 +12,7 @@ export default function formatResponse<T>(c: Context, d: T, _status?: Contentful
         message: d.message,
       },
     }
-    console.error(d);
+    if (!_status) console.error(d);
     return c.json(response, status);
   }
 
