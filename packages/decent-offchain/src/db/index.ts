@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 const hosted = process.env.DATABASE_URL;
-console.log(!!hosted && "DB HOSTED");
+console.log("DB HOSTED:", !!hosted);
 
 export const connectionString =
   hosted ||

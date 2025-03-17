@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { integer, json, text, timestamp, varchar } from "drizzle-orm/pg-core";
-import { offchainSchema } from "./common";
+import { offchainSchema } from "./offchain";
 
 export const proposals = offchainSchema.table("proposals", {
   slug: varchar().primaryKey().unique().default(nanoid()),

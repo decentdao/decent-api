@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { schema } from "@/db/schema";
 import resf from "@/api/utils/responseFormatter";
+
 const app = new Hono();
 
 app.get("/", async (c) => {
