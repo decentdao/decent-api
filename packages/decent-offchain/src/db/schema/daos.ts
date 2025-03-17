@@ -1,8 +1,8 @@
 import { integer, text, boolean, pgSchema } from "drizzle-orm/pg-core";
-import { onchainSchema } from "./common";
 
 // copy of onchain schema from @decent-ponder/ponder.schema.ts
 // TODO: remove this once we have a way to sync the schema
+const onchainSchema = pgSchema("onchain");
 export const daos = onchainSchema.table("daos", {
   slug: text("dao").primaryKey(),
   daoName: text(),
