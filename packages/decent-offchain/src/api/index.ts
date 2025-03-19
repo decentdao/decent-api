@@ -12,7 +12,7 @@ const app = new Hono();
 app.onError((err, c) => {
   return resf(c, err, 500);
 });
-
+console.log(Bun.env.PONDER_RPC_URL_1)
 // Routes
 app.route("/", meta);
 app.route("/auth", auth);
