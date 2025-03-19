@@ -1,21 +1,16 @@
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { generateSiweNonce, parseSiweMessage } from "viem/siwe";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { schema } from "@/db/schema";
 import { db } from "@/db";
-import resf from "@/api/utils/responseFormatter";
+import resf, { ApiError } from "@/api/utils/responseFormatter";
 import { publicClient } from "@/api/utils/publicClient";
-const app = new Hono();
+import { cookieName, cookieOptions } from "@/api/utils/cookie";
+import { Me, Nonce, Logout } from "@/api/types";
 
-const cookieName = "decent-session";
-const cookieOptions = {
-  httpOnly: true,
-  maxAge: 60 * 60 * 24 * 7,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-} as const;
+const app = new Hono();
 
 app.get("/nonce", async (c) => {
   const id = getCookie(c, cookieName) || nanoid();
@@ -33,20 +28,23 @@ app.get("/nonce", async (c) => {
     setCookie(c, cookieName, id, cookieOptions);
   }
 
-  return resf(c, { nonce });
+  const data: Nonce = { nonce };
+
+  return resf(c, data);
 });
 
 app.post("/verify", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) return resf(c, { error: "Session not found" }, 401);
+  if (!id) throw new ApiError("no id found in cookie", 401);
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
-  if (!session) return resf(c, { error: "Session not found" }, 401);
+  if (!session) throw new ApiError("session not found", 401);
   
   const { message, signature } = await c.req.json();
 
   const { address, nonce } = parseSiweMessage(message);
-  if (!nonce) return resf(c, { error: "Invalid nonce" }, 401);
+  if (!nonce) throw new ApiError("invalid nonce", 401);
+  if (!address) throw new ApiError("no address found in message", 401);
 
   const success = await publicClient.verifySiweMessage({
     message,
@@ -55,32 +53,49 @@ app.post("/verify", async (c) => {
     address,
   });
   
-  if (!success) return resf(c, { error: "Invalid signature" }, 401);
+  if (!success) throw new ApiError("invalid signature", 401);
+
+  const ensName = await publicClient.getEnsName({ address })
 
   await db.update(schema.sessions).set({
     address,
+    ensName,
     nonce,
+    signature,
   }).where(eq(schema.sessions.id, id));
 
-  return resf(c, { success: true });
+  const data: Me = {
+    address,
+    ensName,
+  }
+
+  return resf(c, data);
 });
 
 app.get("/me", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) return resf(c, { error: "Session not found" }, 401);
+  if (!id) throw new ApiError("no id found in cookie", 401);
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
-  if (!session) return resf(c, { error: "Session not found" }, 401);
-  if (!session.address) return resf(c, { error: "Address not found" }, 401);
-  return resf(c, { session });
+  if (!session) throw new ApiError("session not found", 401);
+  if (!session.address) throw new ApiError("address not found", 401);
+
+  const data: Me = {
+    address: session.address,
+    ensName: session.ensName,
+  }
+
+  return resf(c, data);
 });
 
 app.post("/logout", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) return resf(c, { error: "Session not found" }, 401);
+  if (!id) throw new ApiError("no id found in cookie", 401);
 
   await db.delete(schema.sessions).where(eq(schema.sessions.id, id));
-  return resf(c, { success: true });
+  deleteCookie(c, cookieName);
+  const data: Logout = "ok";
+  return resf(c, data);
 });
 
 export default app;

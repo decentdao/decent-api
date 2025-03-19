@@ -1,0 +1,38 @@
+name: Test API
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-bun@v2
+      - run: bun install
+      - name: Setup database schema
+        run: bun push
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+      - run: bun test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
