@@ -2,13 +2,18 @@ import { Context } from "hono";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { ApiResponse } from "../types";
 
+export class ApiError extends Error {
+  constructor(message: string, public status?: ContentfulStatusCode) {
+    super(message);
+  }
+}
+
 export default function formatResponse<T>(c: Context, d: T, _status?: ContentfulStatusCode): Response {
-  if (d instanceof Error) {
-    const status = _status || 500;
+  if (d instanceof ApiError) {
+    const status = d?.status || 500;
     const response: ApiResponse<T> = {
       success: false,
       error: {
-        type: d.name.toLowerCase(),
         message: d.message,
       },
     }
