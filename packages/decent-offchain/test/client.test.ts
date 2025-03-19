@@ -1,6 +1,6 @@
 import { beforeAll } from 'bun:test';
 import { createWalletClient, http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
 import { createSiweMessage } from "viem/siwe";
 import { cookieName } from '@/api/utils/cookie';
@@ -12,13 +12,11 @@ beforeAll(async () => {
   await db.delete(schema.sessions).execute();
 });
 
-const TEST_PRIVATE_KEY = process.env.TEST_PRIVATE_KEY_1 as `0x${string}`;
-
-if (!TEST_PRIVATE_KEY) {
-  throw new Error('TEST_PRIVATE_KEY is not set');
-}
+const specPrivateKey = process.env.TEST_PRIVATE_KEY_1 as `0x${string}`;
+const TEST_PRIVATE_KEY = specPrivateKey || generatePrivateKey();
 
 export const testAccount = privateKeyToAccount(TEST_PRIVATE_KEY);
+console.log(`WALLET_ADDRESS: ${testAccount.address}`);
 
 export const testWalletClient = createWalletClient({
   account: testAccount,
