@@ -9,8 +9,8 @@ export class ApiError extends Error {
 }
 
 export default function formatResponse<T>(c: Context, d: T, _status?: ContentfulStatusCode): Response {
-  if (d instanceof ApiError) {
-    const status = d?.status || 500;
+  if (d instanceof ApiError || d instanceof Error) {
+    const status = (d as ApiError).status || 500;
     const response: ApiResponse<T> = {
       success: false,
       error: {
@@ -25,5 +25,6 @@ export default function formatResponse<T>(c: Context, d: T, _status?: Contentful
     success: true,
     data: d,
   }
-  return c.json(response, _status);
+  const status = _status || 200;
+  return c.json(response, status);
 }

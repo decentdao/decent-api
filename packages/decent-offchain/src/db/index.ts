@@ -2,12 +2,12 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
-const hosted = process.env.DATABASE_URL;
-console.log("DB HOSTED:", !!hosted);
+const LOCAL_DB = `postgres://${process.env.USER}@localhost:5432/decent`;
+const DATABASE_URL = process.env.DATABASE_URL || LOCAL_DB;
+const hide = (str: string) => str.replace(/:(.*?)@/, ":****@");
+console.log("DB URL:", hide(DATABASE_URL));
 
-export const connectionString =
-  hosted ||
-  `postgres://${process.env.USER}@localhost:5432/decent`;
+export const connectionString = DATABASE_URL;
 
 const client = new Pool({ connectionString });
 

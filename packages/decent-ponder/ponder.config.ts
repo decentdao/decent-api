@@ -2,12 +2,13 @@ import { createConfig } from "ponder";
 import { http } from "viem";
 import { KeyValuePairsAbi } from "./abis/KeyValuePairsAbi";
 import { FractalRegistryAbi } from "./abis/FractalRegistry";
+
 export default createConfig({
   networks: {
-    sepolia: {
-      chainId: 11155111,
-      transport: http(process.env.PONDER_RPC_URL_11155111),
-    },
+    // sepolia: {
+    //   chainId: 11155111,
+    //   transport: http(process.env.PONDER_RPC_URL_11155111),
+    // },
     mainnet: {
       chainId: 1,
       transport: http(process.env.PONDER_RPC_URL_1),
@@ -29,10 +30,10 @@ export default createConfig({
     KeyValuePairs: {
       abi: KeyValuePairsAbi,
       network: {
-        sepolia: {
-          address: "0xC0E08581b70cF745770154f3E9a9A8890198b024",
-          startBlock: 4916643,
-        },
+        // sepolia: {
+        //   address: "0xC0E08581b70cF745770154f3E9a9A8890198b024",
+        //   startBlock: 4916643,
+        // },
         mainnet: {
           address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
           startBlock: 17389311,
@@ -54,10 +55,10 @@ export default createConfig({
     FractalRegistry: {
       abi: FractalRegistryAbi,
       network: {
-        sepolia: {
-          address: "0x4791FF2a6E84F012402c0679C12Cb1d9260450A6",
-          startBlock: 4916634,
-        },
+        // sepolia: {
+        //   address: "0x4791FF2a6E84F012402c0679C12Cb1d9260450A6",
+        //   startBlock: 4916634,
+        // },
         mainnet: {
           address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
           startBlock: 17389302,
