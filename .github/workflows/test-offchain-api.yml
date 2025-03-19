@@ -3,8 +3,12 @@ name: Test API
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'packages/decent-offchain/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'packages/decent-offchain/**'
 
 jobs:
   test:
