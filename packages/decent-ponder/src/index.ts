@@ -1,17 +1,26 @@
-import { ponder } from "ponder:registry";
-import { daos } from "ponder:schema";
+import { Context, ponder } from "ponder:registry";
+import { daos, DaoInsert } from "ponder:schema";
 import { chainIdToPrefix } from "./networks";
+import { fetchSafe } from "./safe/fetch";
 
 // KeyValuePairs is a generic key value store for Decent
-// Subgraph
-// https://github.com/decentdao/decent-subgraph/blob/main/src/key-value-pairs.ts
-// Contract
-// https://github.com/decentdao/decent-contracts/blob/develop/contracts/singletons/KeyValuePairs.sol
+// Subgraph: https://github.com/decentdao/decent-subgraph/blob/main/src/key-value-pairs.ts
+// Contract: https://github.com/decentdao/decent-contracts/blob/develop/contracts/singletons/KeyValuePairs.sol
 ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
-  const { theAddress: dao, key, value } = event.args;
+  const { theAddress: safeAddress, key, value } = event.args;
   const timestamp = Number(event.block.timestamp);
   const prefix = chainIdToPrefix(context.network.chainId);
-  const entry = { dao: `${prefix}:${dao}`, createdAt: timestamp };
+  const dao = `${prefix}:${safeAddress}`
+  const entry: DaoInsert = { dao, createdAt: timestamp };
+
+  const daoInfo = await context.db.find(daos, { dao });
+  if (!daoInfo?.signers) {
+    const daoInfo = await fetchSafe(context, safeAddress);
+    entry.azoriusModuleAddress = daoInfo?.modules[0];
+    entry.signers = daoInfo?.owners;
+    entry.requiredSignatures = daoInfo?.threshold;
+  }
+
 
   if (key === "daoName") {
     await context.db.insert(daos)
@@ -61,15 +70,22 @@ ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
 });
 
 // Decent used to be called Fractal and used this event to set the dao name
-// Subgraph
-// https://github.com/decentdao/decent-subgraph/blob/main/src/fractal-registry.ts
-// Contract
-// https://github.com/decentdao/decent-contracts/blob/87b74fc69c788709bb606c59e41cf5a365506b06/contracts/FractalRegistry.sol
+// Subgraph: https://github.com/decentdao/decent-subgraph/blob/main/src/fractal-registry.ts
+// Contract: https://github.com/decentdao/decent-contracts/blob/87b74fc69c788709bb606c59e41cf5a365506b06/contracts/FractalRegistry.sol
 ponder.on("FractalRegistry:FractalNameUpdated", async ({ event, context }) => {
   const { daoAddress, daoName } = event.args;
   const timestamp = Number(event.block.timestamp);
   const prefix = chainIdToPrefix(context.network.chainId);
-  const entry = { dao: `${prefix}:${daoAddress}`, createdAt: timestamp };
+  const dao = `${prefix}:${daoAddress}`;
+  const entry: DaoInsert = { dao, createdAt: timestamp };
+
+  const daoInfo = await context.db.find(daos, { dao });
+  if (!daoInfo?.signers) {
+    const daoInfo = await fetchSafe(context, daoAddress);
+    entry.azoriusModuleAddress = daoInfo?.modules[0];
+    entry.signers = daoInfo?.owners;
+    entry.requiredSignatures = daoInfo?.threshold;
+  }
 
   await context.db.insert(daos)
     .values({ ...entry, daoName })
@@ -80,7 +96,16 @@ ponder.on("FractalRegistry:FractalSubDAODeclared", async ({ event, context }) =>
   const { parentDAOAddress, subDAOAddress } = event.args;
   const timestamp = Number(event.block.timestamp);
   const prefix = chainIdToPrefix(context.network.chainId);
-  const entry = { dao: `${prefix}:${subDAOAddress}`, createdAt: timestamp };
+  const dao = `${prefix}:${subDAOAddress}`;
+  const entry: DaoInsert = { dao, createdAt: timestamp };
+
+  const daoInfo = await context.db.find(daos, { dao });
+  if (!daoInfo?.signers) {
+    const daoInfo = await fetchSafe(context, subDAOAddress);
+    entry.azoriusModuleAddress = daoInfo?.modules[0];
+    entry.signers = daoInfo?.owners;
+    entry.requiredSignatures = daoInfo?.threshold;
+  }
 
   await context.db.insert(daos)
     .values({ ...entry, subDaoOf: `${prefix}:${parentDAOAddress}` })
