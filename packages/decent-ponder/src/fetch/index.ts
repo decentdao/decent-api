@@ -1,7 +1,7 @@
 import { Address, getAddress, zeroAddress } from "viem";
 import { Context } from "ponder:registry";
 import { GnosisSafeL2Abi } from "../../abis/GnosisSafeL2";
-import { getStrategy } from "./strategy";
+import { getStrategyFromModule } from "./strategy";
 import {
   getPages,
   SENTINEL_ADDRESS,
@@ -59,24 +59,27 @@ export async function fetchGovernance(context: Context, safeAddress: Address) {
     }
 
     const fetchedStrategies = (await Promise.all(
-      modules.map(module => getStrategy(context, module))
+      modules.map(async (module) => {
+        const strategy = await getStrategyFromModule(context, module)
+        return strategy
+      })
     )).filter(strategy => strategy !== null).flat();
 
     const strategies = fetchedStrategies.length > 0 ? fetchedStrategies : null;
 
-    let token: Token | undefined = undefined;
+    let tokens: Token[] = [];
     let strategyIndex: number = 0;
     if (strategies) {
-      const tokens = await Promise.all(
+      await Promise.all(
         strategies.map(async (strategy, index) => {
           const token = await fetchTokenFromStrategy(context, strategy);
           if (!!token) {
+            tokens.push(token);
             strategyIndex = index;
           }
           return token;
         })
       );
-      token = tokens.filter(token => token !== null).flat()[0];
     }
 
     return {
@@ -85,8 +88,8 @@ export async function fetchGovernance(context: Context, safeAddress: Address) {
       threshold: Number(threshold ? threshold : 0),
       owners: owners as string[],
       modules,
-      strategy: strategies?.[strategyIndex],
-      token: token,
+      strategies,
+      tokens,
       guard: guardStorageValue ? getAddress(`0x${guardStorageValue.slice(-40)}`) : zeroAddress,
       version: version,
     };

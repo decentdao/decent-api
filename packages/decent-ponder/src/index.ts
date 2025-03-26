@@ -17,12 +17,11 @@ const getGovernanceFormatEntry = async (
 
   if (!daoInfo?.signers) {
     const governance = await fetchGovernance(context, safeAddress);
-    entry.azoriusModuleAddress = governance.strategy;
+    entry.azoriusModuleAddress = governance.modules;
     entry.signers = governance.owners;
     entry.requiredSignatures = governance.threshold;
-    entry.votingStrategyAddress = governance.strategy;
-    entry.votingTokenType = governance.token?.type;
-    entry.votingTokenAddress = governance.token?.addresses;
+    entry.votingStrategyAddress = governance.strategies;
+    entry.votingToken = governance.tokens;
   }
 
   return entry;
@@ -33,6 +32,7 @@ const getGovernanceFormatEntry = async (
 // Contract: https://github.com/decentdao/decent-contracts/blob/develop/contracts/singletons/KeyValuePairs.sol
 ponder.on("KeyValuePairs:ValueUpdated", async ({ event, context }) => {
   const { theAddress: safeAddress, key, value } = event.args;
+  // confirm safeAddress is a valid safe address
   const entry = await getGovernanceFormatEntry(event, context, safeAddress);
   const updatedAt = entry.createdAt;
   if (key === "daoName") {
