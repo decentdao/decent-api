@@ -7,15 +7,16 @@ import {
   PAGE_SIZE,
 } from "./common";
 
-export async function getStrategy(context: Context, moduleAddress: Address) {
+export async function getStrategyFromModule(context: Context, moduleAddress: Address) {
   try { 
     const [
       _domainSeparatorTypeHash,
       _transactionTypeHash,
-      avatar,
+      _avatar,
       strategiesResponse
     ] = await context.client.multicall({
       contracts: [
+        // add FractalModule stuff here too
         {
           abi: abis.Azorius,
           address: moduleAddress,
