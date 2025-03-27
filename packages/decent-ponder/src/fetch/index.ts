@@ -8,7 +8,7 @@ import {
   GUARD_STORAGE_SLOT,
   PAGE_SIZE,
 } from "./common";
-import { fetchTokenFromStrategy, Token } from "./token";
+import { getTokenFromStrategy, Token } from "./token";
 
 // https://github.com/decentdao/decent-app/blob/develop/src/providers/App/hooks/useSafeAPI.ts#L155
 export async function fetchGovernance(context: Context, safeAddress: Address) {
@@ -58,40 +58,28 @@ export async function fetchGovernance(context: Context, safeAddress: Address) {
       modules.push(...moreModules);
     }
 
-    const fetchedStrategies = (await Promise.all(
-      modules.map(async (module) => {
-        const strategy = await getStrategyFromModule(context, module)
-        return strategy
-      })
-    )).filter(strategy => strategy !== null).flat();
+    const strategies = modules.length > 0
+      ? (await Promise.all(
+          modules.map(module => getStrategyFromModule(context, module))
+        )).filter(strategy => !!strategy).flat()
+      : null;
 
-    const strategies = fetchedStrategies.length > 0 ? fetchedStrategies : null;
-
-    let tokens: Token[] = [];
-    let strategyIndex: number = 0;
-    if (strategies) {
-      await Promise.all(
-        strategies.map(async (strategy, index) => {
-          const token = await fetchTokenFromStrategy(context, strategy);
-          if (!!token) {
-            tokens.push(token);
-            strategyIndex = index;
-          }
-          return token;
-        })
-      );
-    }
+    const tokens = strategies 
+      ? (await Promise.all(
+          strategies.map(strategy => getTokenFromStrategy(context, strategy.addresses[0]))
+        )).filter(token => !!token)
+      : null;
 
     return {
       address: safeAddress,
       nonce: Number(nonce ? nonce : 0),
       threshold: Number(threshold ? threshold : 0),
-      owners: owners as string[],
+      owners: owners as Address[],
       modules,
       strategies,
       tokens,
       guard: guardStorageValue ? getAddress(`0x${guardStorageValue.slice(-40)}`) : zeroAddress,
-      version: version,
+      version,
     };
   } catch (error) {
     console.error(error);

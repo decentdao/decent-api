@@ -3,15 +3,18 @@ import { Context } from "ponder:registry";
 import { Address } from "viem";
 
 export type Token = {
-  type: "erc20" | "erc721";
+  type: "ERC20" | "ERC721";
   addresses: Address[];
 };
 
-export async function fetchTokenFromStrategy(
+export async function getTokenFromStrategy(
   context: Context,
   strategyAddress: Address,
 ): Promise<Token | null> {
-  const [governanceToken, allTokenAddresses] = await context.client.multicall({
+  const [
+    ERC20Token,
+    ERC721Token,
+  ] = await context.client.multicall({
     contracts: [
       {
         address: strategyAddress,
@@ -26,17 +29,17 @@ export async function fetchTokenFromStrategy(
     ],
   });
 
-  if (governanceToken.status === "success") {
+  if (ERC20Token.status === "success" && ERC20Token.result) {
     return {
-      type: "erc20",
-      addresses: [governanceToken.result] as Address[],
+      type: "ERC20",
+      addresses: [ERC20Token.result],
     };
   }
 
-  if (allTokenAddresses.status === "success" && allTokenAddresses.result) {
+  if (ERC721Token.status === "success" && ERC721Token.result) {
     return {
-      type: "erc721",
-      addresses: allTokenAddresses.result as Address[],
+      type: "ERC721",
+      addresses: [...ERC721Token.result],
     };
   }
 
