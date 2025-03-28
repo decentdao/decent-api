@@ -4,7 +4,7 @@ import { connectionString } from ".";
 export default defineConfig({
   dialect: "postgresql",
   schema: [
-    "./src/db/schema/offchain",
+    "./src/db/schema/offchain/*",
   ],
   out: "./drizzle",
   dbCredentials: {
