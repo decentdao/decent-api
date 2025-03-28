@@ -41,7 +41,7 @@ export const dao = onchainSchema.table("dao", {
     gasTankAddress:         hex(),
     requiredSignatures:     integer(),
     guardAddress:           hex(),
-    fractalAddress:         hex(),
+    fractalModuleAddress:   hex(),
     createdAt:              bigint("created_at", { mode: "number" }),
     updatedAt:              bigint("updated_at", { mode: "number" }),
   },(t) => [
@@ -60,6 +60,7 @@ export const governanceModule = onchainSchema.table("governance_module", {
 export const votingStrategy = onchainSchema.table("voting_strategy", {
   address:            hex("voting_strategy_address").primaryKey(),
   governanceModuleId: hex("governance_module_id").notNull(), // references governanceModule.address
+  minProposerBalance: bigint("min_proposer_balance", { mode: "number" }),
   version:            text("voting_strategy_version"),
   name:               text("voting_strategy_name"),
   description:        text("voting_strategy_description"),
@@ -91,7 +92,7 @@ export const signerToDao = onchainSchema.table("signer_to_dao", {
 // ================================
 export const daoRelations = relations(dao, ({ many }) => ({
   signers: many(signerToDao),
-  governanceModule: many(governanceModule),
+  governanceModules: many(governanceModule),
 }));
 
 export const governanceModuleRelations = relations(governanceModule, ({ one, many }) => ({
