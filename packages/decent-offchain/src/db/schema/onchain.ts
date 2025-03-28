@@ -1,23 +1,40 @@
 import {
-  onchainTable,
-  text,
-  hex,
-  bigint,
-  boolean,
+  pgSchema,
   integer,
+  text,
+  boolean,
+  bigint,
   primaryKey,
-  relations,
-  onchainEnum,
-} from "ponder";
+  customType
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 // ================================
-export const dao = onchainTable("dao", {
+// ========= Custom Types =========
+// ================================
+const hex = customType<{ data: `0x${string}` }>({
+  dataType() {
+    return "text";
+  },
+  toDriver(hex) {
+    return hex;
+  },
+  fromDriver(hex) {
+    return hex as `0x${string}`;
+  },
+});
+
+// ================================
+// ========= Tables ===============
+// ================================
+const onchainSchema = pgSchema("onchain");
+export const dao = onchainSchema.table("dao", {
     chainId:                integer("dao_chain_id").notNull(),
     address:                hex("dao_address").notNull(),
     name:                   text("dao_name"),
     proposalTemplatesCID:   text(),
     snapshotENS:            text(),
-    subDaoOf:               hex(),
+    subDaoOf:               text(),
     topHatId:               text(),
     hatIdToStreamId:        text(),
     gasTankEnabled:         boolean(),
@@ -25,13 +42,14 @@ export const dao = onchainTable("dao", {
     requiredSignatures:     integer(),
     guardAddress:           hex(),
     fractalModuleAddress:   hex(),
-    createdAt:              bigint("created_at"),
-    updatedAt:              bigint("updated_at"),
-  },
-  (t) => ({ pk: primaryKey({ columns: [t.chainId, t.address] }) })
+    createdAt:              bigint("created_at", { mode: "number" }),
+    updatedAt:              bigint("updated_at", { mode: "number" }),
+  },(t) => [
+    primaryKey({ columns: [t.chainId, t.address] })
+  ]
 );
 
-export const governanceModule = onchainTable("governance_module", {
+export const governanceModule = onchainSchema.table("governance_module", {
   address:      hex("governance_module_address").primaryKey(),
   daoChainId:   integer("dao_chain_id").notNull(),
   daoAddress:   hex("dao_address").notNull(),
@@ -39,29 +57,30 @@ export const governanceModule = onchainTable("governance_module", {
   description:  text("governance_module_description"),
 });
 
-export const votingStrategy = onchainTable("voting_strategy", {
+export const votingStrategy = onchainSchema.table("voting_strategy", {
   address:            hex("voting_strategy_address").primaryKey(),
   governanceModuleId: hex("governance_module_id").notNull(), // references governanceModule.address
-  minProposerBalance: bigint("min_proposer_balance").notNull(),
+  minProposerBalance: bigint("min_proposer_balance", { mode: "number" }),
+  version:            text("voting_strategy_version"),
   name:               text("voting_strategy_name"),
   description:        text("voting_strategy_description"),
-  enabledAt:          bigint("voting_strategy_enabled_at"),
-  disabledAt:         bigint("voting_strategy_disabled_at"),
+  enabledAt:          bigint("voting_strategy_enabled_at", { mode: "number" }),
+  disabledAt:         bigint("voting_strategy_disabled_at", { mode: "number" }),
 });
 
-export const tokenType = onchainEnum("token_type", ["ERC20", "ERC721", "ERC1155"]);
-export const votingToken = onchainTable("voting_token", {
+export const tokenType = onchainSchema.enum("token_type", ["ERC20", "ERC721", "ERC1155"]);
+export const votingToken = onchainSchema.table("voting_token", {
   address:          hex("voting_token_address").primaryKey(),
   votingStrategyId: hex("voting_strategy_id").notNull(), // references votingStrategy.address
   type:             tokenType("type").notNull(),
 });
 
-export const signer = onchainTable("signer", {
+export const signer = onchainSchema.table("signer", {
   address:  hex("signer_address").primaryKey(),
   label:    text("signer_label"),
 });
 
-export const signerToDao = onchainTable("signer_to_dao", {
+export const signerToDao = onchainSchema.table("signer_to_dao", {
   id:         text("signer_to_dao_id").primaryKey(),
   address:    hex("signer_to_dao_address").notNull(),
   daoChainId: integer("dao_chain_id").notNull(),
@@ -118,14 +137,8 @@ export const votingTokenRelations = relations(votingToken, ({ one }) => ({
 // ========== Types ===============
 // ================================
 export type Dao = typeof dao.$inferSelect;
-export type DaoInsert = typeof dao.$inferInsert;
 export type GovernanceModule = typeof governanceModule.$inferSelect;
-export type GovernanceModuleInsert = typeof governanceModule.$inferInsert;
 export type VotingStrategy = typeof votingStrategy.$inferSelect;
-export type VotingStrategyInsert = typeof votingStrategy.$inferInsert;
 export type VotingToken = typeof votingToken.$inferSelect;
-export type VotingTokenInsert = typeof votingToken.$inferInsert;
 export type Signer = typeof signer.$inferSelect;
-export type SignerInsert = typeof signer.$inferInsert;
 export type SignerToDao = typeof signerToDao.$inferSelect;
-export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
