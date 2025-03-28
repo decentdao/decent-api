@@ -1,97 +1,108 @@
-import { Address, getAddress, zeroAddress } from "viem";
+import { Address, getAddress } from "viem";
 import { Context } from "ponder:registry";
-import { GnosisSafeL2Abi } from "../../abis/GnosisSafeL2";
-import { getStrategy } from "./strategy";
+import { safeInfo } from "./safe";
+import { checkModule } from "./modules";
+import { checkStrategy } from "./strategy";
 import {
-  getPages,
-  SENTINEL_ADDRESS,
-  GUARD_STORAGE_SLOT,
-  PAGE_SIZE,
-} from "./common";
-import { fetchTokenFromStrategy, Token } from "./token";
+  GovernanceModuleInsert,
+  VotingStrategyInsert,
+  VotingTokenInsert,
+  SignerInsert,
+  SignerToDaoInsert,
+} from "ponder:schema";
 
-// https://github.com/decentdao/decent-app/blob/develop/src/providers/App/hooks/useSafeAPI.ts#L155
-export async function fetchGovernance(context: Context, safeAddress: Address) {
+export type GovernanceInsert = {
+  address: Address;
+  threshold: number;
+  signers: SignerInsert[];
+  signerToDaos: SignerToDaoInsert[];
+  governanceModules: GovernanceModuleInsert[];
+  votingStrategies: VotingStrategyInsert[];
+  votingTokens: VotingTokenInsert[];
+  fractalModuleAddress: Address | null;
+  guard: Address;
+  version: string;
+};
+
+export async function fetchGovernance(
+  context: Context,
+  _safeAddress: Address,
+): Promise<GovernanceInsert> {
   try {
-    const [nonce, threshold, owners, version, modulesResponse] = await context.client.multicall({
-      contracts: [
-        {
-          abi: GnosisSafeL2Abi,
-          address: safeAddress,
-          functionName: "nonce",
-        },
-        {
-          abi: GnosisSafeL2Abi,
-          address: safeAddress,
-          functionName: "getThreshold",
-        },
-        {
-          abi: GnosisSafeL2Abi,
-          address: safeAddress,
-          functionName: "getOwners",
-        },
-        {
-          abi: GnosisSafeL2Abi,
-          address: safeAddress,
-          functionName: "VERSION",
-        },
-        {
-          abi: GnosisSafeL2Abi,
-          address: safeAddress,
-          functionName: "getModulesPaginated",
-          args: [SENTINEL_ADDRESS, PAGE_SIZE],
-        },
-      ],
-      allowFailure: false,
-    });
+    const safeAddress = getAddress(_safeAddress);
+    const daoChainId = context.network.chainId;
+    const { threshold, owners, version, guard, modules } = await safeInfo(context, safeAddress);
 
-    const guardStorageValue = await context.client.getStorageAt({
+    const signers: SignerInsert[] = owners.map(owner => ({
+      address: owner,
+    }));
+
+    const signerToDaos: SignerToDaoInsert[] = signers.map(signer => ({
+      id: signer.address,
       address: safeAddress,
-      slot: GUARD_STORAGE_SLOT,
-    });
+      daoChainId,
+      daoAddress: safeAddress,
+    }));
 
-    const modules: Address[] = [];
-    if (modulesResponse[0].length < PAGE_SIZE) {
-      modules.push(...modulesResponse[0]);
-    } else {
-      const moreModules = await getPages(context, safeAddress, "GnosisSafeL2", "getModulesPaginated");
-      modules.push(...moreModules);
-    }
+    let fractalModuleAddress: Address | null = null;
+    const governanceModules: GovernanceModuleInsert[] = [];
+    const votingStrategies: VotingStrategyInsert[] = [];
+    const votingTokens: VotingTokenInsert[] = [];
 
-    const fetchedStrategies = (await Promise.all(
-      modules.map(module => getStrategy(context, module))
-    )).filter(strategy => strategy !== null).flat();
+    await Promise.all(
+      modules.map(async m => {
+        const module = await checkModule(context, m);
+        if (!module) return null;
+        if (module.type === "FractalModule") {
+          fractalModuleAddress = module.address;
+          return;
+        }
 
-    const strategies = fetchedStrategies.length > 0 ? fetchedStrategies : null;
+        // Not a FractalModule then
+        // Format governanceModules for the database
+        governanceModules.push({
+          address: module.address,
+          daoChainId,
+          daoAddress: safeAddress,
+        });
 
-    let token: Token | undefined = undefined;
-    let strategyIndex: number = 0;
-    if (strategies) {
-      const tokens = await Promise.all(
-        strategies.map(async (strategy, index) => {
-          const token = await fetchTokenFromStrategy(context, strategy);
-          if (!!token) {
-            strategyIndex = index;
-          }
-          return token;
-        })
-      );
-      token = tokens.filter(token => token !== null).flat()[0];
-    }
+        const strategyAddresses = module.strategies;
+        if (!strategyAddresses) return;
+
+        await Promise.all(strategyAddresses.map(async strategyAddress => {
+          const tokenStrategies = await checkStrategy(context, strategyAddress);
+          if (!tokenStrategies) return;
+          tokenStrategies.forEach(ts => {
+            votingStrategies.push({
+              address: strategyAddress,
+              governanceModuleId: module.address,
+              minProposerBalance: ts.minProposerBalance || 0n,
+            });
+
+            votingTokens.push({
+              address: ts.tokenAddress,
+              votingStrategyId: strategyAddress,
+              type: ts.type,
+            });
+          });
+        }));
+      })
+    );
 
     return {
       address: safeAddress,
-      nonce: Number(nonce ? nonce : 0),
       threshold: Number(threshold ? threshold : 0),
-      owners: owners as string[],
-      modules,
-      strategy: strategies?.[strategyIndex],
-      token: token,
-      guard: guardStorageValue ? getAddress(`0x${guardStorageValue.slice(-40)}`) : zeroAddress,
-      version: version,
+      signers,
+      signerToDaos,
+      governanceModules,
+      votingStrategies,
+      votingTokens,
+      fractalModuleAddress,
+      guard,
+      version,
     };
   } catch (error) {
     console.error(error);
-    throw new Error(`Failed to fetch safe: ${safeAddress}`);
+    throw new Error(`Failed to fetch safe: ${_safeAddress}`);
   }
 }

@@ -1,17 +1,17 @@
 import { relations } from "drizzle-orm";
 import { proposals } from "./proposals";
-import { daos } from "./daos";
+import { dao } from "./onchain";
 import { sessions } from "./sessions";
 
 export const proposalRelations = relations(proposals, ({ one }) => ({
-  dao: one(daos, {
+  dao: one(dao, {
     fields: [proposals.dao],
-    references: [daos.slug],
+    references: [dao.address],
   }),
 }));
 
 export const schema = {
-  daos,
+  dao,
   proposals,
   sessions,
 };
