@@ -1,78 +1,74 @@
-import { Context } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
 import { abis } from "@fractal-framework/fractal-contracts";
-import {
-  getPages,
-  SENTINEL_ADDRESS,
-  PAGE_SIZE,
-} from "./common";
+import { Context } from "ponder:registry";
+import { Address } from "viem";
 
-export type Strategy = {
-  type: "Azorius" | "FractalModule";
-  address: Address;
+// we don't need hat ids
+// will call `isProposer` to check if the user has the right to make a proposal
+export type TokenStrategy = {
+  type:
+    "ERC20" |
+    "ERC721";
+  tokenAddress: Address;
+  minProposerBalance?: bigint;
 };
 
-export async function getStrategyFromModule(context: Context, moduleAddress: Address) {
-  try { 
-    const [
-      domainSeparatorTypeHash,
-      transactionTypeHash,
-      strategiesResponse,
-      fractalModuleAddress,
-    ] = await context.client.multicall({
-      contracts: [
-        {
-          abi: abis.Azorius,
-          address: moduleAddress,
-          functionName: "DOMAIN_SEPARATOR_TYPEHASH",
-        },
-        {
-          abi: abis.Azorius,
-          address: moduleAddress,
-          functionName: "TRANSACTION_TYPEHASH",
-        },
-        {
-          abi: abis.Azorius,
-          address: moduleAddress,
-          functionName: "getStrategies",
-          args: [SENTINEL_ADDRESS, PAGE_SIZE],
-        },
-        {
-          abi: abis.FractalModule,
-          address: moduleAddress,
-          functionName: "avatar",
-        },
-      ],
-      allowFailure: true,
-    });
+export async function checkStrategy(
+  context: Context,
+  strategyAddress: Address,
+): Promise<TokenStrategy[] | null> {
+  const [
+    ERC20Token,
+    ERC20MinProposerBalance,
+    ERC721Token,
+    ERC721MinProposerBalance,
+  ] = await context.client.multicall({
+    contracts: [
+      {
+        address: strategyAddress,
+        abi: abis.LinearERC20Voting,
+        functionName: "governanceToken",
+      },
+      {
+        address: strategyAddress,
+        abi: abis.LinearERC20Voting,
+        functionName: "requiredProposerWeight",
+      },
+      {
+        address: strategyAddress,
+        abi: abis.LinearERC721Voting,
+        functionName: "getAllTokenAddresses",
+      },
+      {
+        address: strategyAddress,
+        abi: abis.LinearERC721Voting,
+        functionName: "proposerThreshold",
+      },
+    ],
+  });
 
-    // Azorius
-    if (
-      domainSeparatorTypeHash.status === "success" &&
-      transactionTypeHash.status === "success" &&
-      strategiesResponse.status === "success"
-    ) {
-      const strategies = strategiesResponse.result[0];
-      if (strategies.length < PAGE_SIZE) {
-        // TODO check token type
-      } else {
-        const moreStrategies = await getPages(context, moduleAddress, "Azorius", "getStrategies");
-        return {
-          type: "Azorius",
-          addresses: [...strategies, ...moreStrategies],
-        };
-      }
-    }
-
-    // FractalModule on a subDAO
-    if (fractalModuleAddress.status === "success" && fractalModuleAddress.result !== zeroAddress) {
-      return {
-        type: "FractalModule",
-        addresses: [fractalModuleAddress.result],
-      };
-    }
-  } catch (error) {
-    // if multicall fails, it's probably not an Azorius module or FractalModule
-    return null;
+  // LinearERC20VotingV1
+  if (
+    ERC20Token.status === "success" &&
+    ERC20MinProposerBalance.status === "success"
+  ) {
+    return [{
+      type: "ERC20",
+      tokenAddress: ERC20Token.result,
+      minProposerBalance: ERC20MinProposerBalance.result,
+    }];
   }
+
+  // LinearERC721VotingV1
+  if (
+    ERC721Token.status === "success" &&
+    ERC721MinProposerBalance.status === "success"
+  ) {
+    return ERC721Token.result.map(tokenAddress => ({
+      type: "ERC721",
+      tokenAddress,
+      minProposerBalance: ERC721MinProposerBalance.result,
+    }));
+  }
+
+  return null;
 }
