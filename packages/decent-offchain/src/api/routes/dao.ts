@@ -27,6 +27,7 @@ app.get("/:_chainId", async (c) => {
           votingStrategies: {
             columns: {
               address: true,
+              minProposerBalance: true,
               name: true,
               description: true,
             },
