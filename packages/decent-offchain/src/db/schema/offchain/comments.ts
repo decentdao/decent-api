@@ -3,7 +3,7 @@ import { text, timestamp, index } from "drizzle-orm/pg-core";
 import { offchainSchema } from "./offchain";
 
 export const comments = offchainSchema.table("comments", {
-  id: text().primaryKey().unique().default(nanoid()),
+  id: text().primaryKey().unique().$defaultFn(() => nanoid()),
   replyToId: text(),
   proposalId: text().notNull(),
   authorAddress: text().notNull(),
