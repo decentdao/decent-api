@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema";
+import { schema } from "./schema";
 
 const LOCAL_DB = `postgres://${process.env.USER}@localhost:5432/decent`;
 const DATABASE_URL = process.env.DATABASE_URL || LOCAL_DB;
@@ -11,4 +11,9 @@ export const connectionString = DATABASE_URL;
 
 const client = new Pool({ connectionString });
 
-export const db = drizzle({ client, schema, casing: "snake_case" });
+export const db = drizzle({
+  client,
+  schema,
+  casing: "snake_case",
+  // logger: true,
+});

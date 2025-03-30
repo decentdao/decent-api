@@ -3,8 +3,9 @@ import { integer, json, text, timestamp, index } from "drizzle-orm/pg-core";
 import { offchainSchema } from "./offchain";
 
 export const proposals = offchainSchema.table("proposals", {
-  slug: text().primaryKey().unique().default(nanoid()),
-  dao: text().notNull(),
+  slug: text().primaryKey().unique().$defaultFn(() => nanoid()),
+  daoChainId: integer().notNull(),
+  daoAddress: text().notNull(),
   authorAddress: text().notNull(),
   status: text(),
   cycle: integer(),
@@ -17,6 +18,6 @@ export const proposals = offchainSchema.table("proposals", {
   createdAt: timestamp().defaultNow(),
   updatedAt: timestamp(),
 }, (t) => [
-  index().on(t.dao),
+  index().on(t.daoChainId, t.daoAddress),
   index().on(t.authorAddress),
 ]);
