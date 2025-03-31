@@ -76,7 +76,7 @@ export async function fetchGovernance(
             votingStrategies.push({
               address: strategyAddress,
               governanceModuleId: module.address,
-              minProposerBalance: ts.minProposerBalance || 0n,
+              minProposerBalance: ts.minProposerBalance?.toString() || "0",
             });
 
             votingTokens.push({
