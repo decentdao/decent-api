@@ -1,5 +1,5 @@
 import { Context } from "ponder:registry";
-import { Address, getAddress, zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 import { abis } from "@fractal-framework/fractal-contracts";
 import { GnosisSafeL2Abi } from "../../abis/GnosisSafeL2";
 

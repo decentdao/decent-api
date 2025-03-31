@@ -60,7 +60,7 @@ export const governanceModuleTable = onchainSchema.table("governance_module", {
 export const votingStrategyTable = onchainSchema.table("voting_strategy", {
   address:            hex("voting_strategy_address").primaryKey(),
   governanceModuleId: hex("governance_module_id").notNull(), // references governanceModule.address
-  minProposerBalance: bigint("min_proposer_balance", { mode: "number" }),
+  minProposerBalance: text("min_proposer_balance"),
   name:               text("voting_strategy_name"),
   description:        text("voting_strategy_description"),
   enabledAt:          bigint("voting_strategy_enabled_at", { mode: "number" }),

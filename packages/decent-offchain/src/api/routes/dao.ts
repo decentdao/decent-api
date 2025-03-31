@@ -82,6 +82,8 @@ app.get("/:_chainId/:_address", async (c) => {
       },
     },
   });
+  console.dir(query, { depth: null });
+
   if (!query) throw new ApiError("DAO not found", 404);
 
   return resf(c, query);
