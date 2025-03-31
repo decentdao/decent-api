@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { db } from "@/db";
 import resf, { ApiError } from "@/api/utils/responseFormatter";
+import { DEFAULT_DAO_WITH } from "@/db/queries";
 
 const app = new Hono();
 
@@ -16,33 +17,7 @@ app.get("/:_chainId", async (c) => {
   const chainId = Number(_chainId);
   const query = await db.query.daoTable.findMany({
     where: (dao, { eq }) => eq(dao.chainId, chainId),
-    with: {
-      governanceModules: {
-        columns: {
-          address: true,
-          name: true,
-          description: true,
-        },
-        with: {
-          votingStrategies: {
-            columns: {
-              address: true,
-              minProposerBalance: true,
-              name: true,
-              description: true,
-            },
-            with: {
-              votingTokens: {
-                columns: {
-                  address: true,
-                  type: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    with: DEFAULT_DAO_WITH,
   });
   return resf(c, query);
 });
@@ -54,35 +29,8 @@ app.get("/:_chainId/:_address", async (c) => {
   const address = _address.toLowerCase() as `0x${string}`;
   const query = await db.query.daoTable.findFirst({
     where: (dao, { eq }) => eq(dao.chainId, chainId) && eq(dao.address, address),
-    with: {
-      governanceModules: {
-        columns: {
-          address: true,
-          name: true,
-          description: true,
-        },
-        with: {
-          votingStrategies: {
-            columns: {
-              address: true,
-              minProposerBalance: true,
-              name: true,
-              description: true,
-            },
-            with: {
-              votingTokens: {
-                columns: {
-                  address: true,
-                  type: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    with: DEFAULT_DAO_WITH,
   });
-  console.dir(query, { depth: null });
 
   if (!query) throw new ApiError("DAO not found", 404);
 

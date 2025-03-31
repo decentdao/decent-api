@@ -38,8 +38,7 @@ export async function fetchGovernance(
     }));
 
     const signerToDaos: SignerToDaoInsert[] = signers.map(signer => ({
-      id: signer.address,
-      address: safeAddress,
+      address: signer.address,
       daoChainId,
       daoAddress: safeAddress,
     }));

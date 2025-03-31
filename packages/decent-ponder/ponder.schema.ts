@@ -62,11 +62,10 @@ export const signer = onchainTable("signer", {
 });
 
 export const signerToDao = onchainTable("signer_to_dao", {
-  id:         text("signer_to_dao_id").primaryKey(),
-  address:    hex("signer_to_dao_address").notNull(),
-  daoChainId: integer("dao_chain_id").notNull(),
-  daoAddress: hex("dao_address").notNull(),
-});
+  address:          hex("std_signer_address").notNull(),
+  daoChainId:       integer("std_dao_chain_id").notNull(),
+  daoAddress:       hex("std_dao_address").notNull(),
+},(t) => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }));
 
 // ================================
 // ========= Relations ============
