@@ -5,9 +5,11 @@ import resf from "@/api/utils/responseFormatter";
 import meta from "@/api/routes/meta";
 import auth from "@/api/routes/auth";
 import dao from "@/api/routes/dao";
-import proposals from "@/api/routes/proposals";
 
-const app = new Hono();
+const app = new Hono()
+  .route("/", meta)
+  .route("/auth", auth)
+  .route("/d", dao);
 
 app.onError((err, c) => {
   return resf(c, err, 500);
@@ -17,7 +19,5 @@ app.onError((err, c) => {
 app.route("/", meta);
 app.route("/auth", auth);
 app.route("/d", dao);
-app.route("/proposal", proposals);
-
 
 export default app;

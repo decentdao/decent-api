@@ -6,9 +6,9 @@ import resf from "@/api/utils/responseFormatter";
 const app = new Hono();
 
 app.get("/", async (c) => {
-  const proposals = await db.select().from(schema.proposals);
+  const comments = await db.query.comments.findMany();
 
-  return resf(c, proposals);
+  return resf(c, comments);
 });
 
 export default app;

@@ -1,14 +1,14 @@
 import { relations } from "drizzle-orm";
 import * as onchainSchema from "./onchain"
-import { proposals } from "./offchain/proposals";
+import { proposalTable } from "./offchain/proposals";
 import { sessions } from "./offchain/sessions";
 import { reactions } from "./offchain/reactions";
 import { temperatureChecks } from "./offchain/temperatureChecks";
 import { comments } from "./offchain/comments";
 
-const proposalRelations = relations(proposals, ({ one }) => ({
+const proposalRelations = relations(proposalTable, ({ one }) => ({
   dao: one(onchainSchema.daoTable, {
-    fields: [proposals.daoChainId, proposals.daoAddress],
+    fields: [proposalTable.daoChainId, proposalTable.daoAddress],
     references: [onchainSchema.daoTable.chainId, onchainSchema.daoTable.address],
   }),
 }));
@@ -16,7 +16,7 @@ const proposalRelations = relations(proposals, ({ one }) => ({
 export const schema = {
   ...onchainSchema,
   comments,
-  proposals,
+  proposalTable,
   reactions,
   temperatureChecks,
   sessions,
