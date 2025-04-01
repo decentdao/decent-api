@@ -12,7 +12,9 @@ const app = new Hono();
  * @returns {Dao[]} Array of DAO objects
  */
 app.get("/", async (c) => {
-  const query = await db.query.daoTable.findMany();
+  const query = await db.query.daoTable.findMany({
+    with: DEFAULT_DAO_WITH,
+  });
   return resf(c, query);
 });
 
