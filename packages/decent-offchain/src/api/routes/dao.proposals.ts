@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { schema } from "@/db/schema";
 import resf, { ApiError } from "@/api/utils/responseFormatter";
 import { eq, and } from "drizzle-orm";
+import { siweAuth } from "@/api/middleware/auth";
 
 const app = new Hono();
 
@@ -39,13 +40,15 @@ app.get("/", async (c) => {
  * @body {...}
  * @returns {Proposal} Proposal object
  */
-app.post("/", async (c) => {
+app.post("/", siweAuth, async (c) => {
   const { chainId, address } = c.req.param() as ProposalParams;
-  const { title, body, authorAddress } = await c.req.json();
+  const { title, body } = await c.req.json();
+  const user = c.get("user");
+  if (!user) throw new ApiError("user not found", 401);
   const proposal = await db.insert(schema.proposalTable).values({
     daoChainId: Number(chainId),
     daoAddress: address.toLowerCase() as `0x${string}`,
-    authorAddress: authorAddress.toLowerCase() as `0x${string}`,
+    authorAddress: user.address,
     title,
     body,
   });
