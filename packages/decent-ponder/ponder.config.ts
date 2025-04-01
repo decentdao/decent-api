@@ -17,14 +17,14 @@ export default createConfig({
       chainId: 8453,
       transport: http(process.env.PONDER_RPC_URL_8453),
     },
-    // optimism: {
-    //   chainId: 10,
-    //   transport: http(process.env.PONDER_RPC_URL_10),
-    // },
-    // polygon: {
-    //   chainId: 137,
-    //   transport: http(process.env.PONDER_RPC_URL_137),
-    // },
+    optimism: {
+      chainId: 10,
+      transport: http(process.env.PONDER_RPC_URL_10),
+    },
+    polygon: {
+      chainId: 137,
+      transport: http(process.env.PONDER_RPC_URL_137),
+    },
   },
   contracts: {
     KeyValuePairs: {
@@ -42,14 +42,14 @@ export default createConfig({
           address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
           startBlock: 12996645,
         },
-        // optimism: {
-        //   address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
-        //   startBlock: 118640420,
-        // },
-        // polygon: {
-        //   address: "0x68e3b985B93eA0a10178c7ae919299699559Aaab",
-        //   startBlock: 43952879,
-        // },
+        optimism: {
+          address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
+          startBlock: 118640420,
+        },
+        polygon: {
+          address: "0x68e3b985B93eA0a10178c7ae919299699559Aaab",
+          startBlock: 43952879,
+        },
       },
     },
     FractalRegistry: {
@@ -67,14 +67,14 @@ export default createConfig({
           address: "0x023bdaefeddddd5b43af125caa8007a99a886fd3",
           startBlock: 12996617,
         },
-        // optimism: {
-        //   address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
-        //   startBlock: 118640391,
-        // },
-        // polygon: {
-        //   address: "0xfE5950B4975a19679be7c31a0A03D626d237f37C",
-        //   startBlock: 43952847,
-        // },
+        optimism: {
+          address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
+          startBlock: 118640391,
+        },
+        polygon: {
+          address: "0xfE5950B4975a19679be7c31a0A03D626d237f37C",
+          startBlock: 43952847,
+        },
       },
     },
   },
