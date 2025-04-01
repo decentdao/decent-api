@@ -55,6 +55,8 @@ app.get("/:chainId/:address", async (c) => {
   return resf(c, query);
 });
 
+// TODO: endpoint to return permissions for individual DAO
+
 /**
  * @dev see ./dao.proposals for implementation
  */
