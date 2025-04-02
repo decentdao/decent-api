@@ -6,10 +6,7 @@
   "scripts": {
     "dev": "ponder dev --schema onchain",
     "start": "ponder start --schema onchain",
-    "db": "ponder db",
-    "codegen": "ponder codegen",
-    "lint": "eslint .",
-    "typecheck": "tsc"
+    "psql": "brew services restart postgresql@15"
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.4.2",

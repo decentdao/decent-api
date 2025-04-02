@@ -8,7 +8,7 @@ import { Address } from "viem";
 const app = new Hono();
 
 /**
- * Get all DAOs
+ * @title Get all DAOs
  * @route GET /d
  * @returns {Dao[]} Array of DAO objects
  */
