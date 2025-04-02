@@ -1,0 +1,6 @@
+{
+  "extends": "ponder",
+  "rules": {
+    "no-trailing-spaces": "warn"
+  }
+}

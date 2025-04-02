@@ -1,10 +1,11 @@
-import { Context } from "hono";
-import { ContentfulStatusCode } from "hono/utils/http-status";
-import { ApiResponse } from "../types";
+import { Context } from 'hono';
+import { ContentfulStatusCode } from 'hono/utils/http-status';
+import { ApiResponse } from '../types';
 
 export class ApiError extends Error {
   constructor(message: string, public status?: ContentfulStatusCode) {
     super(message);
+    this.status = status;
   }
 }
 

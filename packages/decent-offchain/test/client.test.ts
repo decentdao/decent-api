@@ -2,10 +2,10 @@ import { beforeAll } from 'bun:test';
 import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
-import { createSiweMessage } from "viem/siwe";
+import { createSiweMessage } from 'viem/siwe';
 import { cookieName } from '@/api/utils/cookie';
-import { db } from "@/db";
-import { schema } from "@/db/schema";
+import { db } from '@/db';
+import { schema } from '@/db/schema';
 
 // delete all sessions before running tests
 beforeAll(async () => {

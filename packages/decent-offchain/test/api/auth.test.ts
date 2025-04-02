@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { ApiResponse, Nonce, User, Logout } from "@/api/types";
+import { ApiResponse, Nonce, User, Logout } from '@/api/types';
 import {
   cookies,
   getCookie,
   signedSiweMessage,
   testAccount,
-} from "../client.test";
+} from '../client.test';
 
 describe('Auth API', () => {
   let nonce: string;
@@ -29,7 +29,7 @@ describe('Auth API', () => {
       body: JSON.stringify({
         message: signedMessage.message,
         signature: signedMessage.signature,
-      }),  
+      }),
     });
     const json = await res.json() as ApiResponse<User>;
     expect(json.success).toBeTrue();

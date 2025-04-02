@@ -1,13 +1,13 @@
-import { Address } from "viem";
+import { Address } from 'viem';
 
-export type ApiResponse<T = any> = {
+export type ApiResponse<T = unknown> = {
   success: boolean;
   data?: T;
   error?: {
     type?: string;
     message: string;
     code?: string;
-    details?: any;
+    details?: unknown;
   };
 };
 
