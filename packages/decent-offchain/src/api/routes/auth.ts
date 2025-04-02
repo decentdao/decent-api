@@ -12,6 +12,11 @@ import { Me, Nonce, Logout } from "@/api/types";
 
 const app = new Hono();
 
+/**
+ * @title Get a nonce for SIWE authentication
+ * @route GET /auth/nonce
+ * @returns {Nonce} Nonce object
+ */
 app.get("/nonce", async (c) => {
   const id = getCookie(c, cookieName) || nanoid();
   const [session] = await db.select()
@@ -33,6 +38,12 @@ app.get("/nonce", async (c) => {
   return resf(c, data);
 });
 
+/**
+ * @title Verify a SIWE message and signature
+ * @route POST /auth/verify
+ * @body { message: string, signature: string }
+ * @returns {Me} Me object
+ */
 app.post("/verify", async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError("no id found in cookie", 401);
@@ -72,6 +83,11 @@ app.post("/verify", async (c) => {
   return resf(c, data);
 });
 
+/**
+ * @title Get the current authenticated user's information
+ * @route GET /auth/me
+ * @returns {Me} Me object
+ */
 app.get("/me", async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError("no id found in cookie", 401);
@@ -88,6 +104,11 @@ app.get("/me", async (c) => {
   return resf(c, data);
 });
 
+/**
+ * @title Log out the current user
+ * @route POST /auth/logout
+ * @returns {Logout} Logout object
+ */
 app.post("/logout", async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError("no id found in cookie", 401);

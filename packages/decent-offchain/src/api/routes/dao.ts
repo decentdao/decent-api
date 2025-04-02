@@ -3,6 +3,7 @@ import { db } from "@/db";
 import resf, { ApiError } from "@/api/utils/responseFormatter";
 import { DEFAULT_DAO_WITH } from "@/db/queries";
 import proposals from "@/api/routes/dao.proposals";
+import { Address } from "viem";
 
 const app = new Hono();
 
@@ -19,7 +20,7 @@ app.get("/", async (c) => {
 });
 
 /**
- * Get all DAOs for a specific chain
+ * @title Get all DAOs for a specific chain
  * @route GET /d/{chainId}
  * @param {string} chainId - Chain ID parameter
  * @returns {Dao[]} Array of DAO objects
@@ -35,7 +36,7 @@ app.get("/:chainId", async (c) => {
 });
 
 /**
- * Get a DAO by chain ID and address
+ * @title Get a DAO by chain ID and address
  * @route GET /d/{chainId}/{address}
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
@@ -44,7 +45,7 @@ app.get("/:chainId", async (c) => {
 app.get("/:chainId/:address", async (c) => {
   const { chainId, address } = c.req.param();
   const chainIdNumber = Number(chainId);
-  const addressLower = address.toLowerCase() as `0x${string}`;
+  const addressLower = address.toLowerCase() as Address;
   const query = await db.query.daoTable.findFirst({
     where: (dao, { eq }) => eq(dao.chainId, chainIdNumber) && eq(dao.address, addressLower),
     with: DEFAULT_DAO_WITH,

@@ -19,3 +19,15 @@ export type Nonce = {
 };
 
 export type Logout = string;
+
+export type Dao = {
+  chainId: string;
+  address: string;
+};
+
+export type Proposal = {
+  id: string;
+  title: string;
+  body: string;
+  authorAddress: string;
+};
