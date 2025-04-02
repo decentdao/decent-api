@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { ApiResponse, Nonce, Me, Logout } from "@/api/types";
+import { ApiResponse, Nonce, User, Logout } from "@/api/types";
 import {
   cookies,
   getCookie,
@@ -29,9 +29,9 @@ describe('Auth API', () => {
       body: JSON.stringify({
         message: signedMessage.message,
         signature: signedMessage.signature,
-      }),
+      }),  
     });
-    const json = await res.json() as ApiResponse<Me>;
+    const json = await res.json() as ApiResponse<User>;
     expect(json.success).toBeTrue();
     expect(json.error).toBeFalsy();
     expect(json.data?.address).toBe(testAccount.address);
@@ -43,7 +43,7 @@ describe('Auth API', () => {
       headers: cookies(sessionId),
     });
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<Me>;
+    const { data } = await res.json() as ApiResponse<User>;
     expect(data?.address).toBe(testAccount.address);
     expect(data?.ensName).toBeDefined();
   });

@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export type ApiResponse<T = any> = {
   success: boolean;
   data?: T;
@@ -9,8 +11,8 @@ export type ApiResponse<T = any> = {
   };
 };
 
-export type Me = {
-  address: string;
+export type User = {
+  address: Address;
   ensName: string | null;
 };
 
@@ -22,12 +24,12 @@ export type Logout = string;
 
 export type Dao = {
   chainId: string;
-  address: string;
+  address: Address;
 };
 
 export type Proposal = {
   id: string;
   title: string;
   body: string;
-  authorAddress: string;
+  authorAddress: Address;
 };

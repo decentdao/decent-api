@@ -8,7 +8,7 @@ import { db } from "@/db";
 import resf, { ApiError } from "@/api/utils/responseFormatter";
 import { publicClient } from "@/api/utils/publicClient";
 import { cookieName, cookieOptions } from "@/api/utils/cookie";
-import { Me, Nonce, Logout } from "@/api/types";
+import { User, Nonce, Logout } from "@/api/types";
 
 const app = new Hono();
 
@@ -42,11 +42,11 @@ app.get("/nonce", async (c) => {
  * @title Verify a SIWE message and signature
  * @route POST /auth/verify
  * @body { message: string, signature: string }
- * @returns {Me} Me object
+ * @returns {User} Me object
  */
 app.post("/verify", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("no id found in cookie", 401);
+  if (!id) throw new ApiError("cookie not found", 401);    
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
   if (!session) throw new ApiError("session not found", 401);
@@ -75,7 +75,7 @@ app.post("/verify", async (c) => {
     signature,
   }).where(eq(schema.sessions.id, id));
 
-  const data: Me = {
+  const data: User = {    
     address,
     ensName,
   }
@@ -86,17 +86,17 @@ app.post("/verify", async (c) => {
 /**
  * @title Get the current authenticated user's information
  * @route GET /auth/me
- * @returns {Me} Me object
+ * @returns {User} Me object
  */
 app.get("/me", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("no id found in cookie", 401);
+  if (!id) throw new ApiError("cookie not found", 401);
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
   if (!session) throw new ApiError("session not found", 401);
   if (!session.address) throw new ApiError("address not found", 401);
 
-  const data: Me = {
+  const data: User = {
     address: session.address,
     ensName: session.ensName,
   }
@@ -111,7 +111,7 @@ app.get("/me", async (c) => {
  */
 app.post("/logout", async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("no id found in cookie", 401);
+  if (!id) throw new ApiError("cookie not found", 401);
 
   await db.delete(schema.sessions).where(eq(schema.sessions.id, id));
   deleteCookie(c, cookieName);
