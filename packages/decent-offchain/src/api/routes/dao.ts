@@ -1,9 +1,9 @@
-import { Hono } from "hono";
-import { db } from "@/db";
-import resf, { ApiError } from "@/api/utils/responseFormatter";
-import { DEFAULT_DAO_WITH } from "@/db/queries";
-import proposals from "@/api/routes/dao.proposals";
-import { Address } from "viem";
+import { Hono } from 'hono';
+import { db } from '@/db';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { DEFAULT_DAO_WITH } from '@/db/queries';
+import proposals from '@/api/routes/dao.proposals';
+import { Address } from 'viem';
 
 const app = new Hono();
 
@@ -12,7 +12,7 @@ const app = new Hono();
  * @route GET /d
  * @returns {Dao[]} Array of DAO objects
  */
-app.get("/", async (c) => {
+app.get('/', async (c) => {
   const query = await db.query.daoTable.findMany({
     with: DEFAULT_DAO_WITH,
   });
@@ -25,7 +25,7 @@ app.get("/", async (c) => {
  * @param {string} chainId - Chain ID parameter
  * @returns {Dao[]} Array of DAO objects
  */
-app.get("/:chainId", async (c) => {
+app.get('/:chainId', async (c) => {
   const { chainId } = c.req.param();
   const chainIdNumber = Number(chainId);
   const query = await db.query.daoTable.findMany({
@@ -42,7 +42,7 @@ app.get("/:chainId", async (c) => {
  * @param {string} address - Address parameter
  * @returns {Dao} DAO object
  */
-app.get("/:chainId/:address", async (c) => {
+app.get('/:chainId/:address', async (c) => {
   const { chainId, address } = c.req.param();
   const chainIdNumber = Number(chainId);
   const addressLower = address.toLowerCase() as Address;
@@ -50,9 +50,9 @@ app.get("/:chainId/:address", async (c) => {
     where: (dao, { eq }) => eq(dao.chainId, chainIdNumber) && eq(dao.address, addressLower),
     with: DEFAULT_DAO_WITH,
   });
-  
-  if (!query) throw new ApiError("DAO not found", 404);
-  
+
+  if (!query) throw new ApiError('DAO not found', 404);
+
   return resf(c, query);
 });
 
@@ -61,6 +61,6 @@ app.get("/:chainId/:address", async (c) => {
 /**
  * @dev see ./dao.proposals for implementation
  */
-app.route("/:chainId/:address/proposals", proposals);
+app.route('/:chainId/:address/proposals', proposals);
 
 export default app;

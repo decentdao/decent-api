@@ -1,17 +1,17 @@
-import { Hono } from "hono";
-import { Address } from "viem";
-import { db } from "@/db";
-import { schema } from "@/db/schema";
-import resf, { ApiError } from "@/api/utils/responseFormatter";
-import { eq, and } from "drizzle-orm";
-import { siweAuth } from "@/api/middleware/auth";
+import { Hono } from 'hono';
+import { Address } from 'viem';
+import { db } from '@/db';
+import { schema } from '@/db/schema';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { eq, and } from 'drizzle-orm';
+import { siweAuth } from '@/api/middleware/auth';
 
 const app = new Hono();
 
 type ProposalParams = {
   chainId: string;
   address: Address;
-  slug?: string; 
+  slug?: string;
 }
 
 /**
@@ -21,7 +21,7 @@ type ProposalParams = {
  * @param {string} address - Address parameter
  * @returns {Proposal[]} Array of proposal objects
  */
-app.get("/", async (c) => {
+app.get('/', async (c) => {
   const { chainId, address } = c.req.param() as ProposalParams;
   const chainIdNumber = Number(chainId);
   const addressLower = address.toLowerCase() as Address;
@@ -41,13 +41,13 @@ app.get("/", async (c) => {
  * @body {...}
  * @returns {Proposal} Proposal object
  */
-app.post("/", siweAuth, async (c) => {
+app.post('/', siweAuth, async (c) => {
   const { chainId, address } = c.req.param() as ProposalParams;
   const chainIdNumber = Number(chainId);
   const addressLower = address.toLowerCase() as Address;
   const { title, body } = await c.req.json();
-  const user = c.get("user");
-  if (!user) throw new ApiError("user not found", 401);
+  const user = c.get('user');
+  if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.insert(schema.proposalTable).values({
     daoChainId: chainIdNumber,
     daoAddress: addressLower,
@@ -64,17 +64,17 @@ app.post("/", siweAuth, async (c) => {
  * @param {string} slug - Slug or id of the proposal
  * @returns {Proposal} Proposal object
  */
-app.get("/:slug", async (c) => {
+app.get('/:slug', async (c) => {
   const { chainId, address, slug } = c.req.param() as ProposalParams;
   const chainIdNumber = Number(chainId);
   const addressLower = address.toLowerCase() as Address;
-  if (!slug) throw new ApiError("Proposal slug or id is required", 400);
+  if (!slug) throw new ApiError('Proposal slug or id is required', 400);
   const slugIsNumber = !Number.isNaN(Number(slug));
   const slugOrId = slugIsNumber ?
     eq(schema.proposalTable.id, Number(slug)) :
     eq(schema.proposalTable.slug, slug);
 
-    const proposal = await db.query.proposalTable.findFirst({
+  const proposal = await db.query.proposalTable.findFirst({
     where: and(
       slugOrId,
       eq(schema.proposalTable.daoChainId, chainIdNumber),
@@ -82,7 +82,7 @@ app.get("/:slug", async (c) => {
     ),
   });
 
-  if (!proposal) throw new ApiError("Proposal not found", 404);
+  if (!proposal) throw new ApiError('Proposal not found', 404);
 
   return resf(c, proposal);
 });
@@ -93,12 +93,12 @@ app.get("/:slug", async (c) => {
  * @body {...}
  * @returns {Proposal} Proposal object
  */
-app.put("/:slug", siweAuth, async (c) => {
+app.put('/:slug', siweAuth, async (c) => {
   const { slug } = c.req.param() as ProposalParams;
-  if (!slug) throw new ApiError("Proposal slug is required", 400);
+  if (!slug) throw new ApiError('Proposal slug is required', 400);
   const { title, body } = await c.req.json();
-  const user = c.get("user");
-  if (!user) throw new ApiError("user not found", 401);
+  const user = c.get('user');
+  if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.update(schema.proposalTable).set({
     title,
     body,
@@ -108,4 +108,3 @@ app.put("/:slug", siweAuth, async (c) => {
 });
 
 export default app;
- 

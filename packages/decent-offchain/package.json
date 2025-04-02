@@ -10,7 +10,8 @@
     "generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "dev": "bun --watch run src/api/index.ts",
-    "start": "bun run src/api/index.ts"
+    "start": "bun run src/api/index.ts",
+    "lint": "eslint ."
   },
   "dependencies": {
     "drizzle-orm": "^0.40.0",
@@ -20,8 +21,13 @@
     "viem": "^2.23.11"
   },
   "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
     "@types/bun": "^1.2.5",
     "@types/pg": "^8.11.11",
-    "drizzle-kit": "^0.30.5"
+    "drizzle-kit": "^0.30.5",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.29.0"
   }
 }

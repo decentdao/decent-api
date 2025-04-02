@@ -1,14 +1,14 @@
-import { Hono } from "hono";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { generateSiweNonce, parseSiweMessage } from "viem/siwe";
-import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
-import { schema } from "@/db/schema";
-import { db } from "@/db";
-import resf, { ApiError } from "@/api/utils/responseFormatter";
-import { publicClient } from "@/api/utils/publicClient";
-import { cookieName, cookieOptions } from "@/api/utils/cookie";
-import { User, Nonce, Logout } from "@/api/types";
+import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { generateSiweNonce, parseSiweMessage } from 'viem/siwe';
+import { eq } from 'drizzle-orm';
+import { nanoid } from 'nanoid';
+import { schema } from '@/db/schema';
+import { db } from '@/db';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { publicClient } from '@/api/utils/publicClient';
+import { cookieName, cookieOptions } from '@/api/utils/cookie';
+import { User, Nonce, Logout } from '@/api/types';
 
 const app = new Hono();
 
@@ -17,13 +17,13 @@ const app = new Hono();
  * @route GET /auth/nonce
  * @returns {Nonce} Nonce object
  */
-app.get("/nonce", async (c) => {
+app.get('/nonce', async (c) => {
   const id = getCookie(c, cookieName) || nanoid();
   const [session] = await db.select()
     .from(schema.sessions)
     .where(eq(schema.sessions.id, id));
-  
-    const nonce = session?.nonce || generateSiweNonce();
+
+  const nonce = session?.nonce || generateSiweNonce();
 
   if (!session?.nonce) {
     await db.insert(schema.sessions).values({
@@ -44,18 +44,18 @@ app.get("/nonce", async (c) => {
  * @body { message: string, signature: string }
  * @returns {User} Me object
  */
-app.post("/verify", async (c) => {
+app.post('/verify', async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("cookie not found", 401);    
+  if (!id) throw new ApiError('cookie not found', 401);
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
-  if (!session) throw new ApiError("session not found", 401);
-  
+  if (!session) throw new ApiError('session not found', 401);
+
   const { message, signature } = await c.req.json();
 
   const { address, nonce } = parseSiweMessage(message);
-  if (!nonce) throw new ApiError("invalid nonce", 401);
-  if (!address) throw new ApiError("no address found in message", 401);
+  if (!nonce) throw new ApiError('invalid nonce', 401);
+  if (!address) throw new ApiError('no address found in message', 401);
 
   const success = await publicClient.verifySiweMessage({
     message,
@@ -63,8 +63,8 @@ app.post("/verify", async (c) => {
     nonce,
     address,
   });
-  
-  if (!success) throw new ApiError("invalid signature", 401);
+
+  if (!success) throw new ApiError('invalid signature', 401);
 
   const ensName = await publicClient.getEnsName({ address })
 
@@ -75,7 +75,7 @@ app.post("/verify", async (c) => {
     signature,
   }).where(eq(schema.sessions.id, id));
 
-  const data: User = {    
+  const data: User = {
     address,
     ensName,
   }
@@ -88,13 +88,13 @@ app.post("/verify", async (c) => {
  * @route GET /auth/me
  * @returns {User} Me object
  */
-app.get("/me", async (c) => {
+app.get('/me', async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("cookie not found", 401);
+  if (!id) throw new ApiError('cookie not found', 401);
 
   const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
-  if (!session) throw new ApiError("session not found", 401);
-  if (!session.address) throw new ApiError("address not found", 401);
+  if (!session) throw new ApiError('session not found', 401);
+  if (!session.address) throw new ApiError('address not found', 401);
 
   const data: User = {
     address: session.address,
@@ -109,13 +109,13 @@ app.get("/me", async (c) => {
  * @route POST /auth/logout
  * @returns {Logout} Logout object
  */
-app.post("/logout", async (c) => {
+app.post('/logout', async (c) => {
   const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError("cookie not found", 401);
+  if (!id) throw new ApiError('cookie not found', 401);
 
   await db.delete(schema.sessions).where(eq(schema.sessions.id, id));
   deleteCookie(c, cookieName);
-  const data: Logout = "ok";
+  const data: Logout = 'ok';
   return resf(c, data);
 });
 

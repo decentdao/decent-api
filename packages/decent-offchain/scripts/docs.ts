@@ -69,7 +69,7 @@ async function parseJsDocComments(content: string, types: Map<string, TypeDefini
   while ((match = jsDocRegex.exec(content)) !== null) {
     const jsDocContent = match[1] || '';
     const method = match[2]?.toUpperCase() || '';
-    
+
     const routeMatch = routeRegex.exec(jsDocContent);
     if (!routeMatch) continue;
 
@@ -136,7 +136,7 @@ async function generateMarkdown(endpoints: EndpointDoc[], types: Map<string, Typ
     for (const endpoint of groupEndpoints) {
       // Use title property or fallback to description
       const title = endpoint.title || endpoint.description;
-      
+
       markdown += `### ${title}\n`;
       markdown += `${endpoint.method} \`${endpoint.route}\`\n`;
 

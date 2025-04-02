@@ -1,9 +1,9 @@
-import { nanoid } from "nanoid";
-import { integer, json, text, timestamp, index } from "drizzle-orm/pg-core";
-import { offchainSchema } from "./offchain";
-import { hex } from "../hex";
+import { nanoid } from 'nanoid';
+import { integer, json, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { offchainSchema } from './offchain';
+import { hex } from '../hex';
 
-export const proposalTable = offchainSchema.table("proposals", {
+export const proposalTable = offchainSchema.table('proposals', {
   slug: text().primaryKey().unique().$defaultFn(() => nanoid()),
   daoChainId: integer().notNull(),
   daoAddress: hex().notNull(),
