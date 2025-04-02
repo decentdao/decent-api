@@ -3,14 +3,11 @@ import { getCookie } from "hono/cookie";
 import { db } from "@/db";
 import { ApiError } from "@/api/utils/responseFormatter";
 import { cookieName } from "@/api/utils/cookie";
-import { Address } from "viem";
+import { User } from "@/api/types";
 
 declare module "hono" {
   interface ContextVariableMap {
-    user: {
-      address: Address;
-      ensName: string | null;
-    };
+    user: User;
   }
 }
 
@@ -23,7 +20,7 @@ export const siweAuth = async (c: Context, next: Next) => {
   });
 
   if (!session) throw new ApiError("session not found", 401);
-  if (!session.address) throw new ApiError("address not found", 401);
+  if (!session.address) throw new ApiError("address not found in session", 401);
 
   c.set("user", {
     address: session.address,

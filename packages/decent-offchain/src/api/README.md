@@ -1,6 +1,24 @@
 # Decent API Documentation
 
-## D Endpoints
+## Default Endpoints
+
+### Get API metadata
+GET `/`
+- **Response**: `Meta`
+
+## Health Endpoints
+
+### Get API health status
+GET `/health`
+- **Response**: `string`
+
+## Chains Endpoints
+
+### Get all chains with DAOs
+GET `/chains`
+- **Response**: `string[]`
+
+## DAO Endpoints
 
 ### Get all DAOs
 GET `/d`
