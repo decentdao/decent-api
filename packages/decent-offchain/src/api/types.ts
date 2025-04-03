@@ -11,6 +11,15 @@ export type ApiResponse<T = unknown> = {
   };
 };
 
+export type Meta = {
+  name: string;
+  version: string;
+};
+
+export type Health = string;
+
+export type ChainId = number;
+
 export type User = {
   address: Address;
   ensName: string | null;
@@ -27,9 +36,16 @@ export type Dao = {
   address: Address;
 };
 
-export type Proposal = {
-  id: string;
+export type NewProposalBody = {
   title: string;
   body: string;
-  authorAddress: Address;
+  cycle?: string;
+  votingStrategy?: string;
+};
+
+export type UpdateProposalBody = {
+  title?: string;
+  body?: string;
+  cycle?: string;
+  votingStrategy?: string;
 };
