@@ -23,8 +23,11 @@ export const schema = {
   proposalRelations,
 };
 
-export type Proposal = typeof proposalTable.$inferSelect;
-export type Comment = typeof comments.$inferSelect;
-export type Reaction = typeof reactions.$inferSelect;
-export type TemperatureCheck = typeof temperatureChecks.$inferSelect;
-export type Session = typeof sessions.$inferSelect;
+export type DbProposal = typeof proposalTable.$inferSelect;
+export type DbNewProposal = typeof proposalTable.$inferInsert;
+export type DbComment = typeof comments.$inferSelect;
+export type DbNewComment = typeof comments.$inferInsert;
+export type DbReaction = typeof reactions.$inferSelect;
+export type DbNewReaction = typeof reactions.$inferInsert;
+export type DbTemperatureCheck = typeof temperatureChecks.$inferSelect;
+export type DbNewTemperatureCheck = typeof temperatureChecks.$inferInsert;
