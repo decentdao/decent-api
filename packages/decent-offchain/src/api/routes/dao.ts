@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
-import proposals from '@/api/routes/dao.proposals';
 import { Address } from 'viem';
 
 const app = new Hono();
@@ -57,10 +56,5 @@ app.get('/:chainId/:address', async (c) => {
 });
 
 // TODO: endpoint to return permissions for individual DAO
-
-/**
- * @dev see ./dao.proposals for implementation
- */
-app.route('/:chainId/:address/proposals', proposals);
 
 export default app;

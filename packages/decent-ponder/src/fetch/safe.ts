@@ -5,7 +5,7 @@ import { getPages, GUARD_STORAGE_SLOT, PAGE_SIZE, SENTINEL_ADDRESS } from "./com
 
 export async function safeInfo(context: Context, _address: Address) {
   const address = getAddress(_address);
-  
+
   const [
     nonce,
     threshold,

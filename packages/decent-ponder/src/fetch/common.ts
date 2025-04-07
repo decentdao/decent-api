@@ -33,6 +33,6 @@ export async function getPages(
     nextAddress = response[1];
     startAddress = nextAddress;
   }
-  
+
   return results;
 }
