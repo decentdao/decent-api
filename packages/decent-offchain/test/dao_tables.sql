@@ -16,6 +16,93 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: dao; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.dao (
+    dao_chain_id integer NOT NULL,
+    dao_address text NOT NULL,
+    dao_name text,
+    proposal_templates_cid text,
+    snapshot_ens text,
+    sub_dao_of text,
+    top_hat_id text,
+    hat_id_to_stream_id text,
+    gas_tank_enabled boolean,
+    gas_tank_address text,
+    required_signatures integer,
+    guard_address text,
+    fractal_module_address text,
+    created_at numeric(78,0),
+    updated_at numeric(78,0)
+);
+
+
+--
+-- Name: governance_module; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.governance_module (
+    governance_module_address text NOT NULL,
+    dao_chain_id integer NOT NULL,
+    dao_address text NOT NULL,
+    governance_module_name text,
+    governance_module_description text
+);
+
+
+--
+-- Name: signer; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.signer (
+    signer_address text NOT NULL,
+    signer_label text
+);
+
+
+--
+-- Name: signer_to_dao; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.signer_to_dao (
+    std_signer_address text NOT NULL,
+    std_dao_chain_id integer NOT NULL,
+    std_dao_address text NOT NULL
+);
+
+
+--
+-- Name: voting_strategy; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.voting_strategy (
+    voting_strategy_address text NOT NULL,
+    governance_module_id text NOT NULL,
+    min_proposer_balance text NOT NULL,
+    voting_strategy_name text,
+    voting_strategy_description text,
+    voting_strategy_enabled_at numeric(78,0),
+    voting_strategy_disabled_at numeric(78,0)
+);
+
+
+--
+-- Name: voting_token; Type: TABLE; Schema: onchain; Owner: -
+--
+
+CREATE TABLE onchain.voting_token (
+    voting_token_address text NOT NULL,
+    voting_strategy_id text NOT NULL,
+    type onchain.token_type NOT NULL
+);
+
+
 --
 -- Data for Name: dao; Type: TABLE DATA; Schema: onchain; Owner: -
 --
@@ -610,6 +697,96 @@ INSERT INTO onchain.voting_token (voting_token_address, voting_strategy_id, type
 INSERT INTO onchain.voting_token (voting_token_address, voting_strategy_id, type) VALUES ('0x8524ac3781a526e249490794f8c91cab5f19bc20', '0xdb2e3f93a70a6d4d3090a16861dce4e39ba85054', 'ERC20');
 INSERT INTO onchain.voting_token (voting_token_address, voting_strategy_id, type) VALUES ('0xb1008f2da4806a9b82cca885a51a76806f2749ff', '0x49a438da151993e716e816fa72db79c309015b7b', 'ERC20');
 INSERT INTO onchain.voting_token (voting_token_address, voting_strategy_id, type) VALUES ('0xce873a00b2f0e6faae64f1955a45d2ad2f0385dc', '0xe4ba779fb95c8915cfc171058db2f015f8c62fc3', 'ERC20');
+
+
+--
+-- Name: dao dao_dao_chain_id_dao_address_pk; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.dao
+    ADD CONSTRAINT dao_dao_chain_id_dao_address_pk PRIMARY KEY (dao_chain_id, dao_address);
+
+
+--
+-- Name: governance_module governance_module_pkey; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.governance_module
+    ADD CONSTRAINT governance_module_pkey PRIMARY KEY (governance_module_address);
+
+
+--
+-- Name: signer signer_pkey; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.signer
+    ADD CONSTRAINT signer_pkey PRIMARY KEY (signer_address);
+
+
+--
+-- Name: signer_to_dao signer_to_dao_std_signer_address_std_dao_chain_id_std_dao_addre; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.signer_to_dao
+    ADD CONSTRAINT signer_to_dao_std_signer_address_std_dao_chain_id_std_dao_addre PRIMARY KEY (std_signer_address, std_dao_chain_id, std_dao_address);
+
+
+--
+-- Name: voting_strategy voting_strategy_pkey; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.voting_strategy
+    ADD CONSTRAINT voting_strategy_pkey PRIMARY KEY (voting_strategy_address);
+
+
+--
+-- Name: voting_token voting_token_pkey; Type: CONSTRAINT; Schema: onchain; Owner: -
+--
+
+ALTER TABLE ONLY onchain.voting_token
+    ADD CONSTRAINT voting_token_pkey PRIMARY KEY (voting_token_address);
+
+
+--
+-- Name: dao _reorg__dao; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__dao AFTER INSERT OR DELETE OR UPDATE ON onchain.dao FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__dao();
+
+
+--
+-- Name: governance_module _reorg__governance_module; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__governance_module AFTER INSERT OR DELETE OR UPDATE ON onchain.governance_module FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__governance_module();
+
+
+--
+-- Name: signer _reorg__signer; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__signer AFTER INSERT OR DELETE OR UPDATE ON onchain.signer FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__signer();
+
+
+--
+-- Name: signer_to_dao _reorg__signer_to_dao; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__signer_to_dao AFTER INSERT OR DELETE OR UPDATE ON onchain.signer_to_dao FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__signer_to_dao();
+
+
+--
+-- Name: voting_strategy _reorg__voting_strategy; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__voting_strategy AFTER INSERT OR DELETE OR UPDATE ON onchain.voting_strategy FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__voting_strategy();
+
+
+--
+-- Name: voting_token _reorg__voting_token; Type: TRIGGER; Schema: onchain; Owner: -
+--
+
+CREATE TRIGGER _reorg__voting_token AFTER INSERT OR DELETE OR UPDATE ON onchain.voting_token FOR EACH ROW EXECUTE FUNCTION onchain.operation_reorg__voting_token();
 
 
 --

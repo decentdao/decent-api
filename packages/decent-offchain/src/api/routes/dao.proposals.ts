@@ -67,6 +67,7 @@ app.post('/', siweAuth, async (c) => {
     voteChoices,
     cycle,
   }).returning();
+
   const ret = proposal[0];
   return resf(c, ret);
 });

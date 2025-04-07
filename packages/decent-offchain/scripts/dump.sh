@@ -2,7 +2,6 @@
 
 # Dump DAO-related tables
 pg_dump decent \
-  --data-only \
   --column-inserts \
   --no-comments \
   --no-owner \
