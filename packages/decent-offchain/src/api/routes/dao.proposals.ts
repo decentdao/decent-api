@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { siweAuth } from '@/api/middleware/auth';
+import { NewProposal, UpdateProposal } from '@/api/types/Proposal';
 
 const app = new Hono();
 
@@ -45,7 +46,14 @@ app.post('/', siweAuth, async (c) => {
   const { chainId, address } = c.req.param() as ProposalParams;
   const chainIdNumber = Number(chainId);
   const addressLower = address.toLowerCase() as Address;
-  const { title, body } = await c.req.json();
+  const {
+    title,
+    body,
+    votingStrategyAddress,
+    voteType,
+    voteChoices,
+    cycle,
+  } = await c.req.json() as NewProposal;
   const user = c.get('user');
   if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.insert(schema.proposalTable).values({
@@ -54,8 +62,13 @@ app.post('/', siweAuth, async (c) => {
     authorAddress: user.address,
     title,
     body,
-  });
-  return resf(c, proposal);
+    votingStrategyAddress,
+    voteType,
+    voteChoices,
+    cycle,
+  }).returning();
+  const ret = proposal[0];
+  return resf(c, ret);
 });
 
 /**
@@ -96,12 +109,21 @@ app.get('/:slug', async (c) => {
 app.put('/:slug', siweAuth, async (c) => {
   const { slug } = c.req.param() as ProposalParams;
   if (!slug) throw new ApiError('Proposal slug is required', 400);
-  const { title, body } = await c.req.json();
+  const {
+    title,
+    body,
+    voteType,
+    voteChoices,
+    cycle,
+  } = await c.req.json() as UpdateProposal;
   const user = c.get('user');
   if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.update(schema.proposalTable).set({
     title,
     body,
+    voteType,
+    voteChoices,
+    cycle,
   }).where(eq(schema.proposalTable.slug, slug));
 
   return resf(c, proposal);

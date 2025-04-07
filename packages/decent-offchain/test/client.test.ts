@@ -7,9 +7,11 @@ import { cookieName } from '@/api/utils/cookie';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 
+let sessionId = 'blank';
+
 // delete all sessions before running tests
 beforeAll(async () => {
-  await db.delete(schema.sessions).execute();
+  await db.delete(schema.sessionTable).execute();
 });
 
 const specPrivateKey = process.env.TEST_PRIVATE_KEY_1 as `0x${string}`;
@@ -48,7 +50,11 @@ export const getCookie = (res: Response) => {
   return cookieMatch[1] ?? '';
 };
 
-export const cookies = (sessionId: string) => {
+export const setSessionId = (id: string) => {
+  sessionId = id;
+};
+
+export const cookies = () => {
   return {
     Cookie: `${cookieName}=${sessionId}`
   };

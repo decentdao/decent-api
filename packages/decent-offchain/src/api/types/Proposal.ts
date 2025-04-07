@@ -36,7 +36,7 @@ cid stored JSON
 export type Proposal = {
   slug: string; // nanoid
   title: Optional<string>; // title and description are from DB if proposal is in draft.
-  description: Optional<string>;
+  body: Optional<string>;
   status: string; // TBD enum we should have
   authorAddress: Address; // address of the proposer
   metadataCID: Optional<string>; // cid to metadata with data (title and/or description and/or others)
@@ -50,18 +50,20 @@ export type Proposal = {
   version: number; // Starts at 1
   votes: Optional<Vote[]>; // vote records
   cycle: Optional<number>; // Use votingStrategy to get DAO, and get DAO's governance cycle.
+  voteType: Optional<string>; // "single-choice" or "multi-choice"
+  voteChoices: Optional<string[]>; // choices for the vote
   createdAt: number; // timestamp
   updatedAt: Optional<number>; // timestamp
 }
 
-export type NewProposal =
-  Pick<Proposal,
-    'title' |
-    'description' |
-    'votingStrategyAddress' |
-    'cycle' |
-    'voteStartsAt'
-  >
+export type NewProposal = {
+  title: string;
+  body: string;
+  voteType: string;
+  voteChoices?: string[];
+  cycle?: number;
+  votingStrategyAddress?: Address;
+}
 
 export type UpdateProposal = NewProposal & Pick<Proposal, 'slug'>
 

@@ -1,6 +1,6 @@
-import { GovernanceModule } from "./Governance";
-import { Address, Optional } from "./Common";
-import { Safe } from "./Safe";
+import { GovernanceModule } from './Governance';
+import { Address, Optional } from './Common';
+import { Safe } from './Safe';
 
 export type GasTank = {
   address: Optional<Address>;

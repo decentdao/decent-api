@@ -1,4 +1,4 @@
-import { Address } from "./Common";
+import { Address } from './Common';
 
 export type Vote = {
   address: Address;
@@ -7,9 +7,9 @@ export type Vote = {
 }
 
 export enum YesNoVoteOption {
-  Yes = "YES",
-  No = "NO",
-  Abstain = "ABSTAIN",
+  Yes = 'YES',
+  No = 'NO',
+  Abstain = 'ABSTAIN',
 }
 
 export type YesNoVote = Vote & {

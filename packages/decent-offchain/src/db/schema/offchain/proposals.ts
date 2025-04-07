@@ -4,19 +4,23 @@ import { offchainSchema } from './offchain';
 import { hex } from '../hex';
 
 export const proposalTable = offchainSchema.table('proposals', {
-  slug: text().primaryKey().unique().$defaultFn(() => nanoid()),
   daoChainId: integer().notNull(),
   daoAddress: hex().notNull(),
+  slug: text().primaryKey().unique().$defaultFn(() => nanoid()),
+  title: text(),
+  body: text(),
+  status: text(),
   authorAddress: hex().notNull(),
   metadataCID: text(),
-  status: text(),
-  cycle: integer(),
   id: integer(), // number to concat with organization prefix (ex: DCT-1)
   safeNonce: integer(),
   executedTxHash: text(),
-  title: text(),
-  body: text(),
+  votingStrategyAddress: hex(),
+  voteStartsAt: timestamp(),
+  voteEndsAt: timestamp(),
+  discussionId: text(),
   version: integer().default(1),
+  cycle: integer(),
   voteType: text(),
   voteChoices: json().$type<string[]>(),
   createdAt: timestamp().defaultNow(),

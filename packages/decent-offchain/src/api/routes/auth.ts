@@ -20,13 +20,13 @@ const app = new Hono();
 app.get('/nonce', async (c) => {
   const id = getCookie(c, cookieName) || nanoid();
   const [session] = await db.select()
-    .from(schema.sessions)
-    .where(eq(schema.sessions.id, id));
+    .from(schema.sessionTable)
+    .where(eq(schema.sessionTable.id, id));
 
   const nonce = session?.nonce || generateSiweNonce();
 
   if (!session?.nonce) {
-    await db.insert(schema.sessions).values({
+    await db.insert(schema.sessionTable).values({
       id,
       nonce,
     });
@@ -48,7 +48,7 @@ app.post('/verify', async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
-  const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
+  const [session] = await db.select().from(schema.sessionTable).where(eq(schema.sessionTable.id, id));
   if (!session) throw new ApiError('session not found', 401);
 
   const { message, signature } = await c.req.json();
@@ -68,12 +68,12 @@ app.post('/verify', async (c) => {
 
   const ensName = await publicClient.getEnsName({ address })
 
-  await db.update(schema.sessions).set({
+  await db.update(schema.sessionTable).set({
     address,
     ensName,
     nonce,
     signature,
-  }).where(eq(schema.sessions.id, id));
+  }).where(eq(schema.sessionTable.id, id));
 
   const data: User = {
     address,
@@ -92,7 +92,7 @@ app.get('/me', async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
-  const [session] = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id));
+  const [session] = await db.select().from(schema.sessionTable).where(eq(schema.sessionTable.id, id));
   if (!session) throw new ApiError('session not found', 401);
   if (!session.address) throw new ApiError('address not found', 401);
 
@@ -113,7 +113,7 @@ app.post('/logout', async (c) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
-  await db.delete(schema.sessions).where(eq(schema.sessions.id, id));
+  await db.delete(schema.sessionTable).where(eq(schema.sessionTable.id, id));
   deleteCookie(c, cookieName);
   const data: Logout = 'ok';
   return resf(c, data);

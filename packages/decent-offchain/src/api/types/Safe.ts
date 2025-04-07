@@ -1,4 +1,4 @@
-import { Address } from "./Common";
+import { Address } from './Common';
 
 export type Safe = {
   owners: Address[];
