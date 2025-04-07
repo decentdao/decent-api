@@ -24,6 +24,8 @@ SET default_table_access_method = heap;
 -- Name: dao; Type: TABLE; Schema: onchain; Owner: -
 --
 
+CREATE SCHEMA onchain;
+
 CREATE TABLE onchain.dao (
     dao_chain_id integer NOT NULL,
     dao_address text NOT NULL,
