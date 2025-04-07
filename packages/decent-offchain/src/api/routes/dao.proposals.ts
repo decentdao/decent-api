@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { Address } from 'viem';
+import { eq, and } from 'drizzle-orm';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { eq, and } from 'drizzle-orm';
 import { siweAuth } from '@/api/middleware/auth';
 
 const app = new Hono();

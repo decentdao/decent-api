@@ -8,10 +8,12 @@ export const proposalTable = offchainSchema.table('proposals', {
   daoChainId: integer().notNull(),
   daoAddress: hex().notNull(),
   authorAddress: hex().notNull(),
+  metadataCID: text(),
   status: text(),
   cycle: integer(),
   id: integer(), // number to concat with organization prefix (ex: DCT-1)
-  safeTxHash: text(),
+  safeNonce: integer(),
+  executedTxHash: text(),
   title: text(),
   body: text(),
   version: integer().default(1),
