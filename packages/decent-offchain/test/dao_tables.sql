@@ -25,6 +25,11 @@ SET default_table_access_method = heap;
 --
 
 CREATE SCHEMA onchain;
+CREATE TYPE onchain.token_type AS ENUM (
+    'ERC20',
+    'ERC721',
+    'ERC1155'
+);
 
 CREATE TABLE onchain.dao (
     dao_chain_id integer NOT NULL,
