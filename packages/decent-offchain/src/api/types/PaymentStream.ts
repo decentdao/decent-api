@@ -1,4 +1,4 @@
-import { Optional } from "./Common";
+import { Optional } from './Common';
 
 export type PaymentStream = {
   start: Date;

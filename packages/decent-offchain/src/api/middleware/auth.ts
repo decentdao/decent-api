@@ -15,7 +15,7 @@ export const siweAuth = async (c: Context, next: Next) => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('no cookie found', 401);
 
-  const session = await db.query.sessions.findFirst({
+  const session = await db.query.sessionTable.findFirst({
     where: (s, { eq }) => eq(s.id, id),
   });
 

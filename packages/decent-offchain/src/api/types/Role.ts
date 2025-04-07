@@ -1,5 +1,5 @@
-import { PaymentStream } from "./PaymentStream";
-import { Address, Optional } from "./Common";
+import { PaymentStream } from './PaymentStream';
+import { Address, Optional } from './Common';
 
 export type Role = {
   cid: string; // cid to metadata with data (title and/or description and/or others)

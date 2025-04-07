@@ -1,5 +1,5 @@
-import { Address, Optional } from "./Common";
-import { Token } from "./Token";
+import { Address, Optional } from './Common';
+import { Token } from './Token';
 
 export type ProposalPermission = {
   threshold: number; // voting weight
