@@ -3,8 +3,11 @@
 # Dump DAO-related tables
 pg_dump decent \
   --column-inserts \
+  --schema \
   --no-comments \
   --no-owner \
+  -n 'onchain' \
+  --table='onchain.token_type' \
   -t 'onchain.dao' \
   -t 'onchain.governance_module' \
   -t 'onchain.signer' \
