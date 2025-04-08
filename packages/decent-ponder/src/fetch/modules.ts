@@ -1,10 +1,10 @@
-import { Address, getAddress } from "viem";
-import { abis } from "@fractal-framework/fractal-contracts";
-import { Context } from "ponder:registry";
-import { getPages, PAGE_SIZE, SENTINEL_ADDRESS } from "./common";
+import { Address, getAddress } from 'viem';
+import { abis } from '@fractal-framework/fractal-contracts';
+import { Context } from 'ponder:registry';
+import { getPages, PAGE_SIZE, SENTINEL_ADDRESS } from './common';
 
 export type Module = {
-  type: "Azorius" | "FractalModule";
+  type: 'Azorius' | 'FractalModule';
   address: Address;
   strategies?: Address[]; // Only Azorius modules have strategies
 };
@@ -26,28 +26,28 @@ export async function checkModule(
       {
         abi: abis.Azorius,
         address,
-        functionName: "DOMAIN_SEPARATOR_TYPEHASH",
+        functionName: 'DOMAIN_SEPARATOR_TYPEHASH',
       },
       {
         abi: abis.Azorius,
         address,
-        functionName: "TRANSACTION_TYPEHASH",
+        functionName: 'TRANSACTION_TYPEHASH',
       },
       {
         abi: abis.Azorius,
         address,
-        functionName: "getStrategies",
+        functionName: 'getStrategies',
         args: [SENTINEL_ADDRESS, PAGE_SIZE],
       },
       {
         abi: abis.FractalModule,
         address,
-        functionName: "avatar",
+        functionName: 'avatar',
       },
       {
         abi: abis.FractalModule,
         address,
-        functionName: "controllers",
+        functionName: 'controllers',
         // don't care about the address, just want the controllers
         // call to be successful to determine if it's a Fractal module
         args: [SENTINEL_ADDRESS],
@@ -58,17 +58,17 @@ export async function checkModule(
 
   // Azorius module
   if (
-    domainSeparatorTypeHash.status === "success" &&
-    transactionTypeHash.status === "success" &&
-    strategiesResponse.status === "success"
+    domainSeparatorTypeHash.status === 'success' &&
+    transactionTypeHash.status === 'success' &&
+    strategiesResponse.status === 'success'
   ) {
     const strategies = [...strategiesResponse.result[0]];
     if (strategies.length === Number(PAGE_SIZE)) {
-      const moreStrategies = await getPages(context, address, "Azorius", "getStrategies");
+      const moreStrategies = await getPages(context, address, 'Azorius', 'getStrategies');
       strategies.push(...moreStrategies);
     }
     return {
-      type: "Azorius",
+      type: 'Azorius',
       address,
       strategies,
     };
@@ -76,11 +76,11 @@ export async function checkModule(
 
   // Fractal module
   if (
-    fractalModuleAddress.status === "success" &&
-    controllers.status === "success"
+    fractalModuleAddress.status === 'success' &&
+    controllers.status === 'success'
   ) {
     return {
-      type: "FractalModule",
+      type: 'FractalModule',
       address,
     };
   }

@@ -16,14 +16,14 @@
 // prefix is just a frontend thing, do /chain/address/1234567890
 export const chainIdToPrefix = (chainId: number) => {
   if (chainId === 11155111) {
-    return "sep";
+    return 'sep';
   } else if (chainId === 1) {
-    return "eth";
+    return 'eth';
   } else if (chainId === 8453) {
-    return "base";
+    return 'base';
   } else if (chainId === 10) {
-    return "opt";
+    return 'opt';
   } else if (chainId === 137) {
-    return "matic";
+    return 'matic';
   }
 };

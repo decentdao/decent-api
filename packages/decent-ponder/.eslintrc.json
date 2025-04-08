@@ -1,6 +1,7 @@
 {
   "extends": "ponder",
   "rules": {
-    "no-trailing-spaces": "warn"
+    "no-trailing-spaces": "warn",
+    "quotes": ["warn", "single"]
   }
 }

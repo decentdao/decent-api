@@ -1,15 +1,15 @@
-import { Address, getAddress } from "viem";
-import { Context } from "ponder:registry";
-import { safeInfo } from "./safe";
-import { checkModule } from "./modules";
-import { checkStrategy } from "./strategy";
+import { Address, getAddress } from 'viem';
+import { Context } from 'ponder:registry';
+import { safeInfo } from './safe';
+import { checkModule } from './modules';
+import { checkStrategy } from './strategy';
 import {
   GovernanceModuleInsert,
   VotingStrategyInsert,
   VotingTokenInsert,
   SignerInsert,
   SignerToDaoInsert,
-} from "ponder:schema";
+} from 'ponder:schema';
 
 export type GovernanceInsert = {
   address: Address;
@@ -52,7 +52,7 @@ export async function fetchGovernance(
       modules.map(async m => {
         const module = await checkModule(context, m);
         if (!module) return null;
-        if (module.type === "FractalModule") {
+        if (module.type === 'FractalModule') {
           fractalModuleAddress = module.address;
           return;
         }
@@ -75,7 +75,7 @@ export async function fetchGovernance(
             votingStrategies.push({
               address: strategyAddress,
               governanceModuleId: module.address,
-              minProposerBalance: ts.minProposerBalance?.toString() || "0",
+              minProposerBalance: ts.minProposerBalance?.toString() || '0',
             });
 
             votingTokens.push({
