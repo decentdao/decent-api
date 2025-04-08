@@ -1,7 +1,7 @@
-import { Address, getAddress, zeroAddress } from "viem";
-import { Context } from "ponder:registry";
-import { GnosisSafeL2Abi } from "../../abis/GnosisSafeL2";
-import { getPages, GUARD_STORAGE_SLOT, PAGE_SIZE, SENTINEL_ADDRESS } from "./common";
+import { Address, getAddress, zeroAddress } from 'viem';
+import { Context } from 'ponder:registry';
+import { GnosisSafeL2Abi } from '../../abis/GnosisSafeL2';
+import { getPages, GUARD_STORAGE_SLOT, PAGE_SIZE, SENTINEL_ADDRESS } from './common';
 
 export async function safeInfo(context: Context, _address: Address) {
   const address = getAddress(_address);
@@ -17,27 +17,27 @@ export async function safeInfo(context: Context, _address: Address) {
       {
         abi: GnosisSafeL2Abi,
         address,
-        functionName: "nonce",
+        functionName: 'nonce',
       },
       {
         abi: GnosisSafeL2Abi,
         address,
-        functionName: "getThreshold",
+        functionName: 'getThreshold',
       },
       {
         abi: GnosisSafeL2Abi,
         address,
-        functionName: "getOwners",
+        functionName: 'getOwners',
       },
       {
         abi: GnosisSafeL2Abi,
         address,
-        functionName: "VERSION",
+        functionName: 'VERSION',
       },
       {
         abi: GnosisSafeL2Abi,
         address,
-        functionName: "getModulesPaginated",
+        functionName: 'getModulesPaginated',
         args: [SENTINEL_ADDRESS, PAGE_SIZE],
       },
     ],
@@ -55,7 +55,7 @@ export async function safeInfo(context: Context, _address: Address) {
   if (modulesResponse[0].length < PAGE_SIZE) {
     modules.push(...modulesResponse[0]);
   } else {
-    const moreModules = await getPages(context, address, "GnosisSafeL2", "getModulesPaginated");
+    const moreModules = await getPages(context, address, 'GnosisSafeL2', 'getModulesPaginated');
     modules.push(...moreModules);
   }
 

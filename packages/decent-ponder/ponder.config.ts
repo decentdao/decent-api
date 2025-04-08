@@ -1,7 +1,7 @@
-import { createConfig } from "ponder";
-import { http } from "viem";
-import { KeyValuePairsAbi } from "./abis/KeyValuePairsAbi";
-import { FractalRegistryAbi } from "./abis/FractalRegistry";
+import { createConfig } from 'ponder';
+import { http } from 'viem';
+import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
+import { FractalRegistryAbi } from './abis/FractalRegistry';
 
 export default createConfig({
   networks: {
@@ -35,19 +35,19 @@ export default createConfig({
         //   startBlock: 4916643,
         // },
         mainnet: {
-          address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
+          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
           startBlock: 17389311,
         },
         base: {
-          address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
+          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
           startBlock: 12996645,
         },
         optimism: {
-          address: "0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131",
+          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
           startBlock: 118640420,
         },
         polygon: {
-          address: "0x68e3b985B93eA0a10178c7ae919299699559Aaab",
+          address: '0x68e3b985B93eA0a10178c7ae919299699559Aaab',
           startBlock: 43952879,
         },
       },
@@ -60,19 +60,19 @@ export default createConfig({
         //   startBlock: 4916634,
         // },
         mainnet: {
-          address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
+          address: '0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3',
           startBlock: 17389302,
         },
         base: {
-          address: "0x023bdaefeddddd5b43af125caa8007a99a886fd3",
+          address: '0x023bdaefeddddd5b43af125caa8007a99a886fd3',
           startBlock: 12996617,
         },
         optimism: {
-          address: "0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3",
+          address: '0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3',
           startBlock: 118640391,
         },
         polygon: {
-          address: "0xfE5950B4975a19679be7c31a0A03D626d237f37C",
+          address: '0xfE5950B4975a19679be7c31a0A03D626d237f37C',
           startBlock: 43952847,
         },
       },

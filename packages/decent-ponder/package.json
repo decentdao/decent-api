@@ -7,7 +7,7 @@
     "dev": "ponder dev --schema onchain",
     "start": "ponder dev --schema onchain --disable-ui",
     "psql": "brew services restart postgresql@15",
-    "lint": "eslint ./src/**/*.ts"
+    "lint": "eslint ./**/*.ts ./**/*.*.ts"
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.4.2",
