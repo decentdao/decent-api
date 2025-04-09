@@ -6,9 +6,9 @@
   "scripts": {
     "studio": "drizzle-kit studio --config=./src/db/drizzle.config.ts",
     "push": "drizzle-kit push --config=./src/db/drizzle.config.ts",
+    "push:testdb": "drizzle-kit push --config=./src/db/drizzle.onchain.ts",
     "pull": "drizzle-kit pull --config=./src/db/drizzle.config.ts",
     "generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
-    "generate:testdb": "drizzle-kit generate --config=./src/db/drizzle.onchain.ts --name=onchain && rm -rf test/meta",
     "migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts",
