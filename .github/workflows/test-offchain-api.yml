@@ -37,11 +37,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - name: Setup database schema
+      - name: Setup onchain database schema
         run: bun push:testdb
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-      - name: Setup database data
+      - name: Setup offchain database schema
+        run: bun push
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+      - name: Setup onchain database data
         run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.data.sql
       - run: bun test
         env:
