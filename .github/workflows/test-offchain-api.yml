@@ -40,8 +40,10 @@ jobs:
         run: bun push
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-      - name: Setup database
-        run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao_tables.sql
+      - name: Setup database schema
+        run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.schema.sql
+      - name: Setup database data
+        run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.data.sql
       - run: bun test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test

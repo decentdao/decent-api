@@ -7,6 +7,7 @@ import { daoCheck } from '@/api/middleware/dao';
 import { DbDao } from '@/db/schema/onchain';
 import { formatDao } from '@/api/utils/typeConverter';
 import { permissionsCheck } from '@/api/middleware/permissions';
+import { getChainId } from '@/api/utils/chains';
 
 const app = new Hono();
 
@@ -31,8 +32,7 @@ app.get('/', async (c) => {
  */
 app.get('/:chainId', async (c) => {
   const { chainId } = c.req.param();
-  const chainIdNumber = Number(chainId);
-  if (isNaN(chainIdNumber)) throw new ApiError('Invalid dao chainId', 400);
+  const chainIdNumber = getChainId(chainId);
   const query = await db.query.daoTable.findMany({
     where: (dao, { eq }) => eq(dao.chainId, chainIdNumber),
     with: DEFAULT_DAO_WITH,
@@ -60,7 +60,7 @@ app.get('/:chainId/:address', daoCheck, async (c) => {
  * @route GET /d/{chainId}/{address}/me
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
- * @returns {Permission[]} Array of permission objects
+ * @returns {User} User object
  */
 app.get('/:chainId/:address/me', daoCheck, siweAuth, permissionsCheck, async (c) => {
   const user = c.get('user');

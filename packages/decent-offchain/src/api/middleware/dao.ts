@@ -6,6 +6,7 @@ import { ApiError } from '@/api/utils/responseFormatter';
 import { Dao } from '@/api/types/Dao';
 import { formatDao } from '@/api/utils/typeConverter';
 import { DbDao } from '@/db/schema/onchain';
+import { getChainId } from '@/api/utils/chains';
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -15,8 +16,7 @@ declare module 'hono' {
 
 export const daoCheck = async (c: Context, next: Next) => {
   const { chainId, address } = c.req.param();
-  const chainIdNumber = Number(chainId);
-  if (isNaN(chainIdNumber)) throw new ApiError('Invalid dao chainId', 400);
+  const chainIdNumber = getChainId(chainId);
 
   const addressLower = address?.toLowerCase();
   if (!addressLower || !isAddress(addressLower)) throw new ApiError('Invalid dao address', 400);

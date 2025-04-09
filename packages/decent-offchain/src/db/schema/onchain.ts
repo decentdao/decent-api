@@ -8,13 +8,14 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { hex } from './hex';
+import { SupportedChainId } from '@/api/types';
 
 // ================================
 // ========= Tables ===============
 // ================================
 const onchainSchema = pgSchema('onchain');
 export const daoTable = onchainSchema.table('dao', {
-  chainId:                integer('dao_chain_id').notNull(),
+  chainId:                integer('dao_chain_id').notNull().$type<SupportedChainId>(),
   address:                hex('dao_address').notNull(),
   name:                   text('dao_name'),
   proposalTemplatesCID:   text(),

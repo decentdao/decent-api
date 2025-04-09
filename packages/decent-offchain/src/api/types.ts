@@ -16,6 +16,9 @@ export type Meta = {
   version: string;
 };
 
+export const SUPPORTED_CHAIN_IDS = [1, 8453, 10, 137, 11155111] as const;
+export type SupportedChainId = typeof SUPPORTED_CHAIN_IDS[number];
+
 export type Health = string;
 
 export type ChainId = number;

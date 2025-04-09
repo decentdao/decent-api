@@ -7,8 +7,8 @@ import {
 } from '../client.test'
 import { ApiResponse, Logout } from '@/api/types';
 
-const daoAddress = '0xdd6cefa62239272f1edf755ba6471eacb7df2fa5';
-const daoChainId = 1;
+const daoAddress = '0x07a281d9CF79585282a2ADa24B78B494977DC33E';
+const daoChainId = 8453;
 const body: NewProposal = {
   title: 'Test Proposal',
   body: 'Test Description',
