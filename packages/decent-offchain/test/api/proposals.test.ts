@@ -32,7 +32,7 @@ describe('Proposals API', () => {
     });
     const json = await res.json() as ApiResponse<Proposal>;
     console.log(json);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(403);
   });
 
   it('POST proposal with a blank cookie', async () => {

@@ -7,6 +7,7 @@ import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { siweAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { NewProposal, UpdateProposal } from '@/api/types/Proposal';
+import { permissionsCheck } from '@/api/middleware/permissions';
 
 const app = new Hono();
 
@@ -41,7 +42,10 @@ app.get('/', daoCheck, async (c) => {
  * @body {...}
  * @returns {Proposal} Proposal object
  */
-app.post('/', daoCheck, siweAuth, async (c) => {
+app.post('/', daoCheck, siweAuth, permissionsCheck, async (c) => {
+  const user = c.get('user');
+  if (!user) throw new ApiError('user not found', 401);
+  if (!user.permissions?.isProposer) throw new ApiError('User does not have proposer permissions', 403);
   const dao = c.get('dao');
   const {
     title,
@@ -51,8 +55,6 @@ app.post('/', daoCheck, siweAuth, async (c) => {
     voteChoices,
     cycle,
   } = await c.req.json() as NewProposal;
-  const user = c.get('user');
-  if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.insert(schema.proposalTable).values({
     daoChainId: dao.chainId,
     daoAddress: dao.address,
@@ -103,9 +105,12 @@ app.get('/:slug', daoCheck, async (c) => {
  * @body {...}
  * @returns {Proposal} Proposal object
  */
-app.put('/:slug', daoCheck, siweAuth, async (c) => {
+app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async (c) => {
   const { slug } = c.req.param() as ProposalParams;
   if (!slug) throw new ApiError('Proposal slug is required', 400);
+  const user = c.get('user');
+  if (!user) throw new ApiError('user not found', 401);
+  if (!user.permissions?.isProposer) throw new ApiError('User does not have proposer permissions', 403);
   const {
     title,
     body,
@@ -113,8 +118,6 @@ app.put('/:slug', daoCheck, siweAuth, async (c) => {
     voteChoices,
     cycle,
   } = await c.req.json() as UpdateProposal;
-  const user = c.get('user');
-  if (!user) throw new ApiError('user not found', 401);
   const proposal = await db.update(schema.proposalTable).set({
     title,
     body,
