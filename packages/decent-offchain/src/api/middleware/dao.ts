@@ -22,7 +22,10 @@ export const daoCheck = async (c: Context, next: Next) => {
   if (!addressLower || !isAddress(addressLower)) throw new ApiError('Invalid dao address', 400);
 
   const query = await db.query.daoTable.findFirst({
-    where: (dao, { eq }) => eq(dao.chainId, chainIdNumber) && eq(dao.address, addressLower),
+    where: (dao, { eq, and }) => and(
+      eq(dao.chainId, chainIdNumber),
+      eq(dao.address, addressLower)
+    ),
     with: DEFAULT_DAO_WITH,
   }) as DbDao;
 
