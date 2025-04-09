@@ -37,11 +37,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - name: Setup database schema
-        run: bun push
+        run: bun push:testdb
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-      - name: Setup database schema
-        run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.schema.sql
       - name: Setup database data
         run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.data.sql
       - run: bun test
