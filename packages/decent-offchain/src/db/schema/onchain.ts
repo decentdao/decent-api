@@ -19,7 +19,7 @@ export const daoTable = onchainSchema.table('dao', {
   name:                   text('dao_name'),
   proposalTemplatesCID:   text(),
   snapshotENS:            text(),
-  subDaoOf:               text(),
+  subDaoOf:               hex(),
   topHatId:               text(),
   hatIdToStreamId:        text(),
   gasTankEnabled:         boolean(),
@@ -121,9 +121,16 @@ export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) =
 // ================================
 // ========== Types ===============
 // ================================
-export type Dao = typeof daoTable.$inferSelect;
-export type GovernanceModule = typeof governanceModuleTable.$inferSelect;
-export type VotingStrategy = typeof votingStrategyTable.$inferSelect;
-export type VotingToken = typeof votingTokenTable.$inferSelect;
-export type Signer = typeof signerTable.$inferSelect;
-export type SignerToDao = typeof signerToDaoTable.$inferSelect;
+export type DbDao = typeof daoTable.$inferSelect & {
+  governanceModules: DbGovernanceModule[];
+  signers: DbSignerToDao[];
+};
+export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
+  votingStrategies: DbVotingStrategy[];
+};
+export type DbVotingStrategy = typeof votingStrategyTable.$inferSelect & {
+  votingTokens: DbVotingToken[];
+};
+export type DbVotingToken = typeof votingTokenTable.$inferSelect;
+export type DbSigner = typeof signerTable.$inferSelect;
+export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;

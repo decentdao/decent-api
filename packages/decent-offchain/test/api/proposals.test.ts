@@ -5,7 +5,7 @@ import {
   cookies,
   setSessionId
 } from '../client.test'
-import { ApiResponse } from '@/api/types';
+import { ApiResponse, Logout } from '@/api/types';
 
 const daoAddress = '0xdd6cefa62239272f1edf755ba6471eacb7df2fa5';
 const daoChainId = 1;
@@ -44,5 +44,16 @@ describe('Proposals API', () => {
     });
     expect(res.status).toBe(401);
   });
+});
 
+describe('Logout', () => {
+  it('should logout a user', async () => {
+    const res = await app.request('/auth/logout', {
+      method: 'POST',
+      headers: cookies(),
+    });
+    const json = await res.json() as ApiResponse<Logout>;
+    expect(res.status).toBe(200);
+    expect(json.data).toBe('ok');
+  });
 });

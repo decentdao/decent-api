@@ -20,9 +20,17 @@ export type Health = string;
 
 export type ChainId = number;
 
+export type Permissions = {
+  isProposer: boolean;
+  isVoter: boolean;
+  isSigner: boolean;
+  isModerator: boolean;
+};
+
 export type User = {
   address: Address;
   ensName: string | null;
+  permissions?: Permissions;
 };
 
 export type Nonce = {
@@ -30,22 +38,3 @@ export type Nonce = {
 };
 
 export type Logout = string;
-
-export type Dao = {
-  chainId: string;
-  address: Address;
-};
-
-export type NewProposalBody = {
-  title: string;
-  body: string;
-  cycle?: string;
-  votingStrategy?: string;
-};
-
-export type UpdateProposalBody = {
-  title?: string;
-  body?: string;
-  cycle?: string;
-  votingStrategy?: string;
-};
