@@ -124,9 +124,18 @@ app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async (c) => {
     voteType,
     voteChoices,
     cycle,
-  }).where(eq(schema.proposalTable.slug, slug));
+  }).where(
+    and(
+      eq(schema.proposalTable.slug, slug),
+      eq(schema.proposalTable.authorAddress, user.address)
+    )
+  ).returning();
 
-  return resf(c, proposal);
+  if (!proposal.length) {
+    throw new ApiError('Proposal not found or you are not the author', 403);
+  }
+
+  return resf(c, proposal[0]);
 });
 
 export default app;

@@ -1,6 +1,7 @@
 import { GovernanceModule } from './Governance';
 import { Address, Optional } from './Common';
 import { Safe } from './Safe';
+import { SupportedChainId } from '../types';
 
 export type GasTank = {
   address: Optional<Address>;
@@ -13,7 +14,7 @@ export type GovernanceCycle = {
 };
 
 export type Dao = {
-  chainId: number;
+  chainId: SupportedChainId;
   address: Address;
   safe: Optional<Safe>;
   name: Optional<string>;
