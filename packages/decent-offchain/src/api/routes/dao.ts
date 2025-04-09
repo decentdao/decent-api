@@ -18,8 +18,9 @@ const app = new Hono();
 app.get('/', async (c) => {
   const query = await db.query.daoTable.findMany({
     with: DEFAULT_DAO_WITH,
-  });
-  return resf(c, query);
+  }) as DbDao[];
+  const daos = query.map(formatDao);
+  return resf(c, daos);
 });
 
 /**
