@@ -2,7 +2,11 @@ import { Hono } from 'hono';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
-import { Address } from 'viem';
+import { siweAuth } from '@/api/middleware/auth';
+import { daoCheck } from '@/api/middleware/dao';
+import { DbDao } from '@/db/schema/onchain';
+import { formatDao } from '@/api/utils/typeConverter';
+import { permissionsCheck } from '@/api/middleware/permissions';
 
 const app = new Hono();
 
@@ -27,11 +31,15 @@ app.get('/', async (c) => {
 app.get('/:chainId', async (c) => {
   const { chainId } = c.req.param();
   const chainIdNumber = Number(chainId);
+  if (isNaN(chainIdNumber)) throw new ApiError('Invalid dao chainId', 400);
   const query = await db.query.daoTable.findMany({
     where: (dao, { eq }) => eq(dao.chainId, chainIdNumber),
     with: DEFAULT_DAO_WITH,
-  });
-  return resf(c, query);
+  }) as DbDao[];
+
+  const daos = query.map(formatDao);
+
+  return resf(c, daos);
 });
 
 /**
@@ -41,20 +49,22 @@ app.get('/:chainId', async (c) => {
  * @param {string} address - Address parameter
  * @returns {Dao} DAO object
  */
-app.get('/:chainId/:address', async (c) => {
-  const { chainId, address } = c.req.param();
-  const chainIdNumber = Number(chainId);
-  const addressLower = address.toLowerCase() as Address;
-  const query = await db.query.daoTable.findFirst({
-    where: (dao, { eq }) => eq(dao.chainId, chainIdNumber) && eq(dao.address, addressLower),
-    with: DEFAULT_DAO_WITH,
-  });
-
-  if (!query) throw new ApiError('DAO not found', 404);
-
-  return resf(c, query);
+app.get('/:chainId/:address', daoCheck, async (c) => {
+  const dao = c.get('dao');
+  return resf(c, dao);
 });
 
-// TODO: endpoint to return permissions for individual DAO
+/**
+ * @title Get my permissions for a DAO
+ * @route GET /d/{chainId}/{address}/me
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @returns {Permission[]} Array of permission objects
+ */
+app.get('/:chainId/:address/me', daoCheck, siweAuth, permissionsCheck, async (c) => {
+  const user = c.get('user');
+  if (!user) throw new ApiError('User not found', 401);
+  return resf(c, user);
+});
 
 export default app;

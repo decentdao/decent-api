@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import resf from '@/api/utils/responseFormatter';
 
-// Routes
+// Route imports
 import meta from '@/api/routes/meta';
 import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
