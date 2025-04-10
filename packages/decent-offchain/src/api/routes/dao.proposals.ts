@@ -127,7 +127,7 @@ app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async (c) => {
   }).where(
     and(
       eq(schema.proposalTable.slug, slug),
-      eq(schema.proposalTable.authorAddress, user.address)
+      eq(schema.proposalTable.authorAddress, user.address) // only the author can update the proposal
     )
   ).returning();
 
