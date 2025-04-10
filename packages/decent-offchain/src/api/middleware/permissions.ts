@@ -17,7 +17,7 @@ export const permissionsCheck = async (c: Context, next: Next) => {
   const tokenAddresses = dao.governanceModules?.flatMap(
     (module) => module.strategies.flatMap((strategy) => strategy.votingTokens.map((token) => token.address))
   ) || [];
-  console.log(strategyAddresses, tokenAddresses);
+
   try {
     const publicClient = getPublicClient(dao.chainId);
 

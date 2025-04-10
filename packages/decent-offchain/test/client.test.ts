@@ -7,36 +7,64 @@ import { cookieName } from '@/api/utils/cookie';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 
-let sessionId = 'blank';
-
 // delete all sessions before running tests
 beforeAll(async () => {
   await db.delete(schema.sessionTable).execute();
 });
 
-const specPrivateKey = process.env.TEST_PRIVATE_KEY_1 as `0x${string}`;
-const TEST_PRIVATE_KEY = specPrivateKey || generatePrivateKey();
+type WalletNumber = 1 | 2 | 3;
 
-export const testAccount = privateKeyToAccount(TEST_PRIVATE_KEY);
-console.log(`WALLET_ADDRESS: ${testAccount.address}`);
+const PK1 = process.env.TEST_PRIVATE_KEY_1 as `0x${string}` || generatePrivateKey();
+const PK2 = process.env.TEST_PRIVATE_KEY_2 as `0x${string}` || generatePrivateKey();
+const PK3 = process.env.TEST_PRIVATE_KEY_3 as `0x${string}` || generatePrivateKey();
 
-export const testWalletClient = createWalletClient({
-  account: testAccount,
-  chain: mainnet,
-  transport: http(),
-});
+const PRIVATE_KEYS: Record<WalletNumber, `0x${string}`> = {
+  1: PK1,
+  2: PK2,
+  3: PK3,
+}
 
-export const signedSiweMessage = async (nonce: string) => {
+type WalletSession = {
+  address: `0x${string}`;
+  sessionId: string;
+}
+
+export const WALLETS: Record<WalletNumber, WalletSession> = {
+  1: {
+    address: privateKeyToAccount(PRIVATE_KEYS[1]).address,
+    sessionId: 'blank',
+  },
+  2: {
+    address: privateKeyToAccount(PRIVATE_KEYS[2]).address,
+    sessionId: 'blank',
+  },
+  3: {
+    address: privateKeyToAccount(PRIVATE_KEYS[3]).address,
+    sessionId: 'blank',
+  },
+}
+
+console.log('WALLETS');
+console.log(WALLETS);
+
+export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumber) => {
+  const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
+  const client = createWalletClient({
+    account,
+    chain: mainnet,
+    transport: http(),
+  });
+
   const message = createSiweMessage({
     chainId: mainnet.id,
     nonce,
-    address: testAccount.address,
+    address: account.address,
     domain: 'localhost',
     uri: 'http://localhost:3000',
     version: '1',
   });
 
-  const signature = await testWalletClient.signMessage({ message });
+  const signature = await client.signMessage({ message });
 
   return {
     message,
@@ -50,12 +78,12 @@ export const getCookie = (res: Response) => {
   return cookieMatch[1] ?? '';
 };
 
-export const setSessionId = (id: string) => {
-  sessionId = id;
+export const setSessionId = (accountNumber: WalletNumber, sessionId: string) => {
+  WALLETS[accountNumber].sessionId = sessionId;
 };
 
-export const cookies = () => {
+export const cookies = (accountNumber: WalletNumber) => {
   return {
-    Cookie: `${cookieName}=${sessionId}`
+    Cookie: `${cookieName}=${WALLETS[accountNumber].sessionId}`
   };
 };
