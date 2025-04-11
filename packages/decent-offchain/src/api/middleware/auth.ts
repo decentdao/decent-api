@@ -1,9 +1,9 @@
 import { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
+import { User } from 'decent-types';
 import { db } from '@/db';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { cookieName } from '@/api/utils/cookie';
-import { User } from '@/api/types';
 
 declare module 'hono' {
   interface ContextVariableMap {

@@ -1,5 +1,5 @@
 import { DbDao } from '@/db/schema/onchain';
-import { Dao } from '@/api/types/Dao';
+import { Dao } from 'decent-types';
 import { zeroAddress } from 'viem';
 
 export const formatDao = (dbDao: DbDao): Dao => {

@@ -1,21 +1,14 @@
 import { Hono } from 'hono';
-import { Address } from 'viem';
 import { eq, and } from 'drizzle-orm';
+import { NewProposal, UpdateProposal, ProposalParams } from 'decent-types';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { siweAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
-import { NewProposal, UpdateProposal } from '@/api/types/Proposal';
 import { permissionsCheck } from '@/api/middleware/permissions';
 
 const app = new Hono();
-
-type ProposalParams = {
-  chainId: string;
-  address: Address;
-  slug?: string;
-}
 
 /**
  * @title Get all proposals for a DAO

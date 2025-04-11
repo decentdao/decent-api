@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { ApiResponse, Meta, Health } from '@/api/types';
+import { ApiResponse, Meta, Health } from 'decent-types';
 
 describe('Hono API Routes', () => {
   it('GET / should return service info', async () => {
