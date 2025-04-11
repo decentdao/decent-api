@@ -1,7 +1,7 @@
 import { beforeAll } from 'bun:test';
 import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
-import { mainnet } from 'viem/chains';
+import { base } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
 import { cookieName } from '@/api/utils/cookie';
 import { db } from '@/db';
@@ -51,12 +51,12 @@ export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumb
   const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
   const client = createWalletClient({
     account,
-    chain: mainnet,
-    transport: http(),
+    chain: base,
+    transport: http(process.env.PONDER_RPC_URL_8453 as string),
   });
 
   const message = createSiweMessage({
-    chainId: mainnet.id,
+    chainId: base.id,
     nonce,
     address: account.address,
     domain: 'localhost',
