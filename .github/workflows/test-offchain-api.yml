@@ -49,6 +49,7 @@ jobs:
         run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.data.sql
       - run: bun test
         env:
+          PONDER_RPC_URL_8453: ${{ secrets.PONDER_RPC_URL_8453 }}
           TEST_PRIVATE_KEY_1: ${{ secrets.TEST_PRIVATE_KEY_1 }}
           TEST_PRIVATE_KEY_2: ${{ secrets.TEST_PRIVATE_KEY_2 }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
