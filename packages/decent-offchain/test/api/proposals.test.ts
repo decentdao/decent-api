@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { NewProposal, Proposal } from '@/api/types/Proposal';
+import { NewProposal, Proposal, ApiResponse, Logout } from 'decent-types';
 import { cookies } from '../client.test'
-import { ApiResponse, Logout } from '@/api/types';
 
 const daoAddress = '0x07a281d9CF79585282a2ADa24B78B494977DC33E';
 const daoChainId = 8453;

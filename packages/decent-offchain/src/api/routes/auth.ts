@@ -3,12 +3,12 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { User, Nonce, Logout } from 'decent-types';
 import { schema } from '@/db/schema';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { publicClient } from '@/api/utils/publicClient';
 import { cookieName, cookieOptions } from '@/api/utils/cookie';
-import { User, Nonce, Logout } from '@/api/types';
 
 const app = new Hono();
 

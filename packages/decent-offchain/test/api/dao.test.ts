@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { ApiResponse } from '@/api/types';
-import { Dao } from '@/api/types/Dao';
+import { ApiResponse, Dao } from 'decent-types';
 import { Address } from 'viem';
 
 describe('DAO API', () => {

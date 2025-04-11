@@ -1,9 +1,9 @@
 import { Context, Next } from 'hono';
 import { isAddress } from 'viem';
+import { Dao } from 'decent-types';
 import { db } from '@/db';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
 import { ApiError } from '@/api/utils/responseFormatter';
-import { Dao } from '@/api/types/Dao';
 import { formatDao } from '@/api/utils/typeConverter';
 import { DbDao } from '@/db/schema/onchain';
 import { getChainId } from '@/api/utils/chains';
