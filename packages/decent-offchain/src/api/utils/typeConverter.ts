@@ -1,6 +1,8 @@
-import { DbDao } from '@/db/schema/onchain';
-import { Dao } from 'decent-types';
 import { zeroAddress } from 'viem';
+import { Dao, Proposal } from 'decent-types';
+import { DbDao } from '@/db/schema/onchain';
+import { DbProposal } from '@/db/schema';
+import { unixTimestamp } from './time';
 
 export const formatDao = (dbDao: DbDao): Dao => {
   const dao: Dao = {
@@ -38,3 +40,30 @@ export const formatDao = (dbDao: DbDao): Dao => {
   };
   return dao;
 };
+
+export const formatProposal = (dbProposal: DbProposal): Proposal => {
+  const proposal: Proposal = {
+    slug: dbProposal.slug,
+    title: dbProposal.title,
+    body: dbProposal.body,
+    status: dbProposal.status || 'pending',
+    authorAddress: dbProposal.authorAddress,
+    metadataCID: dbProposal.metadataCID,
+    id: dbProposal.id,
+    safeNonce: dbProposal.safeNonce,
+    executedTxHash: dbProposal.executedTxHash,
+    votingStrategyAddress: dbProposal.votingStrategyAddress,
+    voteStartsAt: unixTimestamp(dbProposal.voteStartsAt),
+    voteEndsAt: unixTimestamp(dbProposal.voteEndsAt),
+    discussionId: dbProposal.discussionId,
+    version: dbProposal.version || 1,
+    votes: [], // TODO: [ENG-622] votes storage spike
+    cycle: dbProposal.cycle,
+    voteType: dbProposal.voteType,
+    voteChoices: dbProposal.voteChoices,
+    createdAt: unixTimestamp(dbProposal.createdAt),
+    updatedAt: unixTimestamp(dbProposal.updatedAt),
+  };
+  return proposal;
+};
+

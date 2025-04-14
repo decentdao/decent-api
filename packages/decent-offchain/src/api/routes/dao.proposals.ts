@@ -1,12 +1,13 @@
 import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
-import { NewProposal, UpdateProposal, ProposalParams } from 'decent-types';
+import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-types';
 import { db } from '@/db';
-import { schema } from '@/db/schema';
+import { DbProposal, schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { siweAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
+import { formatProposal } from '@/api/utils/typeConverter';
 
 const app = new Hono();
 
@@ -26,7 +27,8 @@ app.get('/', daoCheck, async (c) => {
     )
   });
 
-  return resf(c, proposals);
+  const ret: Proposal[] = proposals.map(formatProposal);
+  return resf(c, ret);
 });
 
 /**
@@ -48,7 +50,7 @@ app.post('/', daoCheck, siweAuth, permissionsCheck, async (c) => {
     voteChoices,
     cycle,
   } = await c.req.json() as NewProposal;
-  const proposal = await db.insert(schema.proposalTable).values({
+  const proposal: DbProposal[] = await db.insert(schema.proposalTable).values({
     daoChainId: dao.chainId,
     daoAddress: dao.address,
     authorAddress: user.address,
@@ -60,7 +62,9 @@ app.post('/', daoCheck, siweAuth, permissionsCheck, async (c) => {
     cycle,
   }).returning();
 
-  const ret = proposal[0];
+  if (!proposal.length || !proposal[0]) throw new ApiError('Failed to create proposal', 500);
+
+  const ret: Proposal = formatProposal(proposal[0]);
   return resf(c, ret);
 });
 
@@ -89,7 +93,8 @@ app.get('/:slug', daoCheck, async (c) => {
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  return resf(c, proposal);
+  const ret: Proposal = formatProposal(proposal);
+  return resf(c, ret);
 });
 
 /**
@@ -124,11 +129,12 @@ app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async (c) => {
     )
   ).returning();
 
-  if (!proposal.length) {
+  if (!proposal.length || !proposal[0]) {
     throw new ApiError('Proposal not found or you are not the author', 403);
   }
 
-  return resf(c, proposal[0]);
+  const ret: Proposal = formatProposal(proposal[0]);
+  return resf(c, ret);
 });
 
 export default app;
