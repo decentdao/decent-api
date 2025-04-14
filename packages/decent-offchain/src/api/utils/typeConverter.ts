@@ -1,7 +1,7 @@
 import { zeroAddress } from 'viem';
-import { Dao, Proposal } from 'decent-types';
+import { Comment, Dao, Proposal } from 'decent-types';
 import { DbDao } from '@/db/schema/onchain';
-import { DbProposal } from '@/db/schema';
+import { DbComment, DbProposal } from '@/db/schema';
 import { unixTimestamp } from './time';
 
 export const formatDao = (dbDao: DbDao): Dao => {
@@ -67,3 +67,15 @@ export const formatProposal = (dbProposal: DbProposal): Proposal => {
   return proposal;
 };
 
+export const formatComment = (dbComment: DbComment): Comment => {
+  const comment: Comment = {
+    id: dbComment.id,
+    authorAddress: dbComment.authorAddress,
+    createdAt: unixTimestamp(dbComment.createdAt),
+    updatedAt: unixTimestamp(dbComment.updatedAt),
+    replyToId: dbComment.replyToId,
+    proposalSlug: dbComment.proposalSlug || '',
+    content: dbComment.content,
+  };
+  return comment;
+};

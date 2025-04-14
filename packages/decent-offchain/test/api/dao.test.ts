@@ -1,7 +1,7 @@
+import { Address } from 'viem';
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
 import { ApiResponse, Dao } from 'decent-types';
-import { Address } from 'viem';
 
 describe('DAO API', () => {
   let daoAddress: Address | undefined;

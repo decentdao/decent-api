@@ -34,7 +34,9 @@ app.get('/', daoCheck, async (c) => {
 /**
  * @title Create a proposal
  * @route POST /d/{chainId}/{address}/proposals
- * @body {...}
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @param {NewProposal} [body] NewProposal object
  * @returns {Proposal} Proposal object
  */
 app.post('/', daoCheck, siweAuth, permissionsCheck, async (c) => {
@@ -71,6 +73,8 @@ app.post('/', daoCheck, siweAuth, permissionsCheck, async (c) => {
 /**
  * @title Get a proposal by slug
  * @route GET /d/{chainId}/{address}/proposals/{slug}
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
  * @param {string} slug - Slug or id of the proposal
  * @returns {Proposal} Proposal object
  */
@@ -100,7 +104,10 @@ app.get('/:slug', daoCheck, async (c) => {
 /**
  * @title Update a proposal
  * @route PUT /d/{chainId}/{address}/proposals/{slug}
- * @body {...}
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @param {string} slug - Slug or id of the proposal
+ * @param {UpdateProposal} [body] UpdateProposal object
  * @returns {Proposal} Proposal object
  */
 app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async (c) => {
