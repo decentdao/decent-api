@@ -6,6 +6,7 @@ import meta from '@/api/routes/meta';
 import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
+import comments from '@/api/routes/dao.comments';
 
 const app = new Hono();
 
@@ -18,5 +19,6 @@ app.route('/', meta);
 app.route('/auth', auth);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
+app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
 
 export default app;

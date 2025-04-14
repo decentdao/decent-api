@@ -7,7 +7,7 @@ import {
   setSessionId,
   signedSiweMessage,
   WALLETS,
-} from '../client.test';
+} from 'test/client';
 
 describe('Auth API', () => {
   let nonce: string;

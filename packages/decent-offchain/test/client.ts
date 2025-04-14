@@ -47,6 +47,13 @@ export const WALLETS: Record<WalletNumber, WalletSession> = {
 console.log('WALLETS');
 console.log(WALLETS);
 
+type ClientStore = {
+  proposalSlug: string;
+}
+export const clientStore: ClientStore = {
+  proposalSlug: ''
+};
+
 export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumber) => {
   const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
   const client = createWalletClient({
@@ -81,6 +88,10 @@ export const getCookie = (res: Response) => {
 export const setSessionId = (accountNumber: WalletNumber, sessionId: string) => {
   WALLETS[accountNumber].sessionId = sessionId;
 };
+
+export const setClientStore = (key: keyof ClientStore, value: string) => {
+  clientStore[key] = value;
+}
 
 export const cookies = (accountNumber: WalletNumber) => {
   return {
