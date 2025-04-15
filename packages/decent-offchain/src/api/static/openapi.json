@@ -1,0 +1,1112 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Decent API",
+    "description": "API for the Decent protocol",
+    "version": "0.1.0",
+    "contact": {
+      "name": "Decent DAO",
+      "url": "https://decentdao.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://decent-offchain.up.railway.app",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Localhost"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Get API metadata",
+        "description": "Retrieve API metadata including version information",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Meta"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Get API health status",
+        "description": "Check if the API is healthy",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Health"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meta/chains": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Get all chains with DAOs",
+        "description": "Retrieve a list of all supported chain IDs that have DAOs",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/nonce": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Get a nonce for SIWE authentication",
+        "description": "Retrieve a nonce for Sign-In with Ethereum authentication",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Nonce"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Verify a SIWE message and signature",
+        "description": "Verify a Sign-In with Ethereum message and signature",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string"
+                  }
+                },
+                "required": ["message", "signature"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Get current user information",
+        "description": "Retrieve information about the currently authenticated user",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Log out current user",
+        "description": "Log out the currently authenticated user",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Logout"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get all DAOs",
+        "description": "Retrieve a list of all DAOs",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Dao"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get DAOs by chain",
+        "description": "Retrieve all DAOs for a specific chain",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Dao"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get DAO by address",
+        "description": "Retrieve a specific DAO by chain ID and address",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Dao"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/proposals": {
+      "get": {
+        "tags": ["proposals"],
+        "summary": "Get DAO proposals",
+        "description": "Retrieve all proposals for a specific DAO",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Proposal"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["proposals"],
+        "summary": "Create proposal",
+        "description": "Create a new proposal for a DAO",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProposal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proposal created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Proposal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/proposals/{slug}": {
+      "get": {
+        "tags": ["proposals"],
+        "summary": "Get proposal by slug",
+        "description": "Retrieve a specific proposal by its slug",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Proposal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["proposals"],
+        "summary": "Update proposal",
+        "description": "Update an existing proposal",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProposal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proposal updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Proposal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/proposals/{slug}/comments": {
+      "get": {
+        "tags": ["comments"],
+        "summary": "Get proposal comments",
+        "description": "Retrieve all comments for a specific proposal",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Comment"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["comments"],
+        "summary": "Create comment",
+        "description": "Create a new comment on a proposal",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewComment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Comment"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/proposals/{slug}/comments/{id}": {
+      "put": {
+        "tags": ["comments"],
+        "summary": "Update comment",
+        "description": "Update an existing comment",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewComment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Comment updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Comment"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["comments"],
+        "summary": "Delete comment",
+        "description": "Delete an existing comment",
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comment deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Comment"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/Meta" },
+              { "$ref": "#/components/schemas/Health" },
+              { "$ref": "#/components/schemas/Nonce" },
+              { "$ref": "#/components/schemas/User" },
+              { "$ref": "#/components/schemas/Logout" },
+              { "$ref": "#/components/schemas/Dao" },
+              { "type": "array", "items": { "$ref": "#/components/schemas/Dao" } },
+              { "$ref": "#/components/schemas/Proposal" },
+              { "type": "array", "items": { "$ref": "#/components/schemas/Proposal" } },
+              { "$ref": "#/components/schemas/Comment" },
+              { "type": "array", "items": { "$ref": "#/components/schemas/Comment" } },
+              { "type": "array", "items": { "type": "integer" } }
+            ]
+          }
+        },
+        "required": ["success", "data"]
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "version"]
+      },
+      "Health": {
+        "type": "string",
+        "enum": ["ok"]
+      },
+      "Nonce": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "type": "string"
+          }
+        },
+        "required": ["nonce"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "ensName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["address"]
+      },
+      "Logout": {
+        "type": "string",
+        "enum": ["ok"]
+      },
+      "Dao": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "integer"
+          },
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["chainId", "address", "name"]
+      },
+      "Proposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "authorAddress": {
+            "type": "string"
+          },
+          "votingStrategyAddress": {
+            "type": "string"
+          },
+          "voteType": {
+            "type": "string"
+          },
+          "voteChoices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cycle": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "slug", "title", "body", "authorAddress", "votingStrategyAddress", "voteType", "voteChoices", "cycle"]
+      },
+      "NewProposal": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "votingStrategyAddress": {
+            "type": "string"
+          },
+          "voteType": {
+            "type": "string"
+          },
+          "voteChoices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cycle": {
+            "type": "integer"
+          }
+        },
+        "required": ["title", "body", "votingStrategyAddress", "voteType", "voteChoices", "cycle"]
+      },
+      "UpdateProposal": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "voteType": {
+            "type": "string"
+          },
+          "voteChoices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cycle": {
+            "type": "integer"
+          }
+        },
+        "required": ["title", "body", "voteType", "voteChoices", "cycle"]
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "proposalSlug": {
+            "type": "string"
+          },
+          "authorAddress": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "replyToId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "proposalSlug", "authorAddress", "content"]
+      },
+      "NewComment": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "replyToId": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": ["content"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "meta",
+      "description": "API metadata and health endpoints"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "dao",
+      "description": "DAO-related operations"
+    },
+    {
+      "name": "proposals",
+      "description": "Proposal-related operations"
+    },
+    {
+      "name": "comments",
+      "description": "Comment-related operations"
+    }
+  ]
+}
