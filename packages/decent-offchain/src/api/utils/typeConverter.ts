@@ -61,8 +61,8 @@ export const formatProposal = (dbProposal: DbProposal): Proposal => {
     cycle: dbProposal.cycle,
     voteType: dbProposal.voteType,
     voteChoices: dbProposal.voteChoices,
-    createdAt: unixTimestamp(dbProposal.createdAt),
-    updatedAt: unixTimestamp(dbProposal.updatedAt),
+    createdAt: unixTimestamp(dbProposal.createdAt) || 0,
+    updatedAt: unixTimestamp(dbProposal.updatedAt) || 0,
   };
   return proposal;
 };
@@ -71,8 +71,8 @@ export const formatComment = (dbComment: DbComment): Comment => {
   const comment: Comment = {
     id: dbComment.id,
     authorAddress: dbComment.authorAddress,
-    createdAt: unixTimestamp(dbComment.createdAt),
-    updatedAt: unixTimestamp(dbComment.updatedAt),
+    createdAt: unixTimestamp(dbComment.createdAt) || 0,
+    updatedAt: unixTimestamp(dbComment.updatedAt) || 0,
     replyToId: dbComment.replyToId,
     proposalSlug: dbComment.proposalSlug || '',
     content: dbComment.content,

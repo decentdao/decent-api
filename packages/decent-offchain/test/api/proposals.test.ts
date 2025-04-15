@@ -24,7 +24,6 @@ describe('Proposals API', () => {
     if (!json.data?.slug) throw new Error('issue creating proposal');
 
     setClientStore('proposalSlug', json.data.slug);
-    console.log(clientStore.proposalSlug)
     expect(res.status).toBe(200);
   });
 

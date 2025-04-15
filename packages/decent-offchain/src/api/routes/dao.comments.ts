@@ -85,7 +85,6 @@ app.put('/:id', daoCheck, siweAuth, permissionsCheck, async (c) => {
   const id = c.req.param('id');
 
   const { content } = await c.req.json();
-
   const comment = await db.update(schema.commentTable).set({ content }).where(and(
     eq(schema.commentTable.id, id),
     eq(schema.commentTable.authorAddress, user.address) // only the author can update the comment

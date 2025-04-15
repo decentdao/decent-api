@@ -49,9 +49,11 @@ console.log(WALLETS);
 
 type ClientStore = {
   proposalSlug: string;
+  commentId: string;
 }
 export const clientStore: ClientStore = {
-  proposalSlug: ''
+  proposalSlug: '',
+  commentId: '',
 };
 
 export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumber) => {

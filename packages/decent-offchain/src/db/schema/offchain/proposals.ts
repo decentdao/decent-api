@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import { integer, json, text, timestamp, index } from 'drizzle-orm/pg-core';
 import { offchainSchema } from './offchain';
 import { hex } from '../hex';
+import { timestamps } from '../timestamps';
 
 export const proposalTable = offchainSchema.table('proposals', {
   daoChainId: integer().notNull(),
@@ -23,8 +24,7 @@ export const proposalTable = offchainSchema.table('proposals', {
   cycle: integer(),
   voteType: text(),
   voteChoices: json().$type<string[]>(),
-  createdAt: timestamp().defaultNow(),
-  updatedAt: timestamp(),
+  ...timestamps,
 }, (t) => [
   index().on(t.daoChainId, t.daoAddress),
   index().on(t.authorAddress),
