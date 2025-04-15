@@ -3,6 +3,7 @@ import resf from '@/api/utils/responseFormatter';
 
 // Route imports
 import meta from '@/api/routes/meta';
+import docs from '@/api/routes/docs';
 import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
@@ -16,6 +17,7 @@ app.onError((err, c) => {
 
 // Routes
 app.route('/', meta);
+app.route('/docs', docs);
 app.route('/auth', auth);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
