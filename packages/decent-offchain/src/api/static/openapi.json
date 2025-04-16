@@ -25,15 +25,16 @@
         "tags": ["meta"],
         "summary": "Get API metadata",
         "description": "Retrieve API metadata including version information",
+        "security": [],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Meta"
@@ -53,15 +54,16 @@
         "tags": ["meta"],
         "summary": "Get API health status",
         "description": "Check if the API is healthy",
+        "security": [],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Health"
@@ -76,20 +78,21 @@
         }
       }
     },
-    "/meta/chains": {
+    "/chains": {
       "get": {
         "tags": ["meta"],
         "summary": "Get all chains with DAOs",
         "description": "Retrieve a list of all supported chain IDs that have DAOs",
+        "security": [],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "type": "array",
@@ -112,15 +115,16 @@
         "tags": ["auth"],
         "summary": "Get a nonce for SIWE authentication",
         "description": "Retrieve a nonce for Sign-In with Ethereum authentication",
+        "security": [],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Nonce"
@@ -140,6 +144,7 @@
         "tags": ["auth"],
         "summary": "Verify a SIWE message and signature",
         "description": "Verify a Sign-In with Ethereum message and signature",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -161,13 +166,13 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/User"
@@ -187,15 +192,20 @@
         "tags": ["auth"],
         "summary": "Get current user information",
         "description": "Retrieve information about the currently authenticated user",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/User"
@@ -215,15 +225,20 @@
         "tags": ["auth"],
         "summary": "Log out current user",
         "description": "Log out the currently authenticated user",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Logout"
@@ -243,15 +258,16 @@
         "tags": ["dao"],
         "summary": "Get all DAOs",
         "description": "Retrieve a list of all DAOs",
+        "security": [],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "type": "array",
@@ -274,6 +290,7 @@
         "tags": ["dao"],
         "summary": "Get DAOs by chain",
         "description": "Retrieve all DAOs for a specific chain",
+        "security": [],
         "parameters": [
           {
             "name": "chainId",
@@ -286,13 +303,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "type": "array",
@@ -315,6 +332,7 @@
         "tags": ["dao"],
         "summary": "Get DAO by address",
         "description": "Retrieve a specific DAO by chain ID and address",
+        "security": [],
         "parameters": [
           {
             "name": "chainId",
@@ -335,13 +353,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Dao"
@@ -361,6 +379,7 @@
         "tags": ["proposals"],
         "summary": "Get DAO proposals",
         "description": "Retrieve all proposals for a specific DAO",
+        "security": [],
         "parameters": [
           {
             "name": "chainId",
@@ -381,13 +400,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "type": "array",
@@ -408,6 +427,11 @@
         "tags": ["proposals"],
         "summary": "Create proposal",
         "description": "Create a new proposal for a DAO",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "chainId",
@@ -438,13 +462,13 @@
         },
         "responses": {
           "201": {
-            "description": "Proposal created successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Proposal"
@@ -464,6 +488,7 @@
         "tags": ["proposals"],
         "summary": "Get proposal by slug",
         "description": "Retrieve a specific proposal by its slug",
+        "security": [],
         "parameters": [
           {
             "name": "chainId",
@@ -492,13 +517,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Proposal"
@@ -516,6 +541,11 @@
         "tags": ["proposals"],
         "summary": "Update proposal",
         "description": "Update an existing proposal",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "chainId",
@@ -554,13 +584,13 @@
         },
         "responses": {
           "200": {
-            "description": "Proposal updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Proposal"
@@ -580,6 +610,7 @@
         "tags": ["comments"],
         "summary": "Get proposal comments",
         "description": "Retrieve all comments for a specific proposal",
+        "security": [],
         "parameters": [
           {
             "name": "chainId",
@@ -608,13 +639,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "type": "array",
@@ -635,6 +666,11 @@
         "tags": ["comments"],
         "summary": "Create comment",
         "description": "Create a new comment on a proposal",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "chainId",
@@ -673,13 +709,13 @@
         },
         "responses": {
           "201": {
-            "description": "Comment created successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Comment"
@@ -699,6 +735,11 @@
         "tags": ["comments"],
         "summary": "Update comment",
         "description": "Update an existing comment",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "chainId",
@@ -745,13 +786,13 @@
         },
         "responses": {
           "200": {
-            "description": "Comment updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Comment"
@@ -769,6 +810,11 @@
         "tags": ["comments"],
         "summary": "Delete comment",
         "description": "Delete an existing comment",
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "chainId",
@@ -805,13 +851,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Comment deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/ApiResponse" },
                     {
+                      "type": "object",
                       "properties": {
                         "data": {
                           "$ref": "#/components/schemas/Comment"
@@ -835,24 +881,29 @@
           "success": {
             "type": "boolean"
           },
-          "data": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/Meta" },
-              { "$ref": "#/components/schemas/Health" },
-              { "$ref": "#/components/schemas/Nonce" },
-              { "$ref": "#/components/schemas/User" },
-              { "$ref": "#/components/schemas/Logout" },
-              { "$ref": "#/components/schemas/Dao" },
-              { "type": "array", "items": { "$ref": "#/components/schemas/Dao" } },
-              { "$ref": "#/components/schemas/Proposal" },
-              { "type": "array", "items": { "$ref": "#/components/schemas/Proposal" } },
-              { "$ref": "#/components/schemas/Comment" },
-              { "type": "array", "items": { "$ref": "#/components/schemas/Comment" } },
-              { "type": "array", "items": { "type": "integer" } }
-            ]
+          "data": { },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "nullable": true
+              },
+              "message": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string",
+                "nullable": true
+              },
+              "details": {
+                "nullable": true
+              }
+            },
+            "required": ["message"]
           }
         },
-        "required": ["success", "data"]
+        "required": ["success"]
       },
       "Meta": {
         "type": "object",
@@ -870,14 +921,23 @@
         "type": "string",
         "enum": ["ok"]
       },
-      "Nonce": {
+      "Permissions": {
         "type": "object",
         "properties": {
-          "nonce": {
-            "type": "string"
+          "isProposer": {
+            "type": "boolean"
+          },
+          "isVoter": {
+            "type": "boolean"
+          },
+          "isSigner": {
+            "type": "boolean"
+          },
+          "isModerator": {
+            "type": "boolean"
           }
         },
-        "required": ["nonce"]
+        "required": ["isProposer", "isVoter", "isSigner", "isModerator"]
       },
       "User": {
         "type": "object",
@@ -888,13 +948,144 @@
           "ensName": {
             "type": "string",
             "nullable": true
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/Permissions"
           }
         },
         "required": ["address"]
       },
+      "Nonce": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "type": "string"
+          }
+        },
+        "required": ["nonce"]
+      },
       "Logout": {
         "type": "string",
         "enum": ["ok"]
+      },
+      "VerifySiwe": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["message", "signature"]
+      },
+      "TokenType": {
+        "type": "string",
+        "enum": ["ERC20", "ERC721", "ERC1155"]
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TokenType"
+          }
+        },
+        "required": ["address", "type"]
+      },
+      "Safe": {
+        "type": "object",
+        "properties": {
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threshold": {
+            "type": "integer"
+          }
+        },
+        "required": ["owners", "threshold"]
+      },
+      "GasTank": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["enabled"]
+      },
+      "GovernanceCycle": {
+        "type": "object",
+        "properties": {
+          "firstStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "days": {
+            "type": "integer"
+          }
+        },
+        "required": ["firstStart", "days"]
+      },
+      "ProposalPermission": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "number"
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "required": ["threshold"]
+      },
+      "VotingStrategy": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "nullable": true
+          },
+          "votingTokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Token"
+            }
+          }
+        },
+        "required": ["address", "votingTokens"]
+      },
+      "GovernanceModule": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VotingStrategy"
+            }
+          }
+        },
+        "required": ["address", "strategies"]
       },
       "Dao": {
         "type": "object",
@@ -905,67 +1096,368 @@
           "address": {
             "type": "string"
           },
+          "safe": {
+            "$ref": "#/components/schemas/Safe",
+            "nullable": true
+          },
           "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "proposalTemplatesCID": {
+            "type": "string",
+            "nullable": true
+          },
+          "governanceModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GovernanceModule"
+            },
+            "nullable": true
+          },
+          "guardAddress": {
             "type": "string"
           },
-          "description": {
+          "fractalModuleAddress": {
             "type": "string",
             "nullable": true
           },
-          "avatar": {
+          "parent": {
             "type": "string",
             "nullable": true
           },
-          "website": {
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "gastank": {
+            "$ref": "#/components/schemas/GasTank",
+            "nullable": true
+          },
+          "snapshotENS": {
             "type": "string",
+            "nullable": true
+          },
+          "cycle": {
+            "$ref": "#/components/schemas/GovernanceCycle",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "integer"
+          }
+        },
+        "required": ["chainId", "address", "guardAddress", "createdAt", "updatedAt"]
+      },
+      "PaymentStream": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cliff": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "cancelable": {
+            "type": "boolean"
+          },
+          "transferable": {
+            "type": "boolean"
+          }
+        },
+        "required": ["start", "end", "amount", "cancelable", "transferable"]
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "cid": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "canPropose": {
+            "type": "boolean"
+          },
+          "term": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "payment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentStream"
+            },
             "nullable": true
           }
         },
-        "required": ["chainId", "address", "name"]
+        "required": ["cid", "address", "canPropose"]
+      },
+      "Action": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["address"]
+      },
+      "TransferAction": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Action" },
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["value"]
+          }
+        ]
+      },
+      "ContractActionParam": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "type", "value"]
+      },
+      "ContractAction": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Action" },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "abi": {
+                "type": "object"
+              },
+              "params": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ContractActionParam"
+                },
+                "nullable": true
+              }
+            },
+            "required": ["name", "abi"]
+          }
+        ]
+      },
+      "ProposalTransaction": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "YesNoVoteResult": {
+        "type": "object",
+        "properties": {
+          "yes": {
+            "type": "number"
+          },
+          "no": {
+            "type": "number"
+          },
+          "abstain": {
+            "type": "number"
+          }
+        },
+        "required": ["yes", "no", "abstain"]
+      },
+      "YesNoVoteOption": {
+        "type": "string",
+        "enum": ["YES", "NO", "ABSTAIN"]
+      },
+      "Vote": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "integer"
+          }
+        },
+        "required": ["address", "weight", "timestamp"]
+      },
+      "YesNoVote": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Vote" },
+          {
+            "type": "object",
+            "properties": {
+              "vote": {
+                "$ref": "#/components/schemas/YesNoVoteOption"
+              }
+            },
+            "required": ["vote"]
+          }
+        ]
+      },
+      "MultipleChoiceVote": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Vote" },
+          {
+            "type": "object",
+            "properties": {
+              "vote": {
+                "type": "integer"
+              }
+            },
+            "required": ["vote"]
+          }
+        ]
+      },
+      "MultipleChoiceVoteResult": {
+        "type": "object",
+        "properties": {
+          "totalWeightVoted": {
+            "type": "number"
+          },
+          "choice": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": ["totalWeightVoted", "choice"]
+      },
+      "ProposalChoice": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "tx": {
+            "$ref": "#/components/schemas/ProposalTransaction"
+          }
+        },
+        "required": ["text", "tx"]
       },
       "Proposal": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "slug": {
             "type": "string"
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
             "type": "string"
           },
           "authorAddress": {
             "type": "string"
           },
+          "metadataCID": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "safeNonce": {
+            "type": "integer",
+            "nullable": true
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true
+          },
           "votingStrategyAddress": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
+          },
+          "voteStartsAt": {
+            "type": "integer",
+            "nullable": true
+          },
+          "voteEndsAt": {
+            "type": "integer",
+            "nullable": true
+          },
+          "discussionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer"
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Vote"
+            },
+            "nullable": true
+          },
+          "cycle": {
+            "type": "integer",
+            "nullable": true
           },
           "voteType": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "voteChoices": {
             "type": "array",
             "items": {
               "type": "string"
-            }
-          },
-          "cycle": {
-            "type": "integer"
+            },
+            "nullable": true
           },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "integer"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "integer",
+            "nullable": true
           }
         },
-        "required": ["id", "slug", "title", "body", "authorAddress", "votingStrategyAddress", "voteType", "voteChoices", "cycle"]
+        "required": ["slug", "status", "authorAddress", "version", "createdAt"]
       },
       "NewProposal": {
         "type": "object",
@@ -976,53 +1468,97 @@
           "body": {
             "type": "string"
           },
+          "voteType": {
+            "type": "string"
+          },
+          "voteChoices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cycle": {
+            "type": "integer"
+          },
           "votingStrategyAddress": {
             "type": "string"
-          },
-          "voteType": {
-            "type": "string"
-          },
-          "voteChoices": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "cycle": {
-            "type": "integer"
           }
         },
-        "required": ["title", "body", "votingStrategyAddress", "voteType", "voteChoices", "cycle"]
+        "required": ["title", "body", "voteType"]
       },
       "UpdateProposal": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "voteType": {
-            "type": "string"
-          },
-          "voteChoices": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "cycle": {
-            "type": "integer"
+        "allOf": [
+          { "$ref": "#/components/schemas/NewProposal" },
+          {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string"
+              }
+            },
+            "required": ["slug"]
           }
-        },
-        "required": ["title", "body", "voteType", "voteChoices", "cycle"]
+        ]
+      },
+      "YesNoProposal": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Proposal" },
+          {
+            "type": "object",
+            "properties": {
+              "thumbsUp": {
+                "type": "number"
+              },
+              "thumbsDown": {
+                "type": "number"
+              },
+              "thumbsUpWeighted": {
+                "type": "number"
+              },
+              "thumbsDownWeighted": {
+                "type": "number"
+              },
+              "tx": {
+                "$ref": "#/components/schemas/ProposalTransaction"
+              },
+              "result": {
+                "$ref": "#/components/schemas/YesNoVoteResult",
+                "nullable": true
+              }
+            },
+            "required": ["thumbsUp", "thumbsDown", "thumbsUpWeighted", "thumbsDownWeighted", "tx"]
+          }
+        ]
+      },
+      "MultipleChoiceProposal": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Proposal" },
+          {
+            "type": "object",
+            "properties": {
+              "choices": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProposalChoice"
+                }
+              },
+              "result": {
+                "$ref": "#/components/schemas/MultipleChoiceVoteResult"
+              }
+            },
+            "required": ["choices", "result"]
+          }
+        ]
       },
       "Comment": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "string"
+          },
+          "replyToId": {
+            "type": "string",
+            "nullable": true
           },
           "proposalSlug": {
             "type": "string"
@@ -1033,58 +1569,90 @@
           "content": {
             "type": "string"
           },
-          "replyToId": {
-            "type": "integer",
-            "nullable": true
-          },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "integer"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "integer",
+            "nullable": true
           }
         },
-        "required": ["id", "proposalSlug", "authorAddress", "content"]
+        "required": ["id", "proposalSlug", "authorAddress", "content", "createdAt"]
       },
       "NewComment": {
         "type": "object",
         "properties": {
+          "replyToId": {
+            "type": "string",
+            "nullable": true
+          },
           "content": {
             "type": "string"
-          },
-          "replyToId": {
-            "type": "integer",
-            "nullable": true
           }
         },
         "required": ["content"]
       },
-      "Error": {
+      "UpdateComment": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "string"
-          },
-          "message": {
+          "content": {
             "type": "string"
           }
         },
-        "required": ["code", "message"]
+        "required": ["content"]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "number"
+          },
+          "usdValue": {
+            "type": "number"
+          },
+          "portfolioPercentage": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": ["tokenAddress", "balance", "usdValue"]
+      },
+      "Treasury": {
+        "type": "object",
+        "properties": {
+          "totalUsdValue": {
+            "type": "number"
+          },
+          "fungible": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "nonFungible": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          }
+        },
+        "required": ["totalUsdValue", "fungible", "nonFungible"]
       }
     },
     "securitySchemes": {
-      "ApiKeyAuth": {
+      "CookieAuth": {
         "type": "apiKey",
-        "in": "header",
-        "name": "Authorization"
+        "in": "cookie",
+        "name": "decent-session"
       }
     }
   },
   "security": [
     {
-      "ApiKeyAuth": []
+      "CookieAuth": []
     }
   ],
   "tags": [
