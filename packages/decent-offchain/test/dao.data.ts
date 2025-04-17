@@ -1,4 +1,4 @@
-import { DEFAULT_DAO_WITH } from "@/db/queries";
+import { DEFAULT_DAO_WITH } from '@/db/queries';
 import { db } from '../src/db';
 import {
   daoTable,
