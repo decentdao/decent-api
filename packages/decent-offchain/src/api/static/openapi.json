@@ -1087,6 +1087,18 @@
         },
         "required": ["address", "strategies"]
       },
+      "HatIdToStreamId": {
+        "type": "object",
+        "properties": {
+          "hatId": {
+            "type": "string"
+          },
+          "streamId": {
+            "type": "string"
+          }
+        },
+        "required": ["hatId", "streamId"]
+      },
       "Dao": {
         "type": "object",
         "properties": {
@@ -1112,6 +1124,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GovernanceModule"
+            },
+            "nullable": true
+          },
+          "hatIdToStreamIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HatIdToStreamId"
             },
             "nullable": true
           },
