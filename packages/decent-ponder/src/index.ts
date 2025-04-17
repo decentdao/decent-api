@@ -16,44 +16,48 @@ const handleGovernanceData = async (
   context: Context,
   timestamp: bigint,
 ) => {
-  const { address, chainId } = entry;
-  const daoInfo = await context.db.find(dao, { address, chainId });
+  const { address } = entry;
 
   let governance = null;
-  if (true) {
-    governance = await fetchGovernance(context, address);
-    console.log('--------------------------------');
-    console.dir(governance, { depth: null });
-    console.log('--------------------------------');
-    entry.guardAddress = governance.guard;
-    entry.fractalModuleAddress = governance.fractalModuleAddress;
-    entry.requiredSignatures = governance.threshold;
-  }
+  governance = await fetchGovernance(context, address);
+  entry.guardAddress = governance.guard;
+  entry.fractalModuleAddress = governance.fractalModuleAddress;
+  entry.requiredSignatures = governance.threshold;
 
   await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate({
     ...entry,
     updatedAt: timestamp,
   });
 
-  await context.db.insert(governanceModule).values(
-    governance.governanceModules
-  ).onConflictDoNothing();
+  if (governance.governanceModules.length > 0) {
+    await context.db.insert(governanceModule).values(
+      governance.governanceModules
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(votingStrategy).values(
-    governance.votingStrategies
-  ).onConflictDoNothing();
+  if (governance.votingStrategies.length > 0) {
+    await context.db.insert(votingStrategy).values(
+      governance.votingStrategies
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(votingToken).values(
-    governance.votingTokens
-  ).onConflictDoNothing();
+  if (governance.votingTokens.length > 0) {
+    await context.db.insert(votingToken).values(
+      governance.votingTokens
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(signer).values(
-    governance.signers
-  ).onConflictDoNothing();
+  if (governance.signers.length > 0) {
+    await context.db.insert(signer).values(
+      governance.signers
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(signerToDao).values(
-    governance.signerToDaos
-  ).onConflictDoNothing();
+  if (governance.signerToDaos.length > 0) {
+    await context.db.insert(signerToDao).values(
+      governance.signerToDaos
+    ).onConflictDoNothing();
+  }
 };
 
 // KeyValuePairs is a generic key value store for Decent
