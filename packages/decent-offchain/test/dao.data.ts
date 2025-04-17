@@ -1,0 +1,64 @@
+import { db } from '../src/db';
+import {
+  daoTable,
+  governanceModuleTable,
+  votingStrategyTable,
+  votingTokenTable,
+  signerToDaoTable,
+} from '../src/db/schema/onchain';
+import { daoAddress, daoChainId } from './constants';
+
+async function insertDaoData() {
+  try {
+    // Insert DAO
+    await db.insert(daoTable).values({
+      chainId: daoChainId,
+      address: daoAddress,
+      name: 'decent-api',
+      requiredSignatures: 1,
+      fractalModuleAddress: '0x0000000000000000000000000000000000000000',
+      createdAt: 1744234225,
+    });
+
+    // Insert Signer to DAO relationship
+    await db.insert(signerToDaoTable).values({
+      address: '0xd0cbdf4b48d3abc9cc3df373ed2f0f91a38c954c',
+      daoChainId: 8453,
+      daoAddress: '0x07a281d9cf79585282a2ada24b78b494977dc33e',
+    });
+
+    // Insert Governance Module
+    await db.insert(governanceModuleTable).values({
+      address: '0xd0cbdf4b48d3abc9cc3df373ed2f0f91a38c954c',
+      daoChainId: 8453,
+      daoAddress: '0x07a281d9cf79585282a2ada24b78b494977dc33e',
+    });
+
+    // Insert Voting Strategy
+    await db.insert(votingStrategyTable).values({
+      address: '0xe6d3d6c70f22459a98985a998f1a1ddf0949e0d0',
+      governanceModuleId: '0xd0cbdf4b48d3abc9cc3df373ed2f0f91a38c954c',
+      minProposerBalance: '1',
+    });
+
+    // Insert Voting Token
+    await db.insert(votingTokenTable).values({
+      address: '0x4e885bf7370499074ef59df80be1f97b590066e2',
+      votingStrategyId: '0xe6d3d6c70f22459a98985a998f1a1ddf0949e0d0',
+      type: 'ERC20',
+    });
+
+    console.log('Successfully inserted DAO data');
+  } catch (error) {
+    console.error('Error inserting DAO data:', error);
+    throw error;
+  }
+}
+
+// Run the insert function
+insertDaoData()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
