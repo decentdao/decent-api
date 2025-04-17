@@ -9,6 +9,8 @@ import {
   signerToDao,
   votingStrategy,
   votingToken,
+  hatIdToStreamId,
+  HatIdToStreamIdInsert
 } from 'ponder:schema';
 
 const handleGovernanceData = async (
@@ -16,8 +18,7 @@ const handleGovernanceData = async (
   context: Context,
   timestamp: bigint,
 ) => {
-  const { address, chainId } = entry;
-  const daoInfo = await context.db.find(dao, { address, chainId });
+  const { address } = entry;
 
   let governance = null;
   if (true) {
@@ -87,7 +88,15 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     entry.topHatId = value;
 
   } else if (key === 'hatIdToStreamId') {
-    entry.hatIdToStreamId = value;
+    const [hatId, streamId] = value.split(':');
+    const hatIdToStreamIdData: HatIdToStreamIdInsert = {
+      daoChainId: context.network.chainId,
+      daoAddress: safeAddress,
+      hatId: hatId,
+      streamId: streamId,
+    }
+    await context.db.insert(hatIdToStreamId).values(hatIdToStreamIdData).onConflictDoNothing();
+    return;
 
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
