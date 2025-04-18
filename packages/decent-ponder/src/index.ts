@@ -29,35 +29,25 @@ const handleGovernanceData = async (
     updatedAt: timestamp,
   });
 
-  if (governance.governanceModules.length > 0) {
-    await context.db.insert(governanceModule).values(
+  await context.db.insert(governanceModule).values(
       governance.governanceModules
     ).onConflictDoNothing();
-  }
 
-  if (governance.votingStrategies.length > 0) {
-    await context.db.insert(votingStrategy).values(
+  await context.db.insert(votingStrategy).values(
       governance.votingStrategies
     ).onConflictDoNothing();
-  }
 
-  if (governance.votingTokens.length > 0) {
-    await context.db.insert(votingToken).values(
+  await context.db.insert(votingToken).values(
       governance.votingTokens
-    ).onConflictDoNothing();
-  }
+  ).onConflictDoNothing();
 
-  if (governance.signers.length > 0) {
-    await context.db.insert(signer).values(
+  await context.db.insert(signer).values(
       governance.signers
-    ).onConflictDoNothing();
-  }
+  ).onConflictDoNothing();
 
-  if (governance.signerToDaos.length > 0) {
-    await context.db.insert(signerToDao).values(
-      governance.signerToDaos
-    ).onConflictDoNothing();
-  }
+  await context.db.insert(signerToDao).values(
+    governance.signerToDaos
+  ).onConflictDoNothing();
 };
 
 // KeyValuePairs is a generic key value store for Decent
@@ -105,7 +95,14 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     console.log('--------------------------------');
   }
 
-  await handleGovernanceData(entry, context, event.block.timestamp);
+  try {
+    await handleGovernanceData(entry, context, event.block.timestamp);
+  } catch (error) {
+    console.log('--------------------------------');
+    console.log('Error handling governance data:', error);
+    console.dir(event, { depth: null });
+    console.log('--------------------------------');
+  }
 });
 
 // Decent used to be called Fractal and used this event to set the dao name
