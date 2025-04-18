@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "ponder dev --schema onchain",
-    "start": "ponder dev --schema onchain --disable-ui",
+    "start": "ponder start --schema onchain",
+    "ponder:list": "ponder db list",
     "psql": "brew services restart postgresql@15",
     "lint": "eslint ./**/*.ts ./**/*.*.ts"
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.4.2",
     "hono": "^4.5.0",
-    "ponder": "^0.9.27",
+    "ponder": "^0.10.16",
     "viem": "^2.21.3"
   },
   "devDependencies": {
