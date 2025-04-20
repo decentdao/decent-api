@@ -29,25 +29,35 @@ const handleGovernanceData = async (
     updatedAt: timestamp,
   });
 
-  await context.db.insert(governanceModule).values(
+  if (governance.governanceModules.length > 0) {
+    await context.db.insert(governanceModule).values(
       governance.governanceModules
     ).onConflictDoNothing();
+  }
 
-  await context.db.insert(votingStrategy).values(
+  if (governance.votingStrategies.length > 0) {
+    await context.db.insert(votingStrategy).values(
       governance.votingStrategies
     ).onConflictDoNothing();
+  }
 
-  await context.db.insert(votingToken).values(
+  if (governance.votingTokens.length > 0) {
+    await context.db.insert(votingToken).values(
       governance.votingTokens
-  ).onConflictDoNothing();
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(signer).values(
+  if (governance.signers.length > 0) {
+    await context.db.insert(signer).values(
       governance.signers
-  ).onConflictDoNothing();
+    ).onConflictDoNothing();
+  }
 
-  await context.db.insert(signerToDao).values(
-    governance.signerToDaos
-  ).onConflictDoNothing();
+  if (governance.signerToDaos.length > 0) {
+    await context.db.insert(signerToDao).values(
+      governance.signerToDaos
+    ).onConflictDoNothing();
+  }
 };
 
 // KeyValuePairs is a generic key value store for Decent
