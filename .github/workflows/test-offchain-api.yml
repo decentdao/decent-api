@@ -38,11 +38,11 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - name: Setup onchain database schema
-        run: bun push:testdb
+        run: bun push:onchain
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - name: Setup offchain database schema
-        run: bun push
+        run: bun push:offchain
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - name: Setup onchain database data
