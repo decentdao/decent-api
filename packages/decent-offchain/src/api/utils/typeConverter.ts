@@ -27,6 +27,10 @@ export const formatDao = (dbDao: DbDao): Dao => {
     })),
     guardAddress: dbDao.guardAddress || zeroAddress,
     fractalModuleAddress: dbDao.fractalModuleAddress,
+    hatIdToStreamIds: dbDao.hatIdToStreamIds.map((hatIdToStreamId) => ({
+      hatId: hatIdToStreamId.hatId,
+      streamId: hatIdToStreamId.streamId,
+    })),
     gastank: {
       address: dbDao.gasTankAddress,
       enabled: Boolean(dbDao.gasTankAddress && dbDao.gasTankEnabled),

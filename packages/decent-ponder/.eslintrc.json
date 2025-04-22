@@ -3,5 +3,6 @@
   "rules": {
     "no-trailing-spaces": "warn",
     "quotes": ["warn", "single"]
-  }
+  },
+  "ignorePatterns": ["ponder-env.d.ts"]
 }

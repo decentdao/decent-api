@@ -21,7 +21,6 @@ export const dao = onchainTable('dao', {
     snapshotENS:            text(),
     subDaoOf:               hex(),
     topHatId:               text(),
-    hatIdToStreamId:        text(),
     gasTankEnabled:         boolean(),
     gasTankAddress:         hex(),
     requiredSignatures:     integer(),
@@ -69,12 +68,20 @@ export const signerToDao = onchainTable('signer_to_dao', {
   daoAddress:       hex('std_dao_address').notNull(),
 },(t) => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }));
 
+export const hatIdToStreamId = onchainTable('hat_id_to_stream_id', {
+  hatId:      text('hat_id'),
+  streamId:   text('stream_id'),
+  daoChainId: integer('dao_chain_id').notNull(),
+  daoAddress: hex('dao_address').notNull(),
+}, (t) => ({ pk: primaryKey({ columns: [t.hatId, t.streamId] }) }));
+
 // ================================
 // ========= Relations ============
 // ================================
 export const daoRelations = relations(dao, ({ many }) => ({
   signers: many(signerToDao),
   governanceModules: many(governanceModule),
+  hatIdToStreamIds: many(hatIdToStreamId),
 }));
 
 export const governanceModuleRelations = relations(governanceModule, ({ one, many }) => ({
@@ -115,6 +122,13 @@ export const votingTokenRelations = relations(votingToken, ({ one }) => ({
   }),
 }));
 
+export const hatIdToStreamIdRelations = relations(hatIdToStreamId, ({ one }) => ({
+  dao: one(dao, {
+    fields: [hatIdToStreamId.daoChainId, hatIdToStreamId.daoAddress],
+    references: [dao.chainId, dao.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -130,3 +144,5 @@ export type Signer = typeof signer.$inferSelect;
 export type SignerInsert = typeof signer.$inferInsert;
 export type SignerToDao = typeof signerToDao.$inferSelect;
 export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
+export type HatIdToStreamId = typeof hatIdToStreamId.$inferSelect;
+export type HatIdToStreamIdInsert = typeof hatIdToStreamId.$inferInsert;
