@@ -22,7 +22,6 @@ export const daoTable = onchainSchema.table('dao', {
   snapshotENS:            text(),
   subDaoOf:               hex(),
   topHatId:               text(),
-  hatIdToStreamId:        text(),
   gasTankEnabled:         boolean(),
   gasTankAddress:         hex(),
   requiredSignatures:     integer(),
@@ -73,12 +72,22 @@ export const signerToDaoTable = onchainSchema.table('signer_to_dao', {
   primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })
 ]);
 
+export const hatIdToStreamIdTable = onchainSchema.table('hat_id_to_stream_id', {
+  hatId:      text('hat_id').notNull(),
+  streamId:   text('stream_id').notNull(),
+  daoChainId: integer('dao_chain_id').notNull(),
+  daoAddress: hex('dao_address').notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.hatId, t.streamId] })
+]);
+
 // ================================
 // ========= Relations ============
 // ================================
 export const daoTableRelations = relations(daoTable, ({ many }) => ({
-  governanceModules: many(governanceModuleTable),
   signers: many(signerToDaoTable),
+  governanceModules: many(governanceModuleTable),
+  hatIdToStreamIds: many(hatIdToStreamIdTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
@@ -119,12 +128,20 @@ export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) =
   }),
 }));
 
+export const hatIdToStreamIdTableRelations = relations(hatIdToStreamIdTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [hatIdToStreamIdTable.daoChainId, hatIdToStreamIdTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
 export type DbDao = typeof daoTable.$inferSelect & {
-  governanceModules: DbGovernanceModule[];
   signers: DbSignerToDao[];
+  governanceModules: DbGovernanceModule[];
+  hatIdToStreamIds: DbHatIdToStreamId[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
   votingStrategies: DbVotingStrategy[];
@@ -135,3 +152,4 @@ export type DbVotingStrategy = typeof votingStrategyTable.$inferSelect & {
 export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
+export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;

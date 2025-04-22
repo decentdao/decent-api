@@ -46,7 +46,9 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - name: Setup onchain database data
-        run: psql postgresql://postgres:postgres@localhost:5432/test < test/dao.data.sql
+        run: bun run test/dao.data.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - run: bun test
         env:
           PONDER_RPC_URL_8453: ${{ secrets.PONDER_RPC_URL_8453 }}

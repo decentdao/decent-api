@@ -29,4 +29,10 @@ export const DEFAULT_DAO_WITH = {
       address: true,
     },
   },
+  hatIdToStreamIds: {
+    columns: {
+      hatId: true,
+      streamId: true,
+    },
+  },
 };

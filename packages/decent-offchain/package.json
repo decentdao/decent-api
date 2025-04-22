@@ -23,7 +23,7 @@
     "nanoid": "^5.1.3",
     "pg": "^8.14.0",
     "viem": "^2.23.11",
-    "decent-types": "github:decentdao/decent-types#d3aac9b"
+    "decent-types": "github:decentdao/decent-types#458c672"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
