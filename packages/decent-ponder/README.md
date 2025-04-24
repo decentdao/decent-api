@@ -5,33 +5,26 @@ Ponder relies on a PostgreSQL database to store the indexed data
 ## Setup
 ### Database
 
-Install PostgreSQL (macOS) *TODO: add instructions for other OS*
-```bash
-brew install postgresql@15
-```
+See [decent-offchain](../decent-offchain/README.md#database)
 
-Create a database
-```bash
-createdb decent
-```
-
-Start the database
-```bash
-npm run psql
-```
-
-### Ponder
+### Environment Variables
 Add your RPC URLs and database URL to `.env.local`
 ```bash
 cp example.env.local .env.local
 ```
 
-Install dependencies
+### Install Dependencies
 ```bash
 npm install
 ```
 
-Run the indexer
+### Running
+To run in [ponder dev](https://ponder.sh/docs/api-reference/ponder-cli#dev) mode (hot reloading, more terminal ui, unlocked tables)
 ```bash
 npm run dev
+```
+
+To run in [ponder start](https://ponder.sh/docs/api-reference/ponder-cli#start) mode (production, no hot reloading, less terminal ui, locked tables) 
+```bash
+npm run start
 ```
