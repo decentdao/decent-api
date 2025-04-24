@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { Health, Meta, SupportedChainId } from 'decent-types';
+import { Health, Meta, SupportedChainId } from 'decent-sdk';
 import resf from '@/api/utils/responseFormatter';
 import { db } from '@/db';
 import { daoTable } from '@/db/schema/onchain';
@@ -39,7 +39,9 @@ app.get('/chains', async (c) => {
   const chainIds = await db
     .selectDistinct({ chainId: daoTable.chainId })
     .from(daoTable);
-  const chains: SupportedChainId[] = chainIds.map((chain) => chain.chainId);
+  const chains: SupportedChainId[] = chainIds
+    .map((chain) => chain.chainId)
+    .sort((a, b) => a - b);
   return resf(c, chains);
 });
 

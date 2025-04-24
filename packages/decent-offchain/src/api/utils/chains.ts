@@ -1,4 +1,4 @@
-import { SUPPORTED_CHAIN_IDS, SupportedChainId } from 'decent-types';
+import { SUPPORTED_CHAIN_IDS, SupportedChainId } from 'decent-sdk';
 
 export const getChainId = (chainId: number | string | undefined): SupportedChainId => {
   const chainIdNumber = Number(chainId);

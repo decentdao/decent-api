@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono';
 import { isAddress } from 'viem';
-import { Dao } from 'decent-types';
+import { Dao } from 'decent-sdk';
 import { db } from '@/db';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
 import { ApiError } from '@/api/utils/responseFormatter';

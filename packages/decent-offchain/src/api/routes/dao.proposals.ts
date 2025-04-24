@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
-import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-types';
+import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-sdk';
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';

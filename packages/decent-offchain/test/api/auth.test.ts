@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
-import { ApiResponse, Nonce, User } from 'decent-types';
+import { ApiResponse, Nonce, User } from 'decent-sdk';
 import {
   cookies,
   getCookie,

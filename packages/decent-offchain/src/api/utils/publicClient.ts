@@ -1,5 +1,5 @@
 import { mainnet, base, optimism, polygon, sepolia } from 'viem/chains';
-import { SupportedChainId } from 'decent-types';
+import { SupportedChainId } from 'decent-sdk';
 import { createPublicClient, http, PublicClient } from 'viem';
 
 export const publicClients: Record<SupportedChainId, PublicClient> = {

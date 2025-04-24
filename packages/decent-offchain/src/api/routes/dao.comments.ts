@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { Comment } from 'decent-types';
+import { Comment } from 'decent-sdk';
 import { eq, and } from 'drizzle-orm';
 import { daoCheck } from '@/api/middleware/dao';
 import { siweAuth } from '@/api/middleware/auth';

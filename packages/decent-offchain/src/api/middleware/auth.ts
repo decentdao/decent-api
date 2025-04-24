@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
-import { User } from 'decent-types';
+import { User } from 'decent-sdk';
 import { db } from '@/db';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { cookieName } from '@/api/utils/cookie';
