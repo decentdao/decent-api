@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { Proposal, ApiResponse } from 'decent-types';
+import { Proposal, ApiResponse } from 'decent-sdk';
 import app from '@/api/index';
 import { cookies, clientStore, setClientStore } from 'test/client';
 import { daoChainId, daoAddress, newProposal } from 'test/constants';

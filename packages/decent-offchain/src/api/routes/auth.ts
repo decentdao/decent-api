@@ -3,7 +3,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
-import { User, Nonce, Logout } from 'decent-types';
+import { User, Nonce, Logout } from 'decent-sdk';
 import { schema } from '@/db/schema';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';

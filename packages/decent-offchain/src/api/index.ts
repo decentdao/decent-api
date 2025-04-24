@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import resf from '@/api/utils/responseFormatter';
 
 // Route imports
@@ -10,6 +11,14 @@ import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
 
 const app = new Hono();
+
+app.use('*', cors({
+  origin: [
+    'http://localhost:3000',
+    'https://decentdao.org'
+  ],
+  credentials: true,
+}));
 
 app.onError((err, c) => {
   return resf(c, err, 500);

@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
-import { ApiResponse } from 'decent-types';
+import { ApiResponse } from 'decent-sdk';
 
 export class ApiError extends Error {
   constructor(message: string, public status?: ContentfulStatusCode) {

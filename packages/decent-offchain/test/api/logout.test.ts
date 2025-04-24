@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { ApiResponse, Logout } from 'decent-types';
+import { ApiResponse, Logout } from 'decent-sdk';
 import app from '@/api/index';
 import { cookies } from 'test/client';
 

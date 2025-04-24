@@ -1,5 +1,5 @@
 import { zeroAddress } from 'viem';
-import { Comment, Dao, Proposal } from 'decent-types';
+import { Comment, Dao, Proposal } from 'decent-sdk';
 import { DbDao } from '@/db/schema/onchain';
 import { DbComment, DbProposal } from '@/db/schema';
 import { unixTimestamp } from './time';

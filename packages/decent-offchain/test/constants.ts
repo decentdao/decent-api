@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { NewProposal, NewComment } from 'decent-types';
+import { NewProposal, NewComment } from 'decent-sdk';
 
 const address = '0x07a281d9CF79585282a2ADa24B78B494977DC33E';
 export const daoAddress = address.toLowerCase() as Address;

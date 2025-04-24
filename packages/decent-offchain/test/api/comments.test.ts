@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { ApiResponse, Comment } from 'decent-types';
+import { ApiResponse, Comment } from 'decent-sdk';
 import app from '@/api/index';
 import { cookies, clientStore } from 'test/client';
 import { daoChainId, daoAddress, newComment } from 'test/constants';

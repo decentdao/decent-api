@@ -8,7 +8,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { hex } from './hex';
-import { SupportedChainId } from 'decent-types';
+import { SupportedChainId } from 'decent-sdk';
 
 // ================================
 // ========= Tables ===============
