@@ -13,17 +13,16 @@
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts",
     "test": "bun test test/order.test.ts",
-    "lint": "eslint .",
-    "postinstall": "cd node_modules/decent-sdk && bun install && bun run build && rm -rf node_modules/decent-types"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.5.0-rc.5",
+    "decent-sdk": "^0.1.6",
     "drizzle-orm": "^0.40.0",
     "hono": "^4.7.4",
     "nanoid": "^5.1.3",
     "pg": "^8.14.0",
-    "viem": "^2.23.11",
-    "decent-sdk": "github:decentdao/decent-sdk#96e756b"
+    "viem": "^2.23.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
