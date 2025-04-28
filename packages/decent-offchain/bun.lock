@@ -4,7 +4,7 @@
     "": {
       "dependencies": {
         "@fractal-framework/fractal-contracts": "^1.5.0-rc.5",
-        "decent-sdk": "github:decentdao/decent-sdk#96e756b",
+        "decent-sdk": "^0.1.6",
         "drizzle-orm": "^0.40.0",
         "hono": "^4.7.4",
         "nanoid": "^5.1.3",
@@ -582,7 +582,7 @@
 
     "decamelize": ["decamelize@4.0.0", "", {}, "sha512-9iE1PgSik9HeIIw2JO94IidnE3eBoQrFJ3w7sFuzSX4DpmZ3v5sZpUiV5Swcf6mQEF+Y0ru8Neo+p+nyh2J+hQ=="],
 
-    "decent-sdk": ["decent-sdk@github:decentdao/decent-sdk#96e756b", { "peerDependencies": { "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0", "react-dom": ">=18.0.0" }, "optionalPeers": ["@tanstack/react-query", "react", "react-dom"] }, "decentdao-decent-sdk-96e756b"],
+    "decent-sdk": ["decent-sdk@0.1.6", "", { "peerDependencies": { "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0", "react-dom": ">=18.0.0" }, "optionalPeers": ["@tanstack/react-query", "react", "react-dom"] }, "sha512-IvS2f5FzVumQq6o/6bwfFeCDiPtzsHpOEBy3l2En65R/EzUHPaHWC0TLNpvFX8U+zUvFeyXaJ2w0Yn30gBWTwQ=="],
 
     "deep-eql": ["deep-eql@4.1.4", "", { "dependencies": { "type-detect": "^4.0.0" } }, "sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg=="],
 
