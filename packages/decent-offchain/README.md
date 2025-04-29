@@ -68,3 +68,7 @@ bun run dev
 ## API
 
 see live [API docs](https://decent-offchain.up.railway.app/docs)
+
+## Websocket
+
+Local testing: Connect to ws://localhost:81/ws
