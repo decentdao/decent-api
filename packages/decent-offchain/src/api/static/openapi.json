@@ -881,7 +881,7 @@
           "success": {
             "type": "boolean"
           },
-          "data": { },
+          "data": {},
           "error": {
             "type": "object",
             "properties": {

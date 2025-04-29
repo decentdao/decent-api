@@ -4,7 +4,6 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
 
-
 export default defineConfig([
   globalIgnores(['node_modules', '**/scripts/**']),
   { files: ['**/*.{js,mjs,cjs,ts}'] },
@@ -13,7 +12,7 @@ export default defineConfig([
   tseslint.configs.recommended,
   {
     plugins: {
-      '@stylistic': stylistic
+      '@stylistic': stylistic,
     },
     rules: {
       'no-trailing-spaces': 'warn',

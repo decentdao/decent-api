@@ -7,7 +7,7 @@ describe('Hono API Routes', () => {
     const res = await app.request('/');
     expect(res.status).toBe(200);
 
-    const { success, data } = await res.json() as ApiResponse<Meta>;
+    const { success, data } = (await res.json()) as ApiResponse<Meta>;
     expect(success).toBe(true);
     expect(data?.version).toBe('local');
   });
@@ -15,7 +15,7 @@ describe('Hono API Routes', () => {
   it('GET /health should return ok', async () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const { success, data } = await res.json() as ApiResponse<Health>;
+    const { success, data } = (await res.json()) as ApiResponse<Health>;
     expect(success).toBe(true);
     expect(data).toBe('ok');
   });

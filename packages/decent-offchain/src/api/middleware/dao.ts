@@ -21,16 +21,13 @@ export const daoCheck = async (c: Context, next: Next) => {
   const addressLower = address?.toLowerCase();
   if (!addressLower || !isAddress(addressLower)) throw new ApiError('Invalid dao address', 400);
 
-  const query = await db.query.daoTable.findFirst({
-    where: (dao, { eq, and }) => and(
-      eq(dao.chainId, chainIdNumber),
-      eq(dao.address, addressLower)
-    ),
+  const query = (await db.query.daoTable.findFirst({
+    where: (dao, { eq, and }) => and(eq(dao.chainId, chainIdNumber), eq(dao.address, addressLower)),
     with: DEFAULT_DAO_WITH,
-  }) as DbDao;
+  })) as DbDao;
 
   if (!query) throw new ApiError('DAO not found', 404);
 
   c.set('dao', formatDao(query));
   await next();
-}
+};

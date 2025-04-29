@@ -9,7 +9,7 @@ describe('Logout', () => {
       method: 'POST',
       headers: cookies(1),
     });
-    const json = await res.json() as ApiResponse<Logout>;
+    const json = (await res.json()) as ApiResponse<Logout>;
     expect(res.status).toBe(200);
     expect(json.data).toBe('ok');
   });

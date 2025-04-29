@@ -17,9 +17,10 @@ const app = new Hono();
  * @route GET /auth/nonce
  * @returns {Nonce} Nonce object
  */
-app.get('/nonce', async (c) => {
+app.get('/nonce', async c => {
   const id = getCookie(c, cookieName) || nanoid();
-  const [session] = await db.select()
+  const [session] = await db
+    .select()
     .from(schema.sessionTable)
     .where(eq(schema.sessionTable.id, id));
 
@@ -44,11 +45,14 @@ app.get('/nonce', async (c) => {
  * @body { message: string, signature: string }
  * @returns {User} Me object
  */
-app.post('/verify', async (c) => {
+app.post('/verify', async c => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
-  const [session] = await db.select().from(schema.sessionTable).where(eq(schema.sessionTable.id, id));
+  const [session] = await db
+    .select()
+    .from(schema.sessionTable)
+    .where(eq(schema.sessionTable.id, id));
   if (!session) throw new ApiError('session not found', 401);
 
   const { message, signature } = await c.req.json();
@@ -66,19 +70,22 @@ app.post('/verify', async (c) => {
 
   if (!success) throw new ApiError('invalid signature', 401);
 
-  const ensName = await publicClient.getEnsName({ address })
+  const ensName = await publicClient.getEnsName({ address });
 
-  await db.update(schema.sessionTable).set({
-    address,
-    ensName,
-    nonce,
-    signature,
-  }).where(eq(schema.sessionTable.id, id));
+  await db
+    .update(schema.sessionTable)
+    .set({
+      address,
+      ensName,
+      nonce,
+      signature,
+    })
+    .where(eq(schema.sessionTable.id, id));
 
   const data: User = {
     address,
     ensName,
-  }
+  };
 
   return resf(c, data);
 });
@@ -88,18 +95,21 @@ app.post('/verify', async (c) => {
  * @route GET /auth/me
  * @returns {User} Me object
  */
-app.get('/me', async (c) => {
+app.get('/me', async c => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
-  const [session] = await db.select().from(schema.sessionTable).where(eq(schema.sessionTable.id, id));
+  const [session] = await db
+    .select()
+    .from(schema.sessionTable)
+    .where(eq(schema.sessionTable.id, id));
   if (!session) throw new ApiError('session not found', 401);
   if (!session.address) throw new ApiError('address not found', 401);
 
   const data: User = {
     address: session.address,
     ensName: session.ensName,
-  }
+  };
 
   return resf(c, data);
 });
@@ -109,7 +119,7 @@ app.get('/me', async (c) => {
  * @route POST /auth/logout
  * @returns {Logout} Logout object
  */
-app.post('/logout', async (c) => {
+app.post('/logout', async c => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 

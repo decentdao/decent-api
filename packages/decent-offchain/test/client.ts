@@ -14,20 +14,20 @@ beforeAll(async () => {
 
 type WalletNumber = 1 | 2 | 3;
 
-const PK1 = process.env.TEST_PRIVATE_KEY_1 as `0x${string}` || generatePrivateKey();
-const PK2 = process.env.TEST_PRIVATE_KEY_2 as `0x${string}` || generatePrivateKey();
-const PK3 = process.env.TEST_PRIVATE_KEY_3 as `0x${string}` || generatePrivateKey();
+const PK1 = (process.env.TEST_PRIVATE_KEY_1 as `0x${string}`) || generatePrivateKey();
+const PK2 = (process.env.TEST_PRIVATE_KEY_2 as `0x${string}`) || generatePrivateKey();
+const PK3 = (process.env.TEST_PRIVATE_KEY_3 as `0x${string}`) || generatePrivateKey();
 
 const PRIVATE_KEYS: Record<WalletNumber, `0x${string}`> = {
   1: PK1,
   2: PK2,
   3: PK3,
-}
+};
 
 type WalletSession = {
   address: `0x${string}`;
   sessionId: string;
-}
+};
 
 export const WALLETS: Record<WalletNumber, WalletSession> = {
   1: {
@@ -42,7 +42,7 @@ export const WALLETS: Record<WalletNumber, WalletSession> = {
     address: privateKeyToAccount(PRIVATE_KEYS[3]).address,
     sessionId: 'blank',
   },
-}
+};
 
 console.log('WALLETS');
 console.log(WALLETS);
@@ -50,7 +50,7 @@ console.log(WALLETS);
 type ClientStore = {
   proposalSlug: string;
   commentId: string;
-}
+};
 export const clientStore: ClientStore = {
   proposalSlug: '',
   commentId: '',
@@ -93,10 +93,10 @@ export const setSessionId = (accountNumber: WalletNumber, sessionId: string) => 
 
 export const setClientStore = (key: keyof ClientStore, value: string) => {
   clientStore[key] = value;
-}
+};
 
 export const cookies = (accountNumber: WalletNumber) => {
   return {
-    Cookie: `${cookieName}=${WALLETS[accountNumber].sessionId}`
+    Cookie: `${cookieName}=${WALLETS[accountNumber].sessionId}`,
   };
 };

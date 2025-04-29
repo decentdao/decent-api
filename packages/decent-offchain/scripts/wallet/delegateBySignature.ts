@@ -22,16 +22,12 @@ const contract = getContract({
   client: walletClient,
 });
 
-async function generateDelegationSignature(
-  delegatee: Address,
-  nonce: bigint,
-  expiry: bigint
-) {
+async function generateDelegationSignature(delegatee: Address, nonce: bigint, expiry: bigint) {
   const account = walletClient.account;
   if (!account) throw new Error('No account configured');
 
   const chainId = await walletClient.getChainId();
-  
+
   // Get domain data for EIP-712 signing
   const domain = {
     name: await contract.read.name(),
@@ -87,7 +83,7 @@ async function main() {
   const expiry = BigInt(Math.floor(Date.now() / 1000) + 3600); // 1 hour from now
 
   const sigValues = await generateDelegationSignature(delegatee, nonce, expiry);
-  
+
   console.log('Delegation Signature Values:');
   console.log({
     delegatee: sigValues.delegatee,
