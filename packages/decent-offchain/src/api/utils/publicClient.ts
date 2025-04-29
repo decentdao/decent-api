@@ -18,7 +18,7 @@ export const publicClients: Record<SupportedChainId, PublicClient> = {
   137: createPublicClient({
     chain: polygon,
     transport: http(process.env.PONDER_RPC_URL_137),
-  })
+  }),
 };
 
 export const getPublicClient = (chainId: SupportedChainId): PublicClient => {

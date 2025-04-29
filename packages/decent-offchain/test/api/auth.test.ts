@@ -1,13 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
 import { ApiResponse, Nonce, User } from 'decent-sdk';
-import {
-  cookies,
-  getCookie,
-  setSessionId,
-  signedSiweMessage,
-  WALLETS,
-} from 'test/client';
+import { cookies, getCookie, setSessionId, signedSiweMessage, WALLETS } from 'test/client';
 
 describe('Auth API', () => {
   let nonce: string;
@@ -15,7 +9,7 @@ describe('Auth API', () => {
   it('should return a nonce', async () => {
     const res = await app.request('/auth/nonce');
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<Nonce>;
+    const { data } = (await res.json()) as ApiResponse<Nonce>;
     expect(data?.nonce).toBeDefined();
     const sessionId = getCookie(res);
     setSessionId(1, sessionId);
@@ -32,7 +26,7 @@ describe('Auth API', () => {
         signature: signedMessage.signature,
       }),
     });
-    const json = await res.json() as ApiResponse<User>;
+    const json = (await res.json()) as ApiResponse<User>;
     expect(json.success).toBeTrue();
     expect(json.error).toBeFalsy();
     expect(json.data?.address).toBe(WALLETS[1].address);
@@ -44,7 +38,7 @@ describe('Auth API', () => {
       headers: cookies(1),
     });
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<User>;
+    const { data } = (await res.json()) as ApiResponse<User>;
     expect(data?.address).toBe(WALLETS[1].address);
     expect(data?.ensName).toBeDefined();
   });
@@ -52,7 +46,7 @@ describe('Auth API', () => {
   it('auth 2nd wallet', async () => {
     const nonceRes = await app.request('/auth/nonce');
     expect(nonceRes.status).toBe(200);
-    const { data: nonceData } = await nonceRes.json() as ApiResponse<Nonce>;
+    const { data: nonceData } = (await nonceRes.json()) as ApiResponse<Nonce>;
     nonce = nonceData?.nonce || '';
     const sessionId = getCookie(nonceRes);
     setSessionId(2, sessionId);
@@ -66,7 +60,7 @@ describe('Auth API', () => {
       }),
     });
     expect(verifyRes.status).toBe(200);
-    const { data: verifyData } = await verifyRes.json() as ApiResponse<User>;
+    const { data: verifyData } = (await verifyRes.json()) as ApiResponse<User>;
     expect(verifyData?.address).toBe(WALLETS[2].address);
     expect(verifyData?.ensName).toBeDefined();
   });
@@ -74,7 +68,7 @@ describe('Auth API', () => {
   it('auth 3rd wallet', async () => {
     const nonceRes = await app.request('/auth/nonce');
     expect(nonceRes.status).toBe(200);
-    const { data: nonceData } = await nonceRes.json() as ApiResponse<Nonce>;
+    const { data: nonceData } = (await nonceRes.json()) as ApiResponse<Nonce>;
     nonce = nonceData?.nonce || '';
     const sessionId = getCookie(nonceRes);
     setSessionId(3, sessionId);

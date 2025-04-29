@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import * as onchainSchema from './onchain'
+import * as onchainSchema from './onchain';
 import { proposalTable } from './offchain/proposals';
 import { sessionTable } from './offchain/sessions';
 import { temperatureCheckTable } from './offchain/temperatureChecks';

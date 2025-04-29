@@ -9,17 +9,17 @@ export const formatDao = (dbDao: DbDao): Dao => {
     chainId: dbDao.chainId,
     address: dbDao.address,
     safe: {
-      owners: dbDao.signers.map((signer) => signer.address),
+      owners: dbDao.signers.map(signer => signer.address),
       threshold: dbDao.requiredSignatures || 0,
     },
     name: dbDao.name,
     proposalTemplatesCID: dbDao.proposalTemplatesCID,
-    governanceModules: dbDao.governanceModules.map((module) => ({
+    governanceModules: dbDao.governanceModules.map(module => ({
       address: module.address,
-      strategies: module.votingStrategies.map((strategy) => ({
+      strategies: module.votingStrategies.map(strategy => ({
         address: strategy.address,
         version: 1, // TODO: [ENG-551] add version to db
-        votingTokens: strategy.votingTokens.map((token) => ({
+        votingTokens: strategy.votingTokens.map(token => ({
           address: token.address,
           type: token.type,
         })),
@@ -27,7 +27,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
     })),
     guardAddress: dbDao.guardAddress || zeroAddress,
     fractalModuleAddress: dbDao.fractalModuleAddress,
-    hatIdToStreamIds: dbDao.hatIdToStreamIds.map((hatIdToStreamId) => ({
+    hatIdToStreamIds: dbDao.hatIdToStreamIds.map(hatIdToStreamId => ({
       hatId: hatIdToStreamId.hatId,
       streamId: hatIdToStreamId.streamId,
     })),

@@ -8,10 +8,10 @@ export const daoChainId = 8453;
 export const newProposal: NewProposal = {
   title: 'Test Proposal',
   body: 'Test Description',
-  voteType: 'single-choice'
+  voteType: 'single-choice',
 };
 
 export const newComment: NewComment = {
   content: 'Test Comment',
-  replyToId: null
+  replyToId: null,
 };

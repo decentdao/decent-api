@@ -10,7 +10,7 @@ describe('DAO API', () => {
   it('GET all DAOs', async () => {
     const res = await app.request('/d');
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<Dao[]>;
+    const { data } = (await res.json()) as ApiResponse<Dao[]>;
     expect(data).toBeDefined();
     expect(data?.length).toBeGreaterThan(0);
     daoAddress = data?.[0]?.address;
@@ -20,7 +20,7 @@ describe('DAO API', () => {
   it('GET DAOs by chainId', async () => {
     const res = await app.request(`/d/${daoChainId}`);
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<Dao[]>;
+    const { data } = (await res.json()) as ApiResponse<Dao[]>;
     expect(data).toBeDefined();
     expect(data?.length).toBeGreaterThan(0);
   });
@@ -28,7 +28,7 @@ describe('DAO API', () => {
   it('GET DAO by chainId and address', async () => {
     const res = await app.request(`/d/${daoChainId}/${daoAddress}`);
     expect(res.status).toBe(200);
-    const { data } = await res.json() as ApiResponse<Dao>;
+    const { data } = (await res.json()) as ApiResponse<Dao>;
     expect(data).toBeDefined();
   });
 });
