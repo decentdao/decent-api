@@ -6,47 +6,59 @@ import { daoChainId, daoAddress, newComment } from 'test/constants';
 
 describe('Comments API', () => {
   it('POST comment without a cookie', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`, {
-      method: 'POST',
-      body: JSON.stringify(newComment),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
+      {
+        method: 'POST',
+        body: JSON.stringify(newComment),
+      },
+    );
 
     expect(res.status).toBe(401);
   });
 
   it('POST comment with wallet 2', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`, {
-      method: 'POST',
-      headers: cookies(2),
-      body: JSON.stringify(newComment),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
+      {
+        method: 'POST',
+        headers: cookies(2),
+        body: JSON.stringify(newComment),
+      },
+    );
 
     expect(res.status).toBe(200);
-    const json = await res.json() as ApiResponse<Comment>;
+    const json = (await res.json()) as ApiResponse<Comment>;
     if (!json.data?.id) throw new Error('issue creating comment');
 
     clientStore.commentId = json.data.id;
   });
 
   it('PUT wallet 2 comment with wallet 3', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`, {
-      method: 'PUT',
-      headers: cookies(1),
-      body: JSON.stringify({ content: 'updated comment' }),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
+      {
+        method: 'PUT',
+        headers: cookies(1),
+        body: JSON.stringify({ content: 'updated comment' }),
+      },
+    );
 
     expect(res.status).toBe(403);
   });
 
   it('PUT wallet 2 comment with wallet 2', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`, {
-      method: 'PUT',
-      headers: cookies(2),
-      body: JSON.stringify({ content: 'updated comment' }),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
+      {
+        method: 'PUT',
+        headers: cookies(2),
+        body: JSON.stringify({ content: 'updated comment' }),
+      },
+    );
 
     expect(res.status).toBe(200);
-    const json = await res.json() as ApiResponse<Comment>;
+    const json = (await res.json()) as ApiResponse<Comment>;
     if (!json.data?.id) throw new Error('issue updating comment');
 
     expect(json.data.content).toBe('updated comment');
@@ -54,24 +66,30 @@ describe('Comments API', () => {
   });
 
   it('POST comment with wallet 1', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`, {
-      method: 'POST',
-      headers: cookies(1),
-      body: JSON.stringify(newComment),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
+      {
+        method: 'POST',
+        headers: cookies(1),
+        body: JSON.stringify(newComment),
+      },
+    );
 
     expect(res.status).toBe(200);
-    const json = await res.json() as ApiResponse<Comment>;
+    const json = (await res.json()) as ApiResponse<Comment>;
     if (!json.data?.id) throw new Error('issue creating comment');
 
     clientStore.commentId = json.data.id;
   });
 
   it('DELETE wallet 1 comment with wallet 1', async () => {
-    const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`, {
-      method: 'DELETE',
-      headers: cookies(1),
-    });
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
+      {
+        method: 'DELETE',
+        headers: cookies(1),
+      },
+    );
 
     expect(res.status).toBe(200);
   });

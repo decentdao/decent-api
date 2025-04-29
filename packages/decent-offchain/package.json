@@ -13,7 +13,9 @@
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts",
     "test": "bun test test/order.test.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pretty": "prettier . --write",
+    "pretty:check": "prettier . --check"
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.5.0-rc.5",

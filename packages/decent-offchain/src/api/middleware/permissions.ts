@@ -11,19 +11,20 @@ export const permissionsCheck = async (c: Context, next: Next) => {
 
   const isSigner = Boolean(dao?.safe?.owners.includes(user.address));
 
-  const strategyAddresses = dao.governanceModules?.flatMap(
-    (module) => module.strategies.map((strategy) => strategy.address)
-  ) || [];
-  const tokenAddresses = dao.governanceModules?.flatMap(
-    (module) => module.strategies.flatMap((strategy) => strategy.votingTokens.map((token) => token.address))
-  ) || [];
+  const strategyAddresses =
+    dao.governanceModules?.flatMap(module => module.strategies.map(strategy => strategy.address)) ||
+    [];
+  const tokenAddresses =
+    dao.governanceModules?.flatMap(module =>
+      module.strategies.flatMap(strategy => strategy.votingTokens.map(token => token.address)),
+    ) || [];
 
   try {
     const publicClient = getPublicClient(dao.chainId);
 
     // multicall each strategy address to see if the user address has isProposer permissions
     const allIsProposer = await publicClient.multicall({
-      contracts: strategyAddresses.map((address) => ({
+      contracts: strategyAddresses.map(address => ({
         abi: abis.LinearERC20Voting,
         address,
         functionName: 'isProposer' as const, // ERC20, ERC721, & w/ hats all use this
@@ -31,9 +32,9 @@ export const permissionsCheck = async (c: Context, next: Next) => {
       })),
       allowFailure: false,
     });
-    const isProposer = allIsProposer.some((result) => Boolean(result));
+    const isProposer = allIsProposer.some(result => Boolean(result));
     const balances = await publicClient.multicall({
-      contracts: tokenAddresses.map((address) => ({
+      contracts: tokenAddresses.map(address => ({
         abi: erc20Abi,
         address,
         functionName: 'balanceOf' as const, // ERC20 & ERC721 both use this
@@ -49,4 +50,4 @@ export const permissionsCheck = async (c: Context, next: Next) => {
     throw new ApiError(`Error checking permissions: ${e}`, 500);
   }
   await next();
-}
+};

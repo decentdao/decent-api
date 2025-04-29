@@ -12,13 +12,13 @@ import comments from '@/api/routes/dao.comments';
 
 const app = new Hono();
 
-app.use('*', cors({
-  origin: [
-    'http://localhost:3000',
-    'https://decentdao.org'
-  ],
-  credentials: true,
-}));
+app.use(
+  '*',
+  cors({
+    origin: ['http://localhost:3000', 'https://decentdao.org'],
+    credentials: true,
+  }),
+);
 
 app.onError((err, c) => {
   return resf(c, err, 500);

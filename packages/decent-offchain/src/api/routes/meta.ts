@@ -11,7 +11,7 @@ const app = new Hono();
  * @route GET /
  * @returns {Meta} API metadata
  */
-app.get('/', (c) => {
+app.get('/', c => {
   const version = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local';
   const meta: Meta = {
     name: 'decent-offchain',
@@ -25,7 +25,7 @@ app.get('/', (c) => {
  * @route GET /health
  * @returns {Health} Health status
  */
-app.get('/health', (c) => {
+app.get('/health', c => {
   const status: Health = 'ok';
   return resf(c, status);
 });
@@ -35,13 +35,9 @@ app.get('/health', (c) => {
  * @route GET /chains
  * @returns {SupportedChainId[]} Array of chain IDs
  */
-app.get('/chains', async (c) => {
-  const chainIds = await db
-    .selectDistinct({ chainId: daoTable.chainId })
-    .from(daoTable);
-  const chains: SupportedChainId[] = chainIds
-    .map((chain) => chain.chainId)
-    .sort((a, b) => a - b);
+app.get('/chains', async c => {
+  const chainIds = await db.selectDistinct({ chainId: daoTable.chainId }).from(daoTable);
+  const chains: SupportedChainId[] = chainIds.map(chain => chain.chainId).sort((a, b) => a - b);
   return resf(c, chains);
 });
 
