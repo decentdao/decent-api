@@ -15,6 +15,8 @@ import comments from '@/api/routes/dao.comments';
 const app = new Hono();
 const { websocket } = createBunWebSocket();
 
+const port = process.env.PORT || 3005;
+
 app.use(
   '*',
   cors({
@@ -37,8 +39,7 @@ app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
 
 export default {
-  port: 3005,
-  fetch: app.fetch,
-  request: app.request,
+  ...app,
+  port,
   websocket,
 };
