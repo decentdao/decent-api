@@ -9,7 +9,7 @@ import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
-import { createBunWebSocket } from 'hono/bun';
+import { Socket } from '@/ws/socket';
 
 const app = new Hono();
 
@@ -33,28 +33,6 @@ app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
 
-/*
-  TODO: ENG-748 Websocket - Figure out if we can serve websocket on the same port as Http/Https
-  */
-const { upgradeWebSocket, websocket } = createBunWebSocket();
-Bun.serve({
-  fetch: app.fetch,
-  port: 81,
-  websocket,
-});
-app.get(
-  '/ws',
-  upgradeWebSocket(() => {
-    return {
-      onMessage(event, ws) {
-        console.log(`Message from client: ${event.data}`);
-        ws.send('Hello from server!');
-      },
-      onClose: () => {
-        console.log('Connection closed');
-      },
-    };
-  }),
-);
+Socket.setup(app);
 
 export default app;
