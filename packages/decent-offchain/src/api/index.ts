@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { createBunWebSocket } from 'hono/bun';
 import resf from '@/api/utils/responseFormatter';
 
 // Route imports
@@ -9,9 +10,10 @@ import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
-import { Socket } from '@/ws/socket';
+import socket from '@/api/ws/socket';
 
 const app = new Hono();
+const { websocket } = createBunWebSocket();
 
 app.use(
   '*',
@@ -32,7 +34,11 @@ app.route('/auth', auth);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
+app.route('/ws', socket);
 
-Socket.setup(app);
-
-export default app;
+export default {
+  port: 3005,
+  fetch: app.fetch,
+  request: app.request,
+  websocket,
+};
