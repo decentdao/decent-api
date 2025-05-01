@@ -57,7 +57,7 @@ export const WebSocketConnections = {
             /* Initial payload is sent immediately upon subscription, not through publish */
             Dispatch.topic(ws, topic)
               .then(async data => {
-                this.send(ws, SubscriptionResponseType.Subscribed, topic, data);
+                this._send(ws, SubscriptionResponseType.Subscribed, topic, data);
               })
               .catch(error => {
                 this._error(ws, error instanceof Error ? error.message : String(error));

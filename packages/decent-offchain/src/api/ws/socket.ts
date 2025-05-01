@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { createBunWebSocket } from 'hono/bun';
 import { WebSocketConnections } from './connections';
-import { ServerWebSocket } from 'bun';
 
 const app = new Hono();
 
