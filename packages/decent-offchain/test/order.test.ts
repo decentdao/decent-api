@@ -4,3 +4,4 @@ import './api/dao.test';
 import './api/proposals.test';
 import './api/comments.test';
 import './api/logout.test';
+import './api/socket.test';

@@ -1,5 +1,6 @@
 import { ServerWebSocket } from 'bun';
 import { WSContext } from 'hono/ws';
+import { Dispatch } from './dispatch';
 
 export type WsMessage = {
   msg: string;
@@ -80,8 +81,16 @@ export class WebSocketConnections {
               this._error(ws, `Invalid topic: ${topic}`);
               return;
             }
-            // TODO: Send data with subscribed message
-            this.send(ws, SubscriptionResponseType.Subscribed, topic);
+            /* Initial payload is sent immediately upon subscription, not through publish */
+            Dispatch.topic(ws, topic)
+              .then(async data => {
+                this.send(ws, SubscriptionResponseType.Subscribed, topic, data);
+              })
+              .catch(error => {
+                this._error(ws, error instanceof Error ? error.message : String(error));
+                return;
+              });
+            return;
           }
           break;
 
