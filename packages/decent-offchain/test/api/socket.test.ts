@@ -2,14 +2,14 @@ import WebSocket from 'ws';
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
 
+const port = 2000;
 Bun.serve({
-  port: 2000,
+  port,
   fetch: app.fetch,
   websocket: app.websocket,
 });
 
 describe('WebSocket Integration', () => {
-  const port = 2000;
   const url = `ws://localhost:${port}/ws`;
 
   it('Connect to Websocket', async () => {
