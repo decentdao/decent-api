@@ -13,11 +13,11 @@ app.get(
     return {
       onOpen(_event, ws) {
         console.log('New connection established');
-        WebSocketConnections.get(ws.raw as ServerWebSocket).connected(ws);
+        WebSocketConnections.connected(ws);
       },
       onMessage(_event, ws) {
         console.log(`Message from client: ${_event.data}`);
-        WebSocketConnections.get(ws.raw as ServerWebSocket).received(ws, _event.data);
+        WebSocketConnections.received(ws, _event.data);
       },
       onClose(event, ws) {
         console.log(event, ws);
