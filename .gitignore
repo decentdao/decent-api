@@ -16,3 +16,6 @@
 # Ponder
 **/generated/
 **/.ponder/
+
+# Database
+*.sql
