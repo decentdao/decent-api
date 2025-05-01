@@ -21,11 +21,13 @@ app.get(
       onClose(event, ws) {
         console.log(event, ws);
         console.log('Connection closed');
+        WebSocketConnections.disconnected(ws);
       },
       onError(event, ws) {
         console.error('WebSocket error:', event);
         console.log('Error on connection:', ws);
         ws.close(500, 'Internal Server Error');
+        WebSocketConnections.disconnected(ws);
       },
     };
   }),

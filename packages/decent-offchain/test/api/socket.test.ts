@@ -23,27 +23,96 @@ describe('WebSocket Integration', () => {
     });
     expect(connectedMsg).toBe('{"msg":"connected"}');
 
-    const subscribeMessage =
-      '{"msg":"subscribe","topic":"dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064"}';
+    it('Subscribe and Unsubscribe', async () => {
+      const subscribeMessage =
+        '{"msg":"subscribe","topic":"dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064"}';
 
-    const subscribedResponse = await new Promise(resolve => {
-      ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-        once: true,
+      // First subscribe to a topic
+      let subscribedResponse = await new Promise(resolve => {
+        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
+          once: true,
+        });
+
+        // Send a client message to the server
+        ws.send(subscribeMessage);
       });
 
-      // 2) Send a client message to the server
-      ws.send(subscribeMessage);
+      expect(subscribedResponse).toBeString();
+      {
+        const msg = JSON.parse(subscribedResponse as string);
+
+        // Perform assertions on the response message that the client receives
+        expect(msg.msg).toBe('subscribed');
+        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
+        expect(msg.data).toBeDefined();
+        expect(msg.notes).toBeUndefined();
+      }
+
+      // Second subscribe to a topic
+      subscribedResponse = await new Promise(resolve => {
+        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
+          once: true,
+        });
+
+        // Send a client message to the server
+        ws.send(subscribeMessage);
+      });
+
+      expect(subscribedResponse).toBeString();
+      {
+        const msg = JSON.parse(subscribedResponse as string);
+
+        // Perform assertions on the response message that the client receives
+        expect(msg.msg).toBe('subscribed');
+        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
+        expect(msg.data).toBeDefined();
+        expect(msg.notes).toBe('Previously subscribed');
+      }
+
+      // First unsubscribe from a topic
+      const unsubscribeMessage =
+        '{"msg":"unsubscribe","topic":"dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064"}';
+
+      let unsubscribedResponse = await new Promise(resolve => {
+        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
+          once: true,
+        });
+
+        // Send a client message to the server
+        ws.send(unsubscribeMessage);
+      });
+
+      expect(unsubscribedResponse).toBeString();
+      {
+        const msg = JSON.parse(unsubscribedResponse as string);
+
+        // Perform assertions on the response message that the client receives
+        expect(msg.msg).toBe('unsubscribed');
+        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
+        expect(msg.notes).toBeUndefined();
+      }
+
+      // Second unsubscribe from a topic
+      unsubscribedResponse = await new Promise(resolve => {
+        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
+          once: true,
+        });
+
+        // Send a client message to the server
+        ws.send(unsubscribeMessage);
+      });
+
+      expect(unsubscribedResponse).toBeString();
+      {
+        const msg = JSON.parse(unsubscribedResponse as string);
+
+        // Perform assertions on the response message that the client receives
+        expect(msg.msg).toBe('unsubscribed');
+        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
+        expect(msg.notes).toBe('Previously unsubscribed');
+      }
     });
-
-    expect(subscribedResponse).toBeString();
-    const msg = JSON.parse(subscribedResponse as string);
-
-    // 3) Perform assertions on the response message that the client receives
-    expect(msg.msg).toBe('subscribed');
-    expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
-    expect(msg.data).toBeDefined();
-
-    // 4) Close the client when everything is done
+    // Close the client when everything is done
     ws.close();
   });
 });
