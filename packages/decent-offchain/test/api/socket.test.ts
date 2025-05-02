@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, afterAll } from 'bun:test';
 import app from '@/api/index';
 
 const port = 2000;
@@ -8,6 +8,8 @@ Bun.serve({
   fetch: app.fetch,
   websocket: app.websocket,
 });
+
+let _ws: WebSocket | null = null;
 
 describe('WebSocket Integration', () => {
   const url = `ws://localhost:${port}/ws`;
@@ -113,6 +115,14 @@ describe('WebSocket Integration', () => {
       }
     });
     // Close the client when everything is done
-    ws.close();
+    // ws.close();
+    _ws = ws;
   });
+});
+
+afterAll(() => {
+  if (_ws) {
+    _ws.close();
+    _ws = null;
+  }
 });
