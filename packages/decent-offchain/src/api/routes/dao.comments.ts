@@ -8,6 +8,8 @@ import { db } from '@/db';
 import { DbComment, schema } from '@/db/schema';
 import { formatComment } from '@/api/utils/typeConverter';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { WebSocketConnections } from '../ws/connections';
+import { Topics } from '../ws/topics';
 
 const app = new Hono();
 
@@ -70,6 +72,8 @@ app.post('/', daoCheck, siweAuth, permissionsCheck, async c => {
   if (!comment.length || !comment[0]) throw new ApiError('Failed to create comment', 500);
 
   const ret: Comment = formatComment(comment[0]);
+  const dao = c.get('dao');
+  WebSocketConnections.updated(Topics.comments(dao.chainId, dao.address, slug), ret);
   return resf(c, ret);
 });
 
@@ -103,6 +107,9 @@ app.put('/:id', daoCheck, siweAuth, permissionsCheck, async c => {
     throw new ApiError('Comment not found or you are not the author', 403);
 
   const ret: Comment = formatComment(comment[0]);
+  const dao = c.get('dao');
+  const slug = c.req.param('slug');
+  WebSocketConnections.updated(Topics.comments(dao.chainId, dao.address, slug), ret);
   return resf(c, ret);
 });
 
@@ -133,6 +140,9 @@ app.delete('/:id', daoCheck, siweAuth, permissionsCheck, async c => {
     throw new ApiError('Comment not found or you are not the author', 403);
 
   const ret: Comment = formatComment(comment[0]);
+  const dao = c.get('dao');
+  const slug = c.req.param('slug');
+  WebSocketConnections.deleted(Topics.comments(dao.chainId, dao.address, slug), { id: ret.id });
   return resf(c, ret);
 });
 

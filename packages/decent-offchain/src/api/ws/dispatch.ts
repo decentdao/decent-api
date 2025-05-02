@@ -48,11 +48,9 @@ export const Dispatch = {
         }
         const daoChainId = parseInt(elements[1]!);
         const daoAddress = elements[2];
-        const proposalId = elements[3];
+        const slug = elements[3];
 
-        const res = await app.request(
-          `/d/${daoChainId}/${daoAddress}/proposals/${proposalId}/comments`,
-        );
+        const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${slug}/comments`);
         const { data } = (await res.json()) as ApiResponse<unknown>;
         return data;
       }

@@ -21,6 +21,7 @@ export enum SubscriptionResponseType {
   Subscribed = 'subscribed',
   Unsubscribed = 'unsubscribed',
   Updated = 'updated',
+  Deleted = 'deleted',
 }
 
 export enum SubscriptionRequestType {
@@ -133,7 +134,7 @@ export const WebSocketConnections = {
     }
   },
 
-  publish(topic: string, data: unknown) {
+  updated(topic: string, data: unknown) {
     const subscriptions = this.topics.get(topic);
     if (!subscriptions || subscriptions.size === 0) {
       return;
@@ -144,6 +145,20 @@ export const WebSocketConnections = {
         continue;
       }
       this._send(ws, SubscriptionResponseType.Updated, topic, data);
+    }
+  },
+
+  deleted(topic: string, data: unknown) {
+    const subscriptions = this.topics.get(topic);
+    if (!subscriptions || subscriptions.size === 0) {
+      return;
+    }
+    for (const id of subscriptions) {
+      const ws = this.sockets.get(id);
+      if (!ws) {
+        continue;
+      }
+      this._send(ws, SubscriptionResponseType.Deleted, topic, data);
     }
   },
 

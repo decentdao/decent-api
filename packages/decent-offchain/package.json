@@ -13,6 +13,7 @@
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts",
     "test": "bun test test/order.test.ts",
+    "sockettest": "bun test test/socket.test.ts",
     "lint": "eslint .",
     "pretty": "prettier . --write",
     "pretty:check": "prettier . --check"
