@@ -5,8 +5,8 @@ export const Topics = {
     return `dao:${chainId}:${address}`;
   },
 
-  proposal(chainId: number, address: Address, proposalId: number) {
-    return `proposal:${chainId}:${address}:${proposalId}`;
+  proposals(chainId: number, address: Address) {
+    return `proposals:${chainId}:${address}`;
   },
 
   comments(chainId: number, address: Address, proposalId: number) {

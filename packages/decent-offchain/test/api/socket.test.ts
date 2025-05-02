@@ -1,6 +1,16 @@
 import WebSocket from 'ws';
 import { describe, it, expect, afterAll } from 'bun:test';
 import app from '@/api/index';
+import { daoChainId, daoAddress, newProposal } from 'test/constants';
+import { Topics } from '@/api/ws/topics';
+import {
+  ConnectionResponseType,
+  SubscriptionRequestType,
+  SubscriptionResponseType,
+  WsMessage,
+} from '@/api/ws/connections';
+import { cookies } from 'test/client';
+import { ApiResponse, Proposal } from 'decent-sdk';
 
 const port = 2000;
 Bun.serve({
@@ -14,109 +24,108 @@ let _ws: WebSocket | null = null;
 describe('WebSocket Integration', () => {
   const url = `ws://localhost:${port}/ws`;
 
+  const message = 'message';
+
   it('Connect to Websocket', async () => {
-    const res = await app.request('/d');
-    console.log(res.status);
     const ws = new WebSocket(url);
-    const connectedMsg = await new Promise(resolve => {
-      ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-        once: true,
-      });
-    });
-    expect(connectedMsg).toBe('{"msg":"connected"}');
+    const connectedResponse = JSON.parse(
+      await new Promise(resolve => {
+        ws.addEventListener(message, ({ data }) => resolve(data.toString('utf8')), {
+          once: true,
+        });
+      }),
+    ) as WsMessage;
+    expect(connectedResponse.msg).toBe(ConnectionResponseType.Connected);
 
     it('Subscribe and Unsubscribe', async () => {
-      const subscribeMessage =
-        '{"msg":"subscribe","topic":"dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064"}';
+      const topic = Topics.dao(daoChainId, daoAddress);
+      const subscribeMessage = JSON.stringify({
+        msg: SubscriptionRequestType.Subscribe,
+        topic: topic,
+      });
 
       // First subscribe to a topic
-      let subscribedResponse = await new Promise(resolve => {
-        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-          once: true,
-        });
+      let subscribedResponse = JSON.parse(
+        await new Promise(resolve => {
+          ws.addEventListener(message, ({ data }) => resolve(data.toString('utf8')), {
+            once: true,
+          });
 
-        // Send a client message to the server
-        ws.send(subscribeMessage);
-      });
+          // Send a client message to the server
+          ws.send(subscribeMessage);
+        }),
+      ) as WsMessage;
 
-      expect(subscribedResponse).toBeString();
-      {
-        const msg = JSON.parse(subscribedResponse as string);
+      console.log(subscribedResponse);
 
-        // Perform assertions on the response message that the client receives
-        expect(msg.msg).toBe('subscribed');
-        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
-        expect(msg.data).toBeDefined();
-        expect(msg.notes).toBeUndefined();
-      }
+      // Perform assertions on the response message that the client receives
+      expect(subscribedResponse.msg).toBe(SubscriptionResponseType.Subscribed);
+      expect(subscribedResponse.topic).toBe(topic);
+      expect(subscribedResponse.data).toBeDefined();
+      expect(subscribedResponse.notes).toBeUndefined();
 
       // Second subscribe to a topic
-      subscribedResponse = await new Promise(resolve => {
-        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-          once: true,
-        });
+      subscribedResponse = JSON.parse(
+        await new Promise(resolve => {
+          ws.addEventListener(message, ({ data }) => resolve(data.toString('utf8')), {
+            once: true,
+          });
 
-        // Send a client message to the server
-        ws.send(subscribeMessage);
+          // Send a client message to the server
+          ws.send(subscribeMessage);
+        }),
+      ) as WsMessage;
+
+      console.log(subscribedResponse);
+
+      // Perform assertions on the response message that the client receives
+      expect(subscribedResponse.msg).toBe(SubscriptionResponseType.Subscribed);
+      expect(subscribedResponse.topic).toBe(topic);
+      expect(subscribedResponse.data).toBeDefined();
+      expect(subscribedResponse.notes).toBe('Previously subscribed');
+
+      const unsubscribeMessage = JSON.stringify({
+        msg: SubscriptionRequestType.Unsubscribe,
+        topic: topic,
       });
 
-      expect(subscribedResponse).toBeString();
-      {
-        const msg = JSON.parse(subscribedResponse as string);
+      let unsubscribedResponse = JSON.parse(
+        await new Promise(resolve => {
+          ws.addEventListener(message, ({ data }) => resolve(data.toString('utf8')), {
+            once: true,
+          });
 
-        // Perform assertions on the response message that the client receives
-        expect(msg.msg).toBe('subscribed');
-        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
-        expect(msg.data).toBeDefined();
-        expect(msg.notes).toBe('Previously subscribed');
-      }
+          // Send a client message to the server
+          ws.send(unsubscribeMessage);
+        }),
+      ) as WsMessage;
 
-      // First unsubscribe from a topic
-      const unsubscribeMessage =
-        '{"msg":"unsubscribe","topic":"dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064"}';
+      console.log(unsubscribedResponse);
 
-      let unsubscribedResponse = await new Promise(resolve => {
-        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-          once: true,
-        });
-
-        // Send a client message to the server
-        ws.send(unsubscribeMessage);
-      });
-
-      expect(unsubscribedResponse).toBeString();
-      {
-        const msg = JSON.parse(unsubscribedResponse as string);
-
-        // Perform assertions on the response message that the client receives
-        expect(msg.msg).toBe('unsubscribed');
-        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
-        expect(msg.notes).toBeUndefined();
-      }
+      // Perform assertions on the response message that the client receives
+      expect(unsubscribedResponse.msg).toBe(SubscriptionResponseType.Unsubscribed);
+      expect(unsubscribedResponse.topic).toBe(topic);
+      expect(unsubscribedResponse.notes).toBeUndefined();
 
       // Second unsubscribe from a topic
-      unsubscribedResponse = await new Promise(resolve => {
-        ws.addEventListener('message', ({ data }) => resolve(data.toString('utf8')), {
-          once: true,
-        });
+      unsubscribedResponse = JSON.parse(
+        await new Promise(resolve => {
+          ws.addEventListener(message, ({ data }) => resolve(data.toString('utf8')), {
+            once: true,
+          });
 
-        // Send a client message to the server
-        ws.send(unsubscribeMessage);
-      });
+          // Send a client message to the server
+          ws.send(unsubscribeMessage);
+        }),
+      ) as WsMessage;
 
-      expect(unsubscribedResponse).toBeString();
-      {
-        const msg = JSON.parse(unsubscribedResponse as string);
+      console.log(unsubscribedResponse);
 
-        // Perform assertions on the response message that the client receives
-        expect(msg.msg).toBe('unsubscribed');
-        expect(msg.topic).toBe('dao:1:0xB98d45F9021D71E6Fc30b43FD37FB3b1Bf12c064');
-        expect(msg.notes).toBe('Previously unsubscribed');
-      }
+      // Perform assertions on the response message that the client receives
+      expect(unsubscribedResponse.msg).toBe(SubscriptionResponseType.Unsubscribed);
+      expect(unsubscribedResponse.topic).toBe(topic);
+      expect(unsubscribedResponse.notes).toBe('Previously unsubscribed');
     });
-    // Close the client when everything is done
-    // ws.close();
-    _ws = ws;
   });
 });
 

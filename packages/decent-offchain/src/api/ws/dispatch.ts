@@ -6,6 +6,9 @@ export const Dispatch = {
   async topic(ws: WSContext<unknown>, topic: string): Promise<unknown> {
     const elements = topic.split(':');
     switch (elements[0]) {
+      /*
+        Get DAO information
+        */
       case 'dao': {
         if (elements.length !== 3) {
           throw new Error('Invalid DAO topic format');
@@ -19,19 +22,26 @@ export const Dispatch = {
         return data;
       }
 
-      case 'proposal': {
-        if (elements.length !== 4) {
-          throw new Error('Invalid Proposal topic format');
+      /*
+        Get proposals for a DAO.
+        When new proposal is created, or existing proposal get, this topic will be updated.
+        */
+      case 'proposals': {
+        if (elements.length !== 3) {
+          throw new Error('Invalid Proposals topic format');
         }
         const daoChainId = parseInt(elements[1]!);
         const daoAddress = elements[2];
-        const proposalId = elements[3];
 
-        const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals/${proposalId}`);
+        const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals`);
         const { data } = (await res.json()) as ApiResponse<unknown>;
         return data;
       }
 
+      /*
+        Get comments for a proposal.
+        When new comment is created, or existing comment get, this topic will be updated.
+        */
       case 'comments': {
         if (elements.length !== 4) {
           throw new Error('Invalid Comments topic format');
