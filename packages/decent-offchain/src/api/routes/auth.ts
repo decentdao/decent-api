@@ -117,14 +117,14 @@ app.get('/me', async c => {
 /**
  * @title Log out the current user
  * @route POST /auth/logout
- * @returns {Logout} Logout object
+ * @returns {Logout} string 'ok'
  */
 app.post('/logout', async c => {
   const id = getCookie(c, cookieName);
   if (!id) throw new ApiError('cookie not found', 401);
 
   await db.delete(schema.sessionTable).where(eq(schema.sessionTable.id, id));
-  deleteCookie(c, cookieName);
+  deleteCookie(c, cookieName, cookieOptions);
   const data: Logout = 'ok';
   return resf(c, data);
 });
