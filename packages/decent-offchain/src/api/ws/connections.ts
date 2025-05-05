@@ -10,8 +10,6 @@ export type WsMessage = {
   data?: unknown;
 };
 
-/* eslint-disable no-unused-vars */
-/* linter gives false positive on this */
 export enum ConnectionResponseType {
   Connected = 'connected',
   Disconnected = 'disconnected',
@@ -28,11 +26,6 @@ export enum SubscriptionRequestType {
   Subscribe = 'subscribe',
   Unsubscribe = 'unsubscribe',
 }
-
-// getBunServer() = () => {
-//   const hmrSymbol = Symbol('BunServerHMR');
-//   const server = globalThis.hmrSymbol;
-// };
 
 interface WithId {
   id?: string;
