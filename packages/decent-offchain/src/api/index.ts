@@ -20,7 +20,7 @@ const port = process.env.PORT || 3005;
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:3000', 'https://decentdao.org', 'https://decent-interface.pages.dev'],
+    origin: ['http://localhost:3000', 'https://app.decentdao.org', 'https://*.decent-interface.pages.dev'],
     credentials: true,
   }),
 );
