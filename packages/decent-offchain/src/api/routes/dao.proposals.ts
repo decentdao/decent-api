@@ -8,6 +8,8 @@ import { siweAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { formatProposal } from '@/api/utils/typeConverter';
+import { WebSocketConnections } from '../ws/connections';
+import { Topics } from '../ws/topics';
 
 const app = new Hono();
 
@@ -65,6 +67,7 @@ app.post('/', daoCheck, siweAuth, permissionsCheck, async c => {
   if (!proposal.length || !proposal[0]) throw new ApiError('Failed to create proposal', 500);
 
   const ret: Proposal = formatProposal(proposal[0]);
+  WebSocketConnections.updated(Topics.proposals(dao.chainId, dao.address), ret);
   return resf(c, ret);
 });
 
@@ -138,6 +141,8 @@ app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async c => {
   }
 
   const ret: Proposal = formatProposal(proposal[0]);
+  const dao = c.get('dao');
+  WebSocketConnections.updated(Topics.proposals(dao.chainId, dao.address), ret);
   return resf(c, ret);
 });
 

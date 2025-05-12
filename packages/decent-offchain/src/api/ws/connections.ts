@@ -1,7 +1,7 @@
 import { WSContext } from 'hono/ws';
-import { DecentData, payload } from './payload';
 import { ServerWebSocket } from 'bun';
 import { nanoid } from 'nanoid';
+import { DecentData, payload } from './dispatch';
 
 export type WsMessage = {
   msg:
@@ -15,8 +15,6 @@ export type WsMessage = {
   data?: DecentData;
 };
 
-/* eslint-disable no-unused-vars */
-/* linter gives false positive on this */
 export enum ConnectionResponseType {
   Connected = 'connected',
 }
@@ -25,6 +23,7 @@ export enum SubscriptionResponseType {
   Subscribed = 'subscribed',
   Unsubscribed = 'unsubscribed',
   Updated = 'updated',
+  Deleted = 'deleted',
 }
 
 export enum SubscriptionRequestType {
@@ -137,7 +136,7 @@ export const WebSocketConnections = {
     }
   },
 
-  publish(topic: string, data: DecentData) {
+  updated(topic: string, data: DecentData) {
     const subscriptions = this.topics.get(topic);
     if (!subscriptions || subscriptions.size === 0) {
       return;
@@ -148,6 +147,20 @@ export const WebSocketConnections = {
         continue;
       }
       this._send(ws, SubscriptionResponseType.Updated, topic, data);
+    }
+  },
+
+  deleted(topic: string, data: DecentData) {
+    const subscriptions = this.topics.get(topic);
+    if (!subscriptions || subscriptions.size === 0) {
+      return;
+    }
+    for (const id of subscriptions) {
+      const ws = this.sockets.get(id);
+      if (!ws) {
+        continue;
+      }
+      this._send(ws, SubscriptionResponseType.Deleted, topic, data);
     }
   },
 

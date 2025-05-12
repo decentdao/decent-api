@@ -9,7 +9,7 @@ export const Topics = {
     return `proposals:${chainId}:${address}`;
   },
 
-  comments(chainId: number, address: Address, proposalId: number) {
-    return `comments:${chainId}:${address}:${proposalId}`;
+  comments(chainId: number, address: Address, slug: string) {
+    return `comments:${chainId}:${address}:${slug}`;
   },
 };

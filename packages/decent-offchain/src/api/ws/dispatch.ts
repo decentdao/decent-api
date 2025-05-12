@@ -1,7 +1,15 @@
 import app from '@/api/index';
 import { ApiResponse, Comment, Dao, Proposal } from 'decent-sdk';
 
-export type DecentData = Dao | Proposal[] | Comment[] | string | undefined;
+export type DecentData =
+  | Dao
+  | Proposal[]
+  | Proposal
+  | Comment[]
+  | Comment
+  | string
+  | undefined
+  | { id: string };
 
 export const payload = async (topic: string): Promise<DecentData> => {
   const elements = topic.split(':');
