@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { createBunWebSocket } from 'hono/bun';
+import { WebSocketConnections } from './connections';
 
 const app = new Hono();
 
@@ -10,16 +11,23 @@ app.get(
   upgradeWebSocket(() => {
     return {
       onOpen(_event, ws) {
-        console.log('Connection opened');
-        ws.send('Hello from server!');
+        console.log('New connection established');
+        WebSocketConnections.connected(ws);
       },
       onMessage(_event, ws) {
         console.log(`Message from client: ${_event.data}`);
-        ws.send('Hello from server!');
+        WebSocketConnections.received(ws, _event.data);
       },
       onClose(event, ws) {
         console.log(event, ws);
         console.log('Connection closed');
+        WebSocketConnections.disconnected(ws);
+      },
+      onError(event, ws) {
+        console.error('WebSocket error:', event);
+        console.log('Error on connection:', ws);
+        ws.close(500, 'Internal Server Error');
+        WebSocketConnections.disconnected(ws);
       },
     };
   }),
