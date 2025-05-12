@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { describe, it, expect, afterAll } from 'bun:test';
 import app from '@/api/index';
-import { daoChainId, daoAddress, newProposal } from 'test/constants';
+import { daoChainId, daoAddress } from 'test/constants';
 import { Topics } from '@/api/ws/topics';
 import {
   ConnectionResponseType,
@@ -9,8 +9,6 @@ import {
   SubscriptionResponseType,
   WsMessage,
 } from '@/api/ws/connections';
-import { cookies } from 'test/client';
-import { ApiResponse, Proposal } from 'decent-sdk';
 
 const port = 2000;
 Bun.serve({
