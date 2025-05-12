@@ -62,7 +62,7 @@ describe('WebSocket Integration', () => {
       expect(subscribedResponse.msg).toBe(SubscriptionResponseType.Subscribed);
       expect(subscribedResponse.topic).toBe(topic);
       expect(subscribedResponse.data).toBeDefined();
-      expect(subscribedResponse.notes).toBeUndefined();
+      expect(subscribedResponse.warning).toBeUndefined();
 
       // Second subscribe to a topic
       subscribedResponse = JSON.parse(
@@ -82,7 +82,7 @@ describe('WebSocket Integration', () => {
       expect(subscribedResponse.msg).toBe(SubscriptionResponseType.Subscribed);
       expect(subscribedResponse.topic).toBe(topic);
       expect(subscribedResponse.data).toBeDefined();
-      expect(subscribedResponse.notes).toBe('Previously subscribed');
+      expect(subscribedResponse.warning).toBe('Previously subscribed');
 
       const unsubscribeMessage = JSON.stringify({
         msg: SubscriptionRequestType.Unsubscribe,
@@ -105,7 +105,7 @@ describe('WebSocket Integration', () => {
       // Perform assertions on the response message that the client receives
       expect(unsubscribedResponse.msg).toBe(SubscriptionResponseType.Unsubscribed);
       expect(unsubscribedResponse.topic).toBe(topic);
-      expect(unsubscribedResponse.notes).toBeUndefined();
+      expect(unsubscribedResponse.warning).toBeUndefined();
 
       // Second unsubscribe from a topic
       unsubscribedResponse = JSON.parse(
@@ -124,7 +124,7 @@ describe('WebSocket Integration', () => {
       // Perform assertions on the response message that the client receives
       expect(unsubscribedResponse.msg).toBe(SubscriptionResponseType.Unsubscribed);
       expect(unsubscribedResponse.topic).toBe(topic);
-      expect(unsubscribedResponse.notes).toBe('Previously unsubscribed');
+      expect(unsubscribedResponse.warning).toBe('Previously unsubscribed');
     });
   });
 });
