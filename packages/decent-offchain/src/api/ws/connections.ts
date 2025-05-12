@@ -1,18 +1,22 @@
 import { WSContext } from 'hono/ws';
-import { Dispatch } from './dispatch';
 import { ServerWebSocket } from 'bun';
 import { nanoid } from 'nanoid';
+import { DecentData, payload } from './dispatch';
 
 export type WsMessage = {
-  msg: string;
-  notes?: string;
+  msg:
+    | ConnectionResponseType
+    | SubscriptionResponseType
+    | SubscriptionRequestType
+    | DisconnectRequestType
+    | 'error';
+  warning?: string;
   topic?: string;
-  data?: unknown;
+  data?: DecentData;
 };
 
 export enum ConnectionResponseType {
   Connected = 'connected',
-  Disconnected = 'disconnected',
 }
 
 export enum SubscriptionResponseType {
@@ -25,6 +29,10 @@ export enum SubscriptionResponseType {
 export enum SubscriptionRequestType {
   Subscribe = 'subscribe',
   Unsubscribe = 'unsubscribe',
+}
+
+export enum DisconnectRequestType {
+  Disconnect = 'disconnect',
 }
 
 interface WithId {
@@ -63,12 +71,6 @@ export const WebSocketConnections = {
         }
       }
     }
-
-    // Send a connected message immediately upon connection
-    const msg: WsMessage = {
-      msg: ConnectionResponseType.Connected,
-    };
-    this._sendRaw(ws, msg);
   },
 
   received(ws: WSContext<unknown>, message: string | ArrayBuffer) {
@@ -87,7 +89,7 @@ export const WebSocketConnections = {
             this.topics.set(topic, subscriptions);
 
             /* Initial payload is sent immediately upon subscription, not through publish */
-            Dispatch.topic(ws, topic)
+            payload(topic)
               .then(async data => {
                 this._send(
                   ws,
@@ -120,6 +122,13 @@ export const WebSocketConnections = {
             );
           }
           break;
+
+        case DisconnectRequestType.Disconnect:
+          {
+            ws.close(1000, 'Client requested disconnection');
+            this.disconnected(ws);
+          }
+          break;
       }
     } catch (error) {
       this._error(ws, error instanceof Error ? error.message : String(error));
@@ -127,7 +136,7 @@ export const WebSocketConnections = {
     }
   },
 
-  updated(topic: string, data: unknown) {
+  updated(topic: string, data: DecentData) {
     const subscriptions = this.topics.get(topic);
     if (!subscriptions || subscriptions.size === 0) {
       return;
@@ -141,7 +150,7 @@ export const WebSocketConnections = {
     }
   },
 
-  deleted(topic: string, data: unknown) {
+  deleted(topic: string, data: DecentData) {
     const subscriptions = this.topics.get(topic);
     if (!subscriptions || subscriptions.size === 0) {
       return;
@@ -198,12 +207,12 @@ export const WebSocketConnections = {
     ws: WSContext<unknown>,
     type: SubscriptionResponseType,
     topic: string,
-    data?: unknown,
-    notes?: string,
+    data?: DecentData,
+    warning?: string,
   ) {
     const message: WsMessage = {
       msg: type,
-      notes,
+      warning,
       topic,
       data,
     };

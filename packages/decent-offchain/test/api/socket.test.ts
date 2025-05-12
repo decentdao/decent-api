@@ -62,9 +62,9 @@ describe('WebSocket Integration', () => {
     expect(subscribedResponse.topic).toBe(topic);
     expect(subscribedResponse.data).toBeDefined();
     if (firstTime) {
-      expect(subscribedResponse.notes).toBeUndefined();
+      expect(subscribedResponse.warning).toBeUndefined();
     } else {
-      expect(subscribedResponse.notes).toBe('Previously subscribed');
+      expect(subscribedResponse.warning).toBe('Previously subscribed');
     }
   };
 
@@ -91,9 +91,9 @@ describe('WebSocket Integration', () => {
     expect(unsubscribedResponse.msg).toBe(SubscriptionResponseType.Unsubscribed);
     expect(unsubscribedResponse.topic).toBe(topic);
     if (firstTime) {
-      expect(unsubscribedResponse.notes).toBeUndefined();
+      expect(unsubscribedResponse.warning).toBeUndefined();
     } else {
-      expect(unsubscribedResponse.notes).toBe('Previously unsubscribed');
+      expect(unsubscribedResponse.warning).toBe('Previously unsubscribed');
     }
   };
 
@@ -142,7 +142,7 @@ describe('WebSocket Integration', () => {
 
         expect(updateResponse.msg).toBe(SubscriptionResponseType.Updated);
         expect(updateResponse.topic).toBe(topic);
-        expect(updateResponse.notes).toBeUndefined();
+        expect(updateResponse.warning).toBeUndefined();
 
         const updatedProposal = updateResponse.data as Proposal;
         expect(updatedProposal).toBeDefined();
@@ -178,7 +178,7 @@ describe('WebSocket Integration', () => {
 
         expect(updateResponse.msg).toBe(SubscriptionResponseType.Updated);
         expect(updateResponse.topic).toBe(topic);
-        expect(updateResponse.notes).toBeUndefined();
+        expect(updateResponse.warning).toBeUndefined();
 
         const updatedProposal = updateResponse.data as Proposal;
         expect(updatedProposal).toBeDefined();
@@ -226,7 +226,7 @@ describe('WebSocket Integration', () => {
 
         expect(updateResponse.msg).toBe(SubscriptionResponseType.Updated);
         expect(updateResponse.topic).toBe(topic);
-        expect(updateResponse.notes).toBeUndefined();
+        expect(updateResponse.warning).toBeUndefined();
 
         const updatedComment = updateResponse.data as Comment;
         expect(updatedComment).toBeDefined();
@@ -265,7 +265,7 @@ describe('WebSocket Integration', () => {
 
         expect(updateResponse.msg).toBe(SubscriptionResponseType.Updated);
         expect(updateResponse.topic).toBe(topic);
-        expect(updateResponse.notes).toBeUndefined();
+        expect(updateResponse.warning).toBeUndefined();
 
         const updatedComment = updateResponse.data as Comment;
         expect(updatedComment).toBeDefined();
@@ -296,7 +296,7 @@ describe('WebSocket Integration', () => {
 
         expect(deleteResponse.msg).toBe(SubscriptionResponseType.Deleted);
         expect(deleteResponse.topic).toBe(topic);
-        expect(deleteResponse.notes).toBeUndefined();
+        expect(deleteResponse.warning).toBeUndefined();
 
         const updatedComment = deleteResponse.data as { id?: string };
         expect(updatedComment).toBeDefined();
