@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://decent-offchain.up.railway.app",
+      "url": "https://api.decent.build",
       "description": "Production server"
     },
     {
