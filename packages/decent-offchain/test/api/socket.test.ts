@@ -9,7 +9,7 @@ import {
   SubscriptionResponseType,
   WsMessage,
 } from '@/api/ws/connections';
-import { clientStore, cookies, setClientStore } from 'test/client';
+import { clientStore, authHeader, setClientStore } from 'test/client';
 import { ApiResponse, Comment, Proposal } from 'decent-sdk';
 
 const port = 2000;
@@ -119,7 +119,7 @@ describe('WebSocket Integration', () => {
       {
         const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals`, {
           method: 'POST',
-          headers: cookies(1),
+          headers: authHeader(1),
           body: JSON.stringify(newProposal),
         });
         const json = (await res.json()) as ApiResponse<Proposal>;
@@ -156,7 +156,7 @@ describe('WebSocket Integration', () => {
           `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}`,
           {
             method: 'PUT',
-            headers: cookies(1),
+            headers: authHeader(1),
             body: JSON.stringify(newProposal),
           },
         );
@@ -201,7 +201,7 @@ describe('WebSocket Integration', () => {
           `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
           {
             method: 'POST',
-            headers: cookies(2),
+            headers: authHeader(2),
             body: JSON.stringify(newComment),
           },
         );
@@ -239,7 +239,7 @@ describe('WebSocket Integration', () => {
           `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
           {
             method: 'PUT',
-            headers: cookies(2),
+            headers: authHeader(2),
             body: JSON.stringify({ content: 'updated comment' }),
           },
         );
@@ -279,7 +279,7 @@ describe('WebSocket Integration', () => {
           `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
           {
             method: 'DELETE',
-            headers: cookies(2),
+            headers: authHeader(2),
           },
         );
         expect(res.status).toBe(200);
