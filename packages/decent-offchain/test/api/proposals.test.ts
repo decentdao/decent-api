@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import { Proposal, ApiResponse } from 'decent-sdk';
 import app from '@/api/index';
-import { cookies, clientStore, setClientStore } from 'test/client';
+import { authHeader, clientStore, setClientStore } from 'test/client';
 import { daoChainId, daoAddress, newProposal } from 'test/constants';
 
 describe('Proposals API', () => {
@@ -16,7 +16,7 @@ describe('Proposals API', () => {
   it('POST proposal with a valid cookie', async () => {
     const res = await app.request(`/d/${daoChainId}/${daoAddress}/proposals`, {
       method: 'POST',
-      headers: cookies(1),
+      headers: authHeader(1),
       body: JSON.stringify(newProposal),
     });
     const json = (await res.json()) as ApiResponse<Proposal>;
@@ -32,7 +32,7 @@ describe('Proposals API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}`,
       {
         method: 'PUT',
-        headers: cookies(1),
+        headers: authHeader(1),
         body: JSON.stringify(newProposal),
       },
     );
@@ -46,7 +46,7 @@ describe('Proposals API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}`,
       {
         method: 'PUT',
-        headers: cookies(2),
+        headers: authHeader(2),
         body: JSON.stringify(newProposal),
       },
     );
@@ -61,7 +61,7 @@ describe('Proposals API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}`,
       {
         method: 'PUT',
-        headers: cookies(3),
+        headers: authHeader(3),
         body: JSON.stringify(newProposal),
       },
     );

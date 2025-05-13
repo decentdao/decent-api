@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import { ApiResponse, Comment } from 'decent-sdk';
 import app from '@/api/index';
-import { cookies, clientStore } from 'test/client';
+import { authHeader, clientStore } from 'test/client';
 import { daoChainId, daoAddress, newComment } from 'test/constants';
 
 describe('Comments API', () => {
@@ -22,7 +22,7 @@ describe('Comments API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
       {
         method: 'POST',
-        headers: cookies(2),
+        headers: authHeader(2),
         body: JSON.stringify(newComment),
       },
     );
@@ -39,7 +39,7 @@ describe('Comments API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
       {
         method: 'PUT',
-        headers: cookies(1),
+        headers: authHeader(1),
         body: JSON.stringify({ content: 'updated comment' }),
       },
     );
@@ -52,7 +52,7 @@ describe('Comments API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
       {
         method: 'PUT',
-        headers: cookies(2),
+        headers: authHeader(2),
         body: JSON.stringify({ content: 'updated comment' }),
       },
     );
@@ -70,7 +70,7 @@ describe('Comments API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments`,
       {
         method: 'POST',
-        headers: cookies(1),
+        headers: authHeader(1),
         body: JSON.stringify(newComment),
       },
     );
@@ -87,7 +87,7 @@ describe('Comments API', () => {
       `/d/${daoChainId}/${daoAddress}/proposals/${clientStore.proposalSlug}/comments/${clientStore.commentId}`,
       {
         method: 'DELETE',
-        headers: cookies(1),
+        headers: authHeader(1),
       },
     );
 

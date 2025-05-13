@@ -1,9 +1,8 @@
 import { Context, Next } from 'hono';
-import { getCookie } from 'hono/cookie';
 import { User } from 'decent-sdk';
 import { db } from '@/db';
 import { ApiError } from '@/api/utils/responseFormatter';
-import { cookieName } from '@/api/utils/cookie';
+import { getSessionId } from '@/api/utils/bearer';
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -11,12 +10,11 @@ declare module 'hono' {
   }
 }
 
-export const siweAuth = async (c: Context, next: Next) => {
-  const id = getCookie(c, cookieName);
-  if (!id) throw new ApiError('no cookie found', 401);
+export const beaerAuth = async (c: Context, next: Next) => {
+  const sessionId = getSessionId(c);
 
   const session = await db.query.sessionTable.findFirst({
-    where: (s, { eq }) => eq(s.id, id),
+    where: (s, { eq }) => eq(s.id, sessionId),
   });
 
   if (!session) throw new ApiError('session not found', 401);
