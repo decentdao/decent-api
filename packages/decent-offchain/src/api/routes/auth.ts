@@ -88,8 +88,6 @@ app.post('/verify', async c => {
  */
 app.get('/me', bearerAuth, async c => {
   const user = c.get('user');
-  if (!user) throw new ApiError('user not found', 401);
-
   return resf(c, user);
 });
 
