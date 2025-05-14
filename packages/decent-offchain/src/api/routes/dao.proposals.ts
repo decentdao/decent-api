@@ -4,7 +4,7 @@ import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-sd
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { siweAuth } from '@/api/middleware/auth';
+import { bearerAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { formatProposal } from '@/api/utils/typeConverter';
@@ -41,7 +41,7 @@ app.get('/', daoCheck, async c => {
  * @param {NewProposal} [body] NewProposal object
  * @returns {Proposal} Proposal object
  */
-app.post('/', daoCheck, siweAuth, permissionsCheck, async c => {
+app.post('/', daoCheck, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
   if (!user) throw new ApiError('user not found', 401);
   if (!user.permissions?.isProposer)
@@ -111,7 +111,7 @@ app.get('/:slug', daoCheck, async c => {
  * @param {UpdateProposal} [body] UpdateProposal object
  * @returns {Proposal} Proposal object
  */
-app.put('/:slug', daoCheck, siweAuth, permissionsCheck, async c => {
+app.put('/:slug', daoCheck, bearerAuth, permissionsCheck, async c => {
   const { slug } = c.req.param() as ProposalParams;
   if (!slug) throw new ApiError('Proposal slug is required', 400);
   const user = c.get('user');

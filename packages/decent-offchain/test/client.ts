@@ -3,7 +3,6 @@ import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
-import { cookieName } from '@/api/utils/cookie';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 
@@ -81,12 +80,6 @@ export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumb
   };
 };
 
-export const getCookie = (res: Response) => {
-  const cookieHeader = res.headers.get('set-cookie') || '';
-  const cookieMatch = new RegExp(`${cookieName}=([^;]+)`).exec(cookieHeader) ?? [];
-  return cookieMatch[1] ?? '';
-};
-
 export const setSessionId = (accountNumber: WalletNumber, sessionId: string) => {
   WALLETS[accountNumber].sessionId = sessionId;
 };
@@ -95,8 +88,8 @@ export const setClientStore = (key: keyof ClientStore, value: string) => {
   clientStore[key] = value;
 };
 
-export const cookies = (accountNumber: WalletNumber) => {
+export const authHeader = (accountNumber: WalletNumber) => {
   return {
-    Cookie: `${cookieName}=${WALLETS[accountNumber].sessionId}`,
+    Authorization: `Bearer ${WALLETS[accountNumber].sessionId}`,
   };
 };

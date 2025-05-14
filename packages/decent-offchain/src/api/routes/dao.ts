@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
-import { siweAuth } from '@/api/middleware/auth';
+import { bearerAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { DbDao } from '@/db/schema/onchain';
 import { formatDao } from '@/api/utils/typeConverter';
@@ -62,7 +62,7 @@ app.get('/:chainId/:address', daoCheck, async c => {
  * @param {string} address - Address parameter
  * @returns {User} User object
  */
-app.get('/:chainId/:address/me', daoCheck, siweAuth, permissionsCheck, async c => {
+app.get('/:chainId/:address/me', daoCheck, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
   if (!user) throw new ApiError('User not found', 401);
   return resf(c, user);

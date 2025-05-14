@@ -15,7 +15,7 @@
       "description": "Production server"
     },
     {
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3005",
       "description": "Localhost"
     }
   ],
@@ -144,7 +144,11 @@
         "tags": ["auth"],
         "summary": "Verify a SIWE message and signature",
         "description": "Verify a Sign-In with Ethereum message and signature",
-        "security": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -194,7 +198,7 @@
         "description": "Retrieve information about the currently authenticated user",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "responses": {
@@ -227,7 +231,7 @@
         "description": "Log out the currently authenticated user",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "responses": {
@@ -429,7 +433,7 @@
         "description": "Create a new proposal for a DAO",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "parameters": [
@@ -543,7 +547,7 @@
         "description": "Update an existing proposal",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "parameters": [
@@ -668,7 +672,7 @@
         "description": "Create a new comment on a proposal",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "parameters": [
@@ -737,7 +741,7 @@
         "description": "Update an existing comment",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "parameters": [
@@ -812,7 +816,7 @@
         "description": "Delete an existing comment",
         "security": [
           {
-            "CookieAuth": []
+            "BearerAuth": []
           }
         ],
         "parameters": [
@@ -959,10 +963,15 @@
         "type": "object",
         "properties": {
           "nonce": {
-            "type": "string"
+            "type": "string",
+            "description": "A unique random string to be included in the SIWE message for verification. This nonce should be used only once for security purposes."
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "A unique identifier for the authenticated user. This sessionId should be sent as `Authorization: Bearer <sessionId>` in the header for subsequent requests that require authentication."
           }
         },
-        "required": ["nonce"]
+        "required": ["nonce", "sessionId"]
       },
       "Logout": {
         "type": "string",
@@ -1662,16 +1671,15 @@
       }
     },
     "securitySchemes": {
-      "CookieAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "decent-session"
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   },
   "security": [
     {
-      "CookieAuth": []
+      "BearerAuth": []
     }
   ],
   "tags": [
