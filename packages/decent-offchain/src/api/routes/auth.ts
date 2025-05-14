@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { eq, and } from 'drizzle-orm';
 import { User, Logout } from 'decent-sdk';
-import { beaerAuth } from '@/api/middleware/auth';
+import { bearerAuth } from '@/api/middleware/auth';
 import { schema } from '@/db/schema';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
@@ -86,7 +86,7 @@ app.post('/verify', async c => {
  * @route GET /auth/me
  * @returns {User} Me object
  */
-app.get('/me', beaerAuth, async c => {
+app.get('/me', bearerAuth, async c => {
   const user = c.get('user');
   if (!user) throw new ApiError('user not found', 401);
 

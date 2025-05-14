@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { Comment } from 'decent-sdk';
 import { eq, and } from 'drizzle-orm';
 import { daoCheck } from '@/api/middleware/dao';
-import { beaerAuth } from '@/api/middleware/auth';
+import { bearerAuth } from '@/api/middleware/auth';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { db } from '@/db';
 import { DbComment, schema } from '@/db/schema';
@@ -52,7 +52,7 @@ app.get('/', daoCheck, async c => {
  * @param {NewComment} [body] - NewComment object to be inserted
  * @returns {Comment} The created comment object
  */
-app.post('/', daoCheck, beaerAuth, permissionsCheck, async c => {
+app.post('/', daoCheck, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
 
   if (!user.permissions?.isVoter) throw new ApiError('Only voters can create comments', 403);
@@ -87,7 +87,7 @@ app.post('/', daoCheck, beaerAuth, permissionsCheck, async c => {
  * @param {NewComment} [body] - NewComment object to be updated
  * @returns {Comment} The updated comment object
  */
-app.put('/:id', daoCheck, beaerAuth, permissionsCheck, async c => {
+app.put('/:id', daoCheck, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
   const id = c.req.param('id');
 
@@ -122,7 +122,7 @@ app.put('/:id', daoCheck, beaerAuth, permissionsCheck, async c => {
  * @param {string} id - ID of the comment
  * @returns {}
  */
-app.delete('/:id', daoCheck, beaerAuth, permissionsCheck, async c => {
+app.delete('/:id', daoCheck, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
   const id = c.req.param('id');
 

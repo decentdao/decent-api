@@ -10,7 +10,7 @@ declare module 'hono' {
   }
 }
 
-export const beaerAuth = async (c: Context, next: Next) => {
+export const bearerAuth = async (c: Context, next: Next) => {
   const sessionId = getSessionId(c);
 
   const session = await db.query.sessionTable.findFirst({
