@@ -29,6 +29,13 @@ Start the database
 brew services start postgresql@16
 ```
 
+Configure postgresql in PATH (if you are using `zsh` shell)
+
+```bash
+echo 'export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
 Create a database
 
 ```bash

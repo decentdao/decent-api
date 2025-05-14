@@ -17,7 +17,22 @@ const { websocket } = createBunWebSocket();
 
 const port = process.env.PORT || 3005;
 
-app.use('*', cors());
+app.use(
+  '*',
+  cors({
+    origin: origin => {
+      const allowedOrigins = ['http://localhost:3000', 'https://app.decentdao.org'];
+      if (allowedOrigins.includes(origin)) {
+        return origin;
+      }
+      if (origin.endsWith('.decent-interface.pages.dev')) {
+        return origin;
+      }
+      return null;
+    },
+    credentials: true,
+  }),
+);
 
 app.onError((err, c) => {
   return resf(c, err, 500);
