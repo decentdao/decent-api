@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { Health, Meta, SupportedChainId } from 'decent-sdk';
-import resf from '@/api/utils/responseFormatter';
+import { count } from 'drizzle-orm';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { db } from '@/db';
 import { daoTable } from '@/db/schema/onchain';
 
@@ -41,4 +42,19 @@ app.get('/chains', async c => {
   return resf(c, chains);
 });
 
+/**
+ * @title Get platform stats
+ * @route GET /stats
+ * @returns Platform stats
+ */
+app.get('/stats', async c => {
+  const query = {
+    daos: await db.select({ count: count() }).from(daoTable),
+  };
+
+  if (!query.daos.length || !query.daos[0]) throw new ApiError('Failed to get daos', 500);
+  const daoCount = query.daos.length ? query.daos[0].count : 0;
+
+  return resf(c, { daoCount });
+});
 export default app;
