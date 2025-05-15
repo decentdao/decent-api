@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-sdk';
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
@@ -10,6 +10,9 @@ import { permissionsCheck } from '@/api/middleware/permissions';
 import { formatProposal } from '@/api/utils/typeConverter';
 import { WebSocketConnections } from '../ws/connections';
 import { Topics } from '../ws/topics';
+import { getPublicClient } from "../utils/publicClient";
+import { getContract } from "viem";
+import { abis } from "@fractal-framework/fractal-contracts";
 
 const app = new Hono();
 
@@ -31,6 +34,61 @@ app.get('/', daoCheck, async c => {
 
   const ret: Proposal[] = proposals.map(formatProposal);
   return resf(c, ret);
+});
+
+/**
+ * @title Fetch all onchain proposals for a DAO
+ * @route POST /d/{chainId}/{address}/proposals/sync
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @returns {void}
+ */
+app.get('/sync', daoCheck, async c => {
+  const dao = c.get('dao');
+  const publicClient = getPublicClient(dao.chainId);
+  const azoriusAddress = dao.governanceModules?.[0]?.address;
+  if (!azoriusAddress) throw new ApiError('Azorius governance module not found', 404);
+
+  const proposalCount = await publicClient.readContract({
+    address: azoriusAddress,
+    abi: abis.Azorius,
+    functionName: 'totalProposalCount',
+  });
+
+  // Get all proposal created events by fetching in chunks of 500 blocks
+  const proposalCreatedEvents = [];
+  const latestBlock = await publicClient.getBlockNumber();
+  let toBlock = latestBlock;
+  const CHUNK_SIZE = 400n;
+  let foundProposals = 0;
+
+  while (foundProposals < Number(proposalCount)) {
+    const fromBlock = toBlock - CHUNK_SIZE > 0n ? toBlock - CHUNK_SIZE : 0n;
+    
+    try {
+      const events = await publicClient.getContractEvents({
+        address: azoriusAddress,
+        abi: abis.Azorius,
+        eventName: 'ProposalCreated',
+        fromBlock,
+        toBlock,
+      });
+      
+      proposalCreatedEvents.push(...events);
+      foundProposals = proposalCreatedEvents.length;
+    } catch (error) {
+      console.error(`Error fetching events from block ${fromBlock} to ${toBlock}:`, error);
+    }
+    
+    if (fromBlock === 0n) break; // We've reached the beginning of the chain
+    toBlock = fromBlock - 1n;
+  }
+
+  console.log(`Found ${proposalCreatedEvents.length} proposal events`);
+
+  return resf(c, {
+    message: 'Proposals synced',
+  });
 });
 
 /**
@@ -132,6 +190,7 @@ app.put('/:slug', daoCheck, bearerAuth, permissionsCheck, async c => {
       and(
         eq(schema.proposalTable.slug, slug),
         eq(schema.proposalTable.authorAddress, user.address), // only the author can update the proposal
+        isNull(schema.proposalTable.proposedTxnHash), // only proposals that have not been put onchain can be updated
       ),
     )
     .returning();

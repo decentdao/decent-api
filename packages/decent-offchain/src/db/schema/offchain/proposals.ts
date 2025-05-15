@@ -20,7 +20,8 @@ export const proposalTable = offchainSchema.table(
     metadataCID: text(),
     id: integer(), // number to concat with organization prefix (ex: DCT-1)
     safeNonce: integer(),
-    executedTxHash: text(),
+    proposedTxnHash: hex(),
+    executedTxHash: hex(),
     votingStrategyAddress: hex(),
     voteStartsAt: timestamp(),
     voteEndsAt: timestamp(),

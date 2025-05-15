@@ -55,6 +55,7 @@ export const formatProposal = (dbProposal: DbProposal): Proposal => {
     metadataCID: dbProposal.metadataCID,
     id: dbProposal.id,
     safeNonce: dbProposal.safeNonce,
+    proposedTxnHash: dbProposal.proposedTxnHash,
     executedTxHash: dbProposal.executedTxHash,
     votingStrategyAddress: dbProposal.votingStrategyAddress,
     voteStartsAt: unixTimestamp(dbProposal.voteStartsAt),
