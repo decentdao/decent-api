@@ -1,8 +1,21 @@
-import { zeroAddress } from 'viem';
+import { zeroAddress, Address, Hex } from 'viem';
 import { Comment, Dao, Proposal } from 'decent-sdk';
 import { DbDao } from '@/db/schema/onchain';
 import { DbComment, DbProposal } from '@/db/schema';
 import { unixTimestamp } from './time';
+
+export type OnchainProposal = {
+  strategy: Address;
+  proposalId: bigint;
+  proposer: Address;
+  transactions: {
+    to: Address;
+    value: bigint;
+    data: Hex;
+    operation: number;
+  }[];
+  metadata: string;
+};
 
 export const formatDao = (dbDao: DbDao): Dao => {
   const dao: Dao = {
@@ -50,12 +63,12 @@ export const formatProposal = (dbProposal: DbProposal): Proposal => {
     slug: dbProposal.slug,
     title: dbProposal.title,
     body: dbProposal.body,
-    status: dbProposal.status || 'pending',
+    status: dbProposal.status || 'none',
     authorAddress: dbProposal.authorAddress,
     metadataCID: dbProposal.metadataCID,
     id: dbProposal.id,
     safeNonce: dbProposal.safeNonce,
-    proposedTxHash: dbProposal.proposedTxnHash,
+    proposedTxHash: dbProposal.proposedTxHash,
     executedTxHash: dbProposal.executedTxHash,
     votingStrategyAddress: dbProposal.votingStrategyAddress,
     voteStartsAt: unixTimestamp(dbProposal.voteStartsAt),
@@ -70,6 +83,50 @@ export const formatProposal = (dbProposal: DbProposal): Proposal => {
     updatedAt: unixTimestamp(dbProposal.updatedAt) || 0,
   };
   return proposal;
+};
+
+export const formatOnchainProposal = (onchainProposal: OnchainProposal) => {
+  try {
+    const metadata = JSON.parse(onchainProposal.metadata);
+    const proposal = {
+      title: metadata.title,
+      body: metadata.description,
+      id: Number(onchainProposal.proposalId),
+      authorAddress: onchainProposal.proposer,
+      votingStrategyAddress: onchainProposal.strategy,
+      transactions: onchainProposal.transactions.map(tx => ({
+        ...tx,
+        value: tx.value ? String(tx.value) : '0',
+      })),
+    };
+    return proposal;
+  } catch {
+    // Fallback to manual extraction
+    try {
+      const titleMatch = onchainProposal.metadata.match(/"title"\s*:\s*"([^"]+?)"/);
+      const title = titleMatch ? titleMatch[1] : '';
+
+      let description = '';
+      const start = onchainProposal.metadata.indexOf('"description":"');
+      if (start !== -1) {
+        const end = onchainProposal.metadata.lastIndexOf('","documentationUrl"');
+        if (end !== -1) {
+          description = onchainProposal.metadata.substring(start + 14, end);
+        }
+      }
+
+      return {
+        title,
+        body: description,
+        id: Number(onchainProposal.proposalId),
+        authorAddress: onchainProposal.proposer,
+        votingStrategyAddress: onchainProposal.strategy,
+      };
+    } catch (fallbackError) {
+      console.error('Even fallback extraction failed:', fallbackError);
+      return null;
+    }
+  }
 };
 
 export const formatComment = (dbComment: DbComment): Comment => {

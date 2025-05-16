@@ -1,6 +1,8 @@
 // Copied from React Dune Hooks package
 // https://github.com/duneanalytics/hooks/blob/main/src/evm/types.ts
 
+import { Address, Hex } from 'viem';
+
 // Use 'type' for simple type aliases
 type TokenBalance = {
   chain: string;
@@ -96,24 +98,40 @@ export type UseTokenBalancesConfig = {
   };
 };
 
+type LogEntry = {
+  address: Address;
+  data: Hex;
+  topics: Hex[];
+  decoded?: {
+    name: string;
+    inputs: {
+      name: string;
+      type: string;
+      value: string;
+    }[];
+  };
+};
+
 export type Transaction = {
-  address: string;
-  block_hash: string;
-  block_number: string;
-  block_time: string;
-  block_version: number;
   chain: string;
-  from: string;
-  to: string;
-  data: string;
-  gas_price: string;
-  hash: string;
-  index: string;
-  max_fee_per_gas: string;
-  max_priority_fee_per_gas: string;
-  nonce: string;
-  transaction_type: string;
+  chain_id: number;
+  address: string;
+  block_time: string;
+  block_number: number;
+  index: number;
+  hash: Hex;
+  block_hash: Hex;
   value: string;
+  transaction_type: string;
+  from: Address;
+  to: Address;
+  nonce: Hex;
+  gas_price: Hex;
+  gas_used: Hex;
+  effective_gas_price: Hex;
+  success: boolean;
+  data: Hex;
+  logs: LogEntry[];
 };
 
 export type TransactionData = {

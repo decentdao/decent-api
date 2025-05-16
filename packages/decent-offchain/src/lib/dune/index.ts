@@ -1,25 +1,18 @@
 // Modified from React Dune Hooks package
 // https://github.com/duneanalytics/hooks/blob/main/src/evm/duneApi.ts
-import {
-  BalanceData,
-  TokenBalancesParams,
-  TransactionData,
-  TransactionsParams,
-} from './types';
+import { Address } from 'viem';
+import { BalanceData, TokenBalancesParams, TransactionData, TransactionsParams } from './types';
 
 const BASE_URL = 'https://api.dune.com';
 const BALANCES_PREFIX = 'api/echo/v1/balances/evm';
 const TRANSACTIONS_PREFIX = 'api/echo/v1/transactions/evm';
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 
-const getBalanceQueryParams = (
-  params: TokenBalancesParams
-): URLSearchParams => {
+const getBalanceQueryParams = (params: TokenBalancesParams): URLSearchParams => {
   const queryParams = new URLSearchParams();
   if (params.allChains) queryParams.append('all_chains', 'true');
   if (params.chainIds) queryParams.append('chain_ids', params.chainIds);
-  if (params.excludeSpamTokens)
-    queryParams.append('exclude_spam_tokens', 'true');
+  if (params.excludeSpamTokens) queryParams.append('exclude_spam_tokens', 'true');
   if (params.filters) queryParams.append('filters', params.filters);
   if (params.offset) queryParams.append('offset', params.offset.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -27,9 +20,7 @@ const getBalanceQueryParams = (
   return queryParams;
 };
 
-const getTransactionsQueryParams = (
-  params: TransactionsParams
-): URLSearchParams => {
+const getTransactionsQueryParams = (params: TransactionsParams): URLSearchParams => {
   const queryParams = new URLSearchParams();
   if (params.chainIds) queryParams.append('chain_ids', params.chainIds);
   if (params.offset) queryParams.append('offset', params.offset.toString());
@@ -40,57 +31,49 @@ const getTransactionsQueryParams = (
   return queryParams;
 };
 
-const getHeaders = (duneApiKey: string | undefined) => {
-  return duneApiKey
-    ? {
-        'x-dune-api-key': duneApiKey,
-      }
-    : undefined;
-};
-
-export async function fetchEvmBalances(
-  walletAddress: string,
+export async function duneFetchBalances(
+  address: Address,
   params: TokenBalancesParams,
-  duneApiKey: string | undefined,
-  proxyUrl: string | undefined
 ): Promise<BalanceData> {
+  if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
+
   const queryParams = getBalanceQueryParams(params);
 
-  if (proxyUrl) {
-    proxyUrl = removeTrailingSlash(proxyUrl);
-  }
+  const url = `${BASE_URL}/${BALANCES_PREFIX}/${address}?${queryParams.toString()}`;
 
-  const apiUrl = `${proxyUrl || BASE_URL}/${BALANCES_PREFIX}/${walletAddress}?${queryParams.toString()}`;
-
-  const response = await fetch(apiUrl, {
+  const response = await fetch(url, {
     method: 'GET',
-    headers: getHeaders(duneApiKey),
+    headers: {
+      'x-dune-api-key': DUNE_API_KEY,
+    },
   });
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<BalanceData>;
 }
 
-export async function fetchEvmTransactions(
-  walletAddress: string,
+export async function duneFetchTransactions(
+  address: Address,
   params: TransactionsParams,
-  duneApiKey: string | undefined,
-  proxyUrl: string | undefined
 ): Promise<TransactionData> {
-  const queryParams = getTransactionsQueryParams(params);
-  const apiUrl = `${proxyUrl || BASE_URL}/${TRANSACTIONS_PREFIX}/${walletAddress}?${queryParams.toString()}`;
+  if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
 
-  const response = await fetch(apiUrl, {
+  const queryParams = getTransactionsQueryParams(params);
+  const url = `${BASE_URL}/${TRANSACTIONS_PREFIX}/${address}?${queryParams.toString()}`;
+
+  const response = await fetch(url, {
     method: 'GET',
-    headers: getHeaders(duneApiKey),
+    headers: {
+      'x-dune-api-key': DUNE_API_KEY,
+    },
   });
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<TransactionData>;
 }

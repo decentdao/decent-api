@@ -1,19 +1,18 @@
 import { Hono } from 'hono';
 import { eq, and, isNull } from 'drizzle-orm';
 import { NewProposal, UpdateProposal, ProposalParams, Proposal } from 'decent-sdk';
+import { abis } from '@fractal-framework/fractal-contracts';
+import { decodeEventLog, getAbiItem, toFunctionSelector } from 'viem';
 import { db } from '@/db';
-import { DbProposal, schema } from '@/db/schema';
+import { DbNewProposal, DbProposal, schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bearerAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
-import { formatProposal } from '@/api/utils/typeConverter';
+import { formatOnchainProposal, formatProposal, OnchainProposal } from '@/api/utils/typeConverter';
 import { WebSocketConnections } from '../ws/connections';
 import { Topics } from '../ws/topics';
-import { getPublicClient } from "../utils/publicClient";
-import { decodeFunctionResult, getContract } from "viem";
-import { TokenBalancesParams } from '@duneanalytics/hooks';
-import { abis } from "@fractal-framework/fractal-contracts";
+import { duneFetchTransactions } from '@/lib/dune';
 
 const app = new Hono();
 
@@ -46,37 +45,46 @@ app.get('/', daoCheck, async c => {
  */
 app.get('/sync', daoCheck, async c => {
   const dao = c.get('dao');
-  const publicClient = getPublicClient(dao.chainId);
   const azoriusAddress = dao.governanceModules?.[0]?.address;
   if (!azoriusAddress) throw new ApiError('Azorius governance module not found', 404);
 
-  const proposalCount = await publicClient.readContract({
-    address: azoriusAddress,
-    abi: abis.Azorius,
-    functionName: 'totalProposalCount',
+  const submitProposalMethodId = toFunctionSelector(
+    getAbiItem({
+      abi: abis.Azorius,
+      name: 'submitProposal',
+    }),
+  );
+
+  const { transactions } = await duneFetchTransactions(azoriusAddress, {
+    chainIds: String(dao.chainId),
+    method_id: submitProposalMethodId,
+    decode: true,
   });
 
-  const calls = Array.from({ length: proposalCount }, (_, i) => ({
-    address: azoriusAddress,
-    abi: abis.Azorius,
-    functionName: 'getProposal' as const,
-    args: [i],
-  }));
+  const proposals: DbNewProposal[] = [];
+  transactions.forEach(t => {
+    if (!t.success) return;
+    const decodedProposalCreated = decodeEventLog({
+      abi: abis.Azorius,
+      data: t?.logs[1]?.data,
+      topics: [t?.logs[1]?.topics[0] ?? '0x'],
+    });
 
-  const multicall = await publicClient.multicall({
-    contracts: calls,
-    allowFailure: false,
+    const proposal = formatOnchainProposal(decodedProposalCreated.args as OnchainProposal);
+
+    if (!proposal) return;
+
+    proposals.push({
+      ...proposal,
+      daoChainId: dao.chainId,
+      daoAddress: dao.address,
+      proposedTxHash: t.hash,
+      createdAt: new Date(t.block_time),
+    });
   });
 
-  const proposals = multicall.map(p => ({
-    strategy: p[0],
-    txHashes: p[1],
-    timelockPeriod: p[2],
-    executionPeriod: p[3],
-    executionCounter: p[4],
-  }));
-
-  console.log(proposals);
+  if (proposals.length < 1) throw new ApiError('No proposals found', 404);
+  await db.insert(schema.proposalTable).values(proposals).onConflictDoNothing()
 
   return resf(c, 'ok');
 });
@@ -180,7 +188,7 @@ app.put('/:slug', daoCheck, bearerAuth, permissionsCheck, async c => {
       and(
         eq(schema.proposalTable.slug, slug),
         eq(schema.proposalTable.authorAddress, user.address), // only the author can update the proposal
-        isNull(schema.proposalTable.proposedTxnHash), // only proposals that have not been put onchain can be updated
+        isNull(schema.proposalTable.proposedTxHash), // only proposals that have not been put onchain can be updated
       ),
     )
     .returning();

@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { integer, json, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { integer, json, text, timestamp, index, unique } from 'drizzle-orm/pg-core';
 import { offchainSchema } from './offchain';
 import { hex } from '../hex';
 import { timestamps } from '../timestamps';
@@ -20,8 +20,9 @@ export const proposalTable = offchainSchema.table(
     metadataCID: text(),
     id: integer(), // number to concat with organization prefix (ex: DCT-1)
     safeNonce: integer(),
-    proposedTxnHash: hex(),
+    proposedTxHash: hex(),
     executedTxHash: hex(),
+    transactions: json(),
     votingStrategyAddress: hex(),
     voteStartsAt: timestamp(),
     voteEndsAt: timestamp(),
@@ -32,5 +33,9 @@ export const proposalTable = offchainSchema.table(
     voteChoices: json().$type<string[]>(),
     ...timestamps,
   },
-  t => [index().on(t.daoChainId, t.daoAddress), index().on(t.authorAddress)],
+  t => [
+    index().on(t.daoChainId, t.daoAddress),
+    index().on(t.authorAddress),
+    unique().on(t.daoChainId, t.daoAddress, t.id),
+  ],
 );
