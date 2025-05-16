@@ -14,10 +14,14 @@ const app = new Hono();
 /**
  * @title Get all DAOs
  * @route GET /d
+ * @param {string} [name] - Optional name query parameter
  * @returns {Dao[]} Array of DAO objects
  */
 app.get('/', async c => {
+  const nameQueryParam = c.req.query('name');
   const query = (await db.query.daoTable.findMany({
+    where: (dao, { ilike }) =>
+      nameQueryParam ? ilike(dao.name, `%${nameQueryParam}%`) : undefined,
     with: DEFAULT_DAO_WITH,
   })) as DbDao[];
   const daos = query.map(formatDao);
