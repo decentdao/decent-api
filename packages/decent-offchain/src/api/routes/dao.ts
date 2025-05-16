@@ -14,10 +14,14 @@ const app = new Hono();
 /**
  * @title Get all DAOs
  * @route GET /d
+ * @param {string} [name] - Optional name query parameter
  * @returns {Dao[]} Array of DAO objects
  */
 app.get('/', async c => {
+  const nameQueryParam = c.req.query('name');
   const query = (await db.query.daoTable.findMany({
+    where: (dao, { ilike }) =>
+      nameQueryParam ? ilike(dao.name, `%${nameQueryParam}%`) : undefined,
     with: DEFAULT_DAO_WITH,
   })) as DbDao[];
   const daos = query.map(formatDao);
@@ -28,20 +32,13 @@ app.get('/', async c => {
  * @title Get all DAOs for a specific chain
  * @route GET /d/{chainId}
  * @param {string} chainId - Chain ID parameter
- * @param {string} [name] - Optional name query parameter
  * @returns {Dao[]} Array of DAO objects
  */
 app.get('/:chainId', async c => {
   const { chainId } = c.req.param();
   const chainIdNumber = getChainId(chainId);
-  const nameQueryParam = c.req.query('name');
-
   const query = (await db.query.daoTable.findMany({
-    where: (dao, { and, eq, ilike }) =>
-      and(
-        eq(dao.chainId, chainIdNumber),
-        nameQueryParam ? ilike(dao.name, `%${nameQueryParam}%`) : undefined,
-      ),
+    where: (dao, { eq }) => eq(dao.chainId, chainIdNumber),
     with: DEFAULT_DAO_WITH,
   })) as DbDao[];
 
