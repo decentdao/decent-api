@@ -11,7 +11,8 @@ import { formatProposal } from '@/api/utils/typeConverter';
 import { WebSocketConnections } from '../ws/connections';
 import { Topics } from '../ws/topics';
 import { getPublicClient } from "../utils/publicClient";
-import { getContract } from "viem";
+import { decodeFunctionResult, getContract } from "viem";
+import { TokenBalancesParams } from '@duneanalytics/hooks';
 import { abis } from "@fractal-framework/fractal-contracts";
 
 const app = new Hono();
@@ -41,7 +42,7 @@ app.get('/', daoCheck, async c => {
  * @route POST /d/{chainId}/{address}/proposals/sync
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
- * @returns {void}
+ * @returns {string} 'ok'
  */
 app.get('/sync', daoCheck, async c => {
   const dao = c.get('dao');
@@ -55,40 +56,29 @@ app.get('/sync', daoCheck, async c => {
     functionName: 'totalProposalCount',
   });
 
-  // Get all proposal created events by fetching in chunks of 500 blocks
-  const proposalCreatedEvents = [];
-  const latestBlock = await publicClient.getBlockNumber();
-  let toBlock = latestBlock;
-  const CHUNK_SIZE = 400n;
-  let foundProposals = 0;
+  const calls = Array.from({ length: proposalCount }, (_, i) => ({
+    address: azoriusAddress,
+    abi: abis.Azorius,
+    functionName: 'getProposal' as const,
+    args: [i],
+  }));
 
-  while (foundProposals < Number(proposalCount)) {
-    const fromBlock = toBlock - CHUNK_SIZE > 0n ? toBlock - CHUNK_SIZE : 0n;
-    
-    try {
-      const events = await publicClient.getContractEvents({
-        address: azoriusAddress,
-        abi: abis.Azorius,
-        eventName: 'ProposalCreated',
-        fromBlock,
-        toBlock,
-      });
-      
-      proposalCreatedEvents.push(...events);
-      foundProposals = proposalCreatedEvents.length;
-    } catch (error) {
-      console.error(`Error fetching events from block ${fromBlock} to ${toBlock}:`, error);
-    }
-    
-    if (fromBlock === 0n) break; // We've reached the beginning of the chain
-    toBlock = fromBlock - 1n;
-  }
-
-  console.log(`Found ${proposalCreatedEvents.length} proposal events`);
-
-  return resf(c, {
-    message: 'Proposals synced',
+  const multicall = await publicClient.multicall({
+    contracts: calls,
+    allowFailure: false,
   });
+
+  const proposals = multicall.map(p => ({
+    strategy: p[0],
+    txHashes: p[1],
+    timelockPeriod: p[2],
+    executionPeriod: p[3],
+    executionCounter: p[4],
+  }));
+
+  console.log(proposals);
+
+  return resf(c, 'ok');
 });
 
 /**
