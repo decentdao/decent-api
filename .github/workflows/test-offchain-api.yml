@@ -49,7 +49,7 @@ jobs:
         run: bun run test/dao.data.ts
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-      - run: bun test
+      - run: bun run test
         env:
           PONDER_RPC_URL_8453: ${{ secrets.PONDER_RPC_URL_8453 }}
           TEST_PRIVATE_KEY_1: ${{ secrets.TEST_PRIVATE_KEY_1 }}
