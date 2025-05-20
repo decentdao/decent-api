@@ -7,17 +7,21 @@ export function parseProposalMetadata(
   try {
     return JSON.parse(metadata);
   } catch {
-    const titleMatch = metadata.match(/"title"\s*:\s*"([^"]+?)"/);
-    const title = titleMatch?.[1] ?? '';
+    try {
+      const titleMatch = metadata.match(/"title"\s*:\s*"([^"]+?)"/);
+      const title = titleMatch?.[1] ?? '';
 
-    let description = '';
-    const start = metadata.indexOf('"description":"');
-    if (start !== -1) {
-      const end = metadata.lastIndexOf('","documentationUrl"');
-      if (end !== -1) {
-        description = metadata.substring(start + 14, end);
+      let description = '';
+      const start = metadata.indexOf('"description":"');
+      if (start !== -1) {
+        const end = metadata.lastIndexOf('","documentationUrl"');
+        if (end !== -1) {
+          description = metadata.substring(start + 14, end);
+        }
       }
+      return { title, description };
+    } catch {
+      throw new Error('No metadata found, assuming not from Azorius.');
     }
-    return { title, description };
   }
 }
