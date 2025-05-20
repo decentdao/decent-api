@@ -8,6 +8,7 @@ import {
   primaryKey,
   relations,
   onchainEnum,
+  json,
 } from 'ponder';
 
 // ================================
@@ -75,6 +76,21 @@ export const hatIdToStreamId = onchainTable('hat_id_to_stream_id', {
   daoAddress: hex('dao_address').notNull(),
 }, (t) => ({ pk: primaryKey({ columns: [t.hatId, t.streamId] }) }));
 
+export const proposal = onchainTable('proposal', {
+  id: bigint('proposal_id').notNull(),
+  daoChainId: integer('dao_chain_id').notNull(),
+  daoAddress: hex('dao_address').notNull(),
+  proposer: hex('proposer').notNull(),
+  votingStrategyAddress: hex('voting_strategy_address').notNull(),
+  transactions: json('transactions'),
+  decodedTransactions: json('decoded_transactions'),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  createdAt: bigint('created_at').notNull(),
+  proposedTxHash: hex('proposed_tx_hash').notNull(),
+  executedTxHash: hex('executed_tx_hash'),
+}, (t) => ({ pk: primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] }) }));
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -82,6 +98,7 @@ export const daoRelations = relations(dao, ({ many }) => ({
   signers: many(signerToDao),
   governanceModules: many(governanceModule),
   hatIdToStreamIds: many(hatIdToStreamId),
+  proposals: many(proposal),
 }));
 
 export const governanceModuleRelations = relations(governanceModule, ({ one, many }) => ({
@@ -125,6 +142,13 @@ export const votingTokenRelations = relations(votingToken, ({ one }) => ({
 export const hatIdToStreamIdRelations = relations(hatIdToStreamId, ({ one }) => ({
   dao: one(dao, {
     fields: [hatIdToStreamId.daoChainId, hatIdToStreamId.daoAddress],
+    references: [dao.chainId, dao.address],
+  }),
+}));
+
+export const proposalRelations = relations(proposal, ({ one }) => ({
+  dao: one(dao, {
+    fields: [proposal.daoChainId, proposal.daoAddress],
     references: [dao.chainId, dao.address],
   }),
 }));

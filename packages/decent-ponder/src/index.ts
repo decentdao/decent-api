@@ -1,5 +1,6 @@
 import { isAddress } from 'viem';
 import { Context, ponder } from 'ponder:registry';
+import { replaceBigInts } from 'ponder';
 import { fetchGovernance } from './fetch';
 import {
   dao,
@@ -10,8 +11,11 @@ import {
   votingStrategy,
   votingToken,
   hatIdToStreamId,
-  HatIdToStreamIdInsert
+  HatIdToStreamIdInsert,
+  proposal
 } from 'ponder:schema';
+import { AzoriusAbi } from '../abis/Azorius';
+import { parseProposalMetadata } from './utils/parseMetadata';
 
 const handleGovernanceData = async (
   entry: DaoInsert,
@@ -148,4 +152,49 @@ ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) =>
   }
 
   await handleGovernanceData(entry, context, event.block.timestamp);
+});
+
+
+ponder.on('ZodiacModules:ProposalCreated', async ({ event, context }) => {
+  const { proposalId, proposer, transactions, metadata, strategy } = event.args;
+  if (!event.transaction.to) return;
+  const daoAddress = await context.client.readContract({
+    address: event.transaction.to,
+    abi: AzoriusAbi,
+    functionName: 'target',
+  });
+  const { title, description } = parseProposalMetadata(metadata);
+  await context.db.insert(proposal).values({
+    id: proposalId,
+    daoChainId: context.network.chainId,
+    daoAddress,
+    proposer,
+    votingStrategyAddress: strategy,
+    transactions: replaceBigInts(transactions, (x) => x.toString()),
+    title,
+    description,
+    createdAt: event.block.timestamp,
+    proposedTxHash: event.transaction.hash,
+  });
+});
+
+ponder.on('ZodiacModules:ProposalExecuted', async ({ event, context }) => {
+  try {
+    const { proposalId } = event.args;
+    if (!event.transaction.to) return;
+    const daoAddress = await context.client.readContract({
+      address: event.transaction.to,
+      abi: AzoriusAbi,
+      functionName: 'target'
+    });
+    await context.db.update(proposal, {
+      id: BigInt(proposalId),
+      daoAddress,
+      daoChainId: context.network.chainId,
+    }).set({
+      executedTxHash: event.transaction.hash,
+    });
+  } catch (error) {
+    console.log('not to Azorius module, skipping...');
+  }
 });
