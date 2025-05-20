@@ -1,7 +1,9 @@
-import { createConfig } from 'ponder';
-import { http } from 'viem';
+import { createConfig, factory } from 'ponder';
+import { getAbiItem, http } from 'viem';
 import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
 import { FractalRegistryAbi } from './abis/FractalRegistry';
+import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactory';
+import { AzoriusAbi } from './abis/Azorius';
 
 export default createConfig({
   networks: {
@@ -25,8 +27,25 @@ export default createConfig({
       chainId: 137,
       transport: http(process.env.PONDER_RPC_URL_137),
     },
+    sepolia: {
+      chainId: 11155111,
+      transport: http(process.env.PONDER_RPC_URL_11155111),
+    }
   },
   contracts: {
+    ZodiacModules: {
+      abi: AzoriusAbi,
+      network: {
+        sepolia: {
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+          startBlock: 8075473,
+        },
+      },
+    },
     KeyValuePairs: {
       abi: KeyValuePairsAbi,
       network: {

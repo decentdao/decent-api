@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "ponder dev --schema onchain",
+    "dev": "ponder dev --schema onchain --disable-ui",
     "start": "ponder start --schema onchain",
     "ponder:list": "ponder db list",
     "psql": "brew services restart postgresql@15",
