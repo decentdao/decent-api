@@ -1,7 +1,9 @@
-import { createConfig } from 'ponder';
-import { http } from 'viem';
+import { createConfig, factory } from 'ponder';
+import { getAbiItem, http } from 'viem';
 import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
 import { FractalRegistryAbi } from './abis/FractalRegistry';
+import { AzoriusAbi } from './abis/Azorius';
+import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactory';
 
 export default createConfig({
   networks: {
@@ -77,5 +79,51 @@ export default createConfig({
         },
       },
     },
+    ZodiacModules: {
+      abi: AzoriusAbi,
+      network: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    }
   },
 });
