@@ -15,7 +15,6 @@ import {
   proposal
 } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/Azorius';
-import { parseProposalMetadata } from './utils/parseMetadata';
 
 const handleGovernanceData = async (
   entry: DaoInsert,
@@ -164,7 +163,7 @@ ponder.on('ZodiacModules:ProposalCreated', async ({ event, context }) => {
       abi: AzoriusAbi,
       functionName: 'target',
     });
-    const { title, description } = parseProposalMetadata(metadata);
+    const { title, description } = JSON.parse(metadata);
     await context.db.insert(proposal).values({
       id: proposalId,
       daoChainId: context.network.chainId,
