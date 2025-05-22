@@ -22,15 +22,15 @@ const app = new Hono();
  */
 app.get('/', daoCheck, async c => {
   const dao = c.get('dao');
-  const proposals = await db.query.proposalTable.findMany({
+  const proposals = await db.query.onchainProposalTable.findMany({
     where: and(
-      eq(schema.proposalTable.daoChainId, dao.chainId),
-      eq(schema.proposalTable.daoAddress, dao.address),
+      eq(schema.onchainProposalTable.daoChainId, dao.chainId),
+      eq(schema.onchainProposalTable.daoAddress, dao.address),
     ),
   });
 
-  const ret: Proposal[] = proposals.map(formatProposal);
-  return resf(c, ret);
+  // const ret: Proposal[] = proposals.map(formatProposal);
+  return resf(c, proposals);
 });
 
 /**

@@ -1,4 +1,4 @@
-import { pgSchema, integer, text, boolean, bigint, primaryKey } from 'drizzle-orm/pg-core';
+import { pgSchema, integer, text, boolean, bigint, primaryKey, json } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { hex } from './hex';
 import { SupportedChainId } from 'decent-sdk';
@@ -79,6 +79,25 @@ export const hatIdToStreamIdTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.hatId, t.streamId] })],
 );
 
+export const onchainProposalTable = onchainSchema.table(
+  'proposal',
+  {
+    id: bigint('proposal_id', { mode: 'number' }).notNull(),
+    daoChainId: integer('dao_chain_id').notNull(),
+    daoAddress: hex('dao_address').notNull(),
+    proposer: hex('proposer').notNull(),
+    votingStrategyAddress: hex('voting_strategy_address').notNull(),
+    transactions: json('transactions'),
+    decodedTransactions: json('decoded_transactions'),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    createdAt: bigint('created_at', { mode: 'number' }).notNull(),
+    proposedTxHash: hex('proposed_tx_hash').notNull(),
+    executedTxHash: hex('executed_tx_hash'),
+  },
+  t => [primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -86,6 +105,7 @@ export const daoTableRelations = relations(daoTable, ({ many }) => ({
   signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
   hatIdToStreamIds: many(hatIdToStreamIdTable),
+  // proposals: many(onchainProposalTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
@@ -129,6 +149,13 @@ export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) =
 export const hatIdToStreamIdTableRelations = relations(hatIdToStreamIdTable, ({ one }) => ({
   dao: one(daoTable, {
     fields: [hatIdToStreamIdTable.daoChainId, hatIdToStreamIdTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+}));
+
+export const onchainProposalTableRelations = relations(onchainProposalTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [onchainProposalTable.daoChainId, onchainProposalTable.daoAddress],
     references: [daoTable.chainId, daoTable.address],
   }),
 }));

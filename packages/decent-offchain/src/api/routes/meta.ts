@@ -3,7 +3,7 @@ import { Health, Meta, SupportedChainId } from 'decent-sdk';
 import { count } from 'drizzle-orm';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { db } from '@/db';
-import { daoTable } from '@/db/schema/onchain';
+import { daoTable, onchainProposalTable } from '@/db/schema/onchain';
 
 const app = new Hono();
 
@@ -48,13 +48,18 @@ app.get('/chains', async c => {
  * @returns Platform stats
  */
 app.get('/stats', async c => {
-  const query = {
-    daos: await db.select({ count: count() }).from(daoTable),
-  };
+  const [daoCountResult, proposalCountResult] = await Promise.all([
+    db.select({ count: count() }).from(daoTable),
+    db.select({ count: count() }).from(onchainProposalTable),
+  ]);
 
-  if (!query.daos.length || !query.daos[0]) throw new ApiError('Failed to get daos', 500);
-  const daoCount = query.daos.length ? query.daos[0].count : 0;
+  if (!daoCountResult.length || !daoCountResult[0]) throw new ApiError('Failed to get daos', 500);
+  if (!proposalCountResult.length || !proposalCountResult[0])
+    throw new ApiError('Failed to get proposals', 500);
 
-  return resf(c, { daoCount });
+  const daoCount = daoCountResult[0].count;
+  const proposalCount = proposalCountResult[0].count;
+
+  return resf(c, { daoCount, proposalCount });
 });
 export default app;
