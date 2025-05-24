@@ -19,6 +19,7 @@ export default function formatResponse<T>(
 ): Response {
   if (d instanceof ApiError || d instanceof Error) {
     const status = (d as ApiError).status || 500;
+    console.error(d);
     const response: ApiResponse<T> = {
       success: false,
       error: {
