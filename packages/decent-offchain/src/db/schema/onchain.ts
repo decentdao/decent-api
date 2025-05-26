@@ -9,7 +9,7 @@ export type Transaction = {
   value: bigint;
   data: string;
   operation: number;
-}
+};
 
 // ================================
 // ========= Tables ===============

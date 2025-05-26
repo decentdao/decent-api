@@ -75,18 +75,25 @@ app.get('/:id/decode', daoCheck, async c => {
       eq(schema.onchainProposalTable.daoChainId, dao.chainId),
       eq(schema.onchainProposalTable.daoAddress, dao.address),
     ),
-  })
+  });
 
   if (!proposal) {
     throw new ApiError('Proposal not found or already decoded', 404);
   }
 
-  const decoded = await Promise.all(proposal.transactions?.map(tx => decodeTxData(tx, dao.chainId)) || []);
-  const stringifiedDecoded = JSON.stringify(decoded, (_, value) => typeof value === 'bigint' ? value.toString() : value);
+  const decoded = await Promise.all(
+    proposal.transactions?.map(tx => decodeTxData(tx, dao.chainId)) || [],
+  );
+  const stringifiedDecoded = JSON.stringify(decoded, (_, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  );
 
-  await db.update(schema.onchainProposalTable).set({
-    decodedTransactions: stringifiedDecoded,
-  }).where(eq(schema.onchainProposalTable.id, proposal.id));
+  await db
+    .update(schema.onchainProposalTable)
+    .set({
+      decodedTransactions: stringifiedDecoded,
+    })
+    .where(eq(schema.onchainProposalTable.id, proposal.id));
 
   return resf(c, 'ok');
 });

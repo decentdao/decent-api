@@ -15,13 +15,13 @@ type EtherscanContractSource = {
   Proxy: string;
   Implementation: string;
   SwarmSource: string;
-}
+};
 
 type EtherscanResponse<T> = {
   status: string;
   message: string;
   result: T;
-}
+};
 
 const getProxyAbi = async (address: Address, chainId: number) => {
   const params = new URLSearchParams({
@@ -37,7 +37,7 @@ const getProxyAbi = async (address: Address, chainId: number) => {
   if (!json.result) throw new Error('No contract source found');
   const abi = JSON.parse(json.result);
   return abi as Abi;
-}
+};
 
 async function getAbi(address: Address, chainId: number) {
   const params = new URLSearchParams({
