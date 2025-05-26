@@ -1,7 +1,15 @@
 import { pgSchema, integer, text, boolean, bigint, primaryKey, json } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { hex } from './hex';
+import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
+import { hex } from './hex';
+
+export type Transaction = {
+  to: Address;
+  value: bigint;
+  data: string;
+  operation: number;
+}
 
 // ================================
 // ========= Tables ===============
@@ -87,7 +95,7 @@ export const onchainProposalTable = onchainSchema.table(
     daoAddress: hex('dao_address').notNull(),
     proposer: hex('proposer').notNull(),
     votingStrategyAddress: hex('voting_strategy_address').notNull(),
-    transactions: json('transactions'),
+    transactions: json('transactions').$type<Transaction[]>(),
     decodedTransactions: json('decoded_transactions'),
     title: text('title').notNull(),
     description: text('description').notNull(),
@@ -178,3 +186,4 @@ export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
+export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect;
