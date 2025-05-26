@@ -54,3 +54,5 @@ app.get('/:id', daoCheck, async c => {
   const ret = formatProposal(proposal);
   return resf(c, ret);
 });
+
+export default app;
