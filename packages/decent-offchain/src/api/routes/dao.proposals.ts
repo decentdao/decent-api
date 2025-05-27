@@ -77,9 +77,7 @@ app.get('/:id/decode', daoCheck, async c => {
     ),
   });
 
-  if (!proposal) {
-    throw new ApiError('Proposal not found or already decoded', 404);
-  }
+  if (!proposal) throw new ApiError('Proposal not found', 404);
 
   const decoded = await Promise.all(
     proposal.transactions?.map(tx => decodeTxData(tx, dao.chainId)) || [],
@@ -93,7 +91,13 @@ app.get('/:id/decode', daoCheck, async c => {
     .set({
       decodedTransactions: stringifiedDecoded,
     })
-    .where(eq(schema.onchainProposalTable.id, proposal.id));
+    .where(
+      and(
+        eq(schema.onchainProposalTable.id, proposal.id),
+        eq(schema.onchainProposalTable.daoChainId, dao.chainId),
+        eq(schema.onchainProposalTable.daoAddress, dao.address),
+      ),
+    );
 
   return resf(c, 'ok');
 });
