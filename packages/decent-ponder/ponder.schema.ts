@@ -24,6 +24,7 @@ export const dao = onchainTable('dao', {
     topHatId:               text(),
     gasTankEnabled:         boolean(),
     gasTankAddress:         hex(),
+    creatorAddress:         hex(),
     requiredSignatures:     integer(),
     guardAddress:           hex(),
     fractalModuleAddress:   hex(),

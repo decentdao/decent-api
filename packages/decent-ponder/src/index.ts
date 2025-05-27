@@ -77,6 +77,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
 
   if (key === 'daoName') {
     entry.name = value;
+    entry.creatorAddress = event.transaction.from;
 
   } else if (key === 'proposalTemplates') {
     entry.proposalTemplatesCID = value;
@@ -137,6 +138,7 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
     chainId: context.network.chainId,
     address: daoAddress,
     name: daoName,
+    creatorAddress: event.transaction.from,
   }
 
   await handleGovernanceData(entry, context, event.block.timestamp);
