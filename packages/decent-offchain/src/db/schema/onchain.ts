@@ -113,7 +113,6 @@ export const daoTableRelations = relations(daoTable, ({ many }) => ({
   signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
   hatIdToStreamIds: many(hatIdToStreamIdTable),
-  // proposals: many(onchainProposalTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
