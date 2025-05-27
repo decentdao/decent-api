@@ -1,7 +1,15 @@
-import { pgSchema, integer, text, boolean, bigint, primaryKey } from 'drizzle-orm/pg-core';
+import { pgSchema, integer, text, boolean, bigint, primaryKey, json } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { hex } from './hex';
+import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
+import { hex } from './hex';
+
+export type Transaction = {
+  to: Address;
+  value: bigint;
+  data: string;
+  operation: number;
+}
 
 // ================================
 // ========= Tables ===============
@@ -79,6 +87,25 @@ export const hatIdToStreamIdTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.hatId, t.streamId] })],
 );
 
+export const onchainProposalTable = onchainSchema.table(
+  'proposal',
+  {
+    id: bigint('proposal_id', { mode: 'number' }).notNull(),
+    daoChainId: integer('dao_chain_id').notNull(),
+    daoAddress: hex('dao_address').notNull(),
+    proposer: hex('proposer').notNull(),
+    votingStrategyAddress: hex('voting_strategy_address').notNull(),
+    transactions: json('transactions').$type<Transaction[]>(),
+    decodedTransactions: json('decoded_transactions'),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    createdAt: bigint('created_at', { mode: 'number' }).notNull(),
+    proposedTxHash: hex('proposed_tx_hash').notNull(),
+    executedTxHash: hex('executed_tx_hash'),
+  },
+  t => [primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -133,6 +160,13 @@ export const hatIdToStreamIdTableRelations = relations(hatIdToStreamIdTable, ({ 
   }),
 }));
 
+export const onchainProposalTableRelations = relations(onchainProposalTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [onchainProposalTable.daoChainId, onchainProposalTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -151,3 +185,4 @@ export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
+export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect;
