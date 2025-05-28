@@ -8,6 +8,8 @@ import { DbDao } from '@/db/schema/onchain';
 import { formatDao } from '@/api/utils/typeConverter';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
+import { getExecutedSafeTransactions } from '@/lib/safe';
+import { DbNewSafeProposal, schema } from '@/db/schema';
 
 const app = new Hono();
 
@@ -57,6 +59,33 @@ app.get('/:chainId', async c => {
 app.get('/:chainId/:address', daoCheck, async c => {
   const dao = c.get('dao');
   return resf(c, dao);
+});
+
+/**
+ * @title Get all Safe proposals for a DAO
+ * @route GET /d/{chainId}/{address}/safe-proposals
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @returns {SafeProposal[]} Array of Safe proposal objects
+ */
+app.get('/:chainId/:address/safe-proposals', daoCheck, async c => {
+  const dao = c.get('dao');
+  if (dao.governanceModules?.length !== 0) throw new ApiError('DAO is not a Safe DAO', 400);
+
+  const transactions = await getExecutedSafeTransactions(dao.chainId, dao.address);
+  const proposals: DbNewSafeProposal[] = [];
+  transactions.results.forEach(t => {
+    const proposer = (t.proposer || t.confirmations?.[0]?.owner) as `0x${string}`;
+    proposals.push({
+      daoChainId: dao.chainId,
+      daoAddress: dao.address,
+      proposer,
+      safeNonce: t.nonce,
+      transactions: t.dataDecoded,
+    });
+  });
+  await db.insert(schema.safeProposalTable).values(proposals);
+  return resf(c, 'ok');
 });
 
 /**
