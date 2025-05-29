@@ -13,9 +13,9 @@ export async function sync() {
     if (!dao) continue;
     const daoStartTime = Date.now();
     console.log(`[${i + 1}/${daos.length}] Syncing ${dao.address} on ${dao.chainId}`);
-    const res = (await fetch(`${API}/d/${dao.chainId}/${dao.address}/safe-proposals`).then(r =>
-      r.json(),
-    )) as ApiResponse<Dao[]>;
+    const res = (await fetch(`${API}/d/${dao.chainId}/${dao.address}/safe-proposals`, {
+      method: 'POST',
+    }).then(r => r.json())) as ApiResponse<Dao[]>;
     if (res.error) {
       console.error(res.error.message);
       continue;

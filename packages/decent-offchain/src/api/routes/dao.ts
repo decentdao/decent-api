@@ -70,7 +70,7 @@ app.get('/:chainId/:address', daoCheck, async c => {
  * @param {string} address - Address parameter
  * @returns {SafeProposal[]} Array of Safe proposal objects
  */
-app.get('/:chainId/:address/safe-proposals', daoCheck, async c => {
+app.post('/:chainId/:address/safe-proposals', daoCheck, async c => {
   const dao = c.get('dao');
   if (dao.governanceModules?.length !== 0) throw new ApiError('DAO is not a Safe DAO', 400);
   const latestProposal = await db.query.safeProposalTable.findFirst({
