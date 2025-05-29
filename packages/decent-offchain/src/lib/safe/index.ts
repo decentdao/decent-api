@@ -1,6 +1,8 @@
 import { SupportedChainId } from 'decent-sdk';
-import { getAddress } from 'viem';
+import { getAddress, decodeAbiParameters, parseAbiParameters } from 'viem';
 import { ListResponse, SafeMultisigTransactionResponse } from './types';
+
+const ADDRESS_MULTISIG_METADATA = '0xdA00000000000000000000000000000000000Da0';
 
 const API_URL = (chainId: SupportedChainId) => {
   let chain = 'mainnet';
@@ -18,10 +20,36 @@ const API_URL = (chainId: SupportedChainId) => {
   return `https://safe-transaction-${chain}.safe.global/api/v2`;
 };
 
-export const getExecutedSafeTransactions = async (chainId: SupportedChainId, _address: string) => {
+export const getExecutedSafeTransactions = async (
+  chainId: SupportedChainId,
+  _address: string,
+  since?: Date,
+) => {
   const url = API_URL(chainId);
   const address = getAddress(_address);
-  const response = await fetch(`${url}/safes/${address}/multisig-transactions`);
+  const params = new URLSearchParams();
+  if (since) {
+    params.set('submission_date__gte', since.toISOString());
+  }
+  const response = await fetch(
+    `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
+  );
   const data = await response.json();
   return data as ListResponse<SafeMultisigTransactionResponse>;
+};
+
+export const getCIDFromSafeTransaction = (tx: SafeMultisigTransactionResponse): string | null => {
+  let cid: string | null = null;
+  if (tx.dataDecoded?.method === 'multiSend') {
+    tx.dataDecoded?.parameters.find(p => {
+      p.valueDecoded?.find(v => {
+        if (v.to === ADDRESS_MULTISIG_METADATA) {
+          const data = v.data as `0x${string}`;
+          [cid] = decodeAbiParameters(parseAbiParameters('string'), data);
+          return true;
+        }
+      });
+    });
+  }
+  return cid;
 };
