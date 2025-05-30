@@ -80,9 +80,7 @@ app.get('/disperses', async c => {
 
   const hasSafeDisperseProposal = safeProposals.filter(proposal =>
     proposal?.transactions?.parameters?.find(parameter =>
-      parameter.valueDecoded?.find(value =>
-        checkDataForFunction(value.data, 'disperseToken'),
-      ),
+      parameter.valueDecoded?.find(value => checkDataForFunction(value.data, 'disperseToken')),
     ),
   ).length;
 
