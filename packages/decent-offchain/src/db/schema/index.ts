@@ -5,6 +5,7 @@ import { sessionTable } from './offchain/sessions';
 import { temperatureCheckTable } from './offchain/temperatureChecks';
 import { commentTable } from './offchain/comments';
 import { safeProposalTable } from './offchain/safeProposals';
+import { contractTable } from './offchain/contracts';
 
 const proposalRelations = relations(proposalTable, ({ one }) => ({
   dao: one(onchainSchema.daoTable, {
@@ -29,6 +30,7 @@ const temperatureCheckRelations = relations(temperatureCheckTable, ({ one }) => 
 
 export const schema = {
   ...onchainSchema,
+  contractTable,
   safeProposalTable,
   proposalTable,
   commentTable,
@@ -46,3 +48,5 @@ export type DbComment = typeof commentTable.$inferSelect;
 export type DbNewComment = typeof commentTable.$inferInsert;
 export type DbTemperatureCheck = typeof temperatureCheckTable.$inferSelect;
 export type DbNewTemperatureCheck = typeof temperatureCheckTable.$inferInsert;
+export type DbContract = typeof contractTable.$inferSelect;
+export type DbNewContract = typeof contractTable.$inferInsert;
