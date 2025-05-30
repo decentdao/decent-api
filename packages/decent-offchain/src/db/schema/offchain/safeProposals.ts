@@ -1,6 +1,7 @@
 import { integer, text, primaryKey, json, timestamp } from 'drizzle-orm/pg-core';
 import { offchainSchema } from './offchain';
 import { hex } from '../hex';
+import { DataDecoded } from '@/lib/safe/types';
 
 export const safeProposalTable = offchainSchema.table(
   'safe_proposals',
@@ -12,7 +13,7 @@ export const safeProposalTable = offchainSchema.table(
     description: text('description'),
     proposer: hex('proposer').notNull(),
     metadataCID: text('metadata_cid'),
-    transactions: json('transactions'),
+    transactions: json('transactions').$type<DataDecoded>(),
     safeTxHash: hex('safe_tx_hash'),
     executedTxHash: hex('executed_tx_hash'),
     submissionDate: timestamp('submission_date').notNull(),
