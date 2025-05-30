@@ -11,6 +11,7 @@ import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
+import points from '@/api/routes/points';
 
 const app = new Hono();
 const { websocket } = createBunWebSocket();
@@ -21,7 +22,13 @@ app.use(
   '*',
   cors({
     origin: origin => {
-      const allowedOrigins = ['http://localhost:3000', 'https://app.decentdao.org'];
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://app.decentdao.org',
+        'https://galxe.com',
+        'https://app.galxe.com',
+        'https://dashboard.galxe.com',
+      ];
       if (allowedOrigins.includes(origin)) {
         return origin;
       }
@@ -43,6 +50,7 @@ app.route('/', meta);
 app.route('/ws', socket);
 app.route('/docs', docs);
 app.route('/auth', auth);
+app.route('/points', points);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
