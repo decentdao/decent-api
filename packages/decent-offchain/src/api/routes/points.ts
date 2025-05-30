@@ -122,17 +122,19 @@ app.get('/roles', async c => {
   const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
 
   const hasOnchainRoleProposal = onchainProposals.filter(proposal =>
-    proposal.transactions?.find(transaction =>
-      checkDataForFunction(transaction.data, 'createRoleHats') ||
-      checkDataForFunction(transaction.data, 'createAndDeclareTree')
+    proposal.transactions?.find(
+      transaction =>
+        checkDataForFunction(transaction.data, 'createRoleHats') ||
+        checkDataForFunction(transaction.data, 'createAndDeclareTree'),
     ),
   ).length;
 
   const hasSafeRoleProposal = safeProposals.filter(proposal =>
     proposal?.transactions?.parameters?.find(parameter =>
-      parameter.valueDecoded?.find(value =>
-        checkDataForFunction(value.data, 'createRoleHats') ||
-        checkDataForFunction(value.data, 'createAndDeclareTree')
+      parameter.valueDecoded?.find(
+        value =>
+          checkDataForFunction(value.data, 'createRoleHats') ||
+          checkDataForFunction(value.data, 'createAndDeclareTree'),
       ),
     ),
   ).length;
