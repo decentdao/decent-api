@@ -1,20 +1,34 @@
 import { Context, Hono } from 'hono';
 import { sql } from 'drizzle-orm';
-import { Address, isAddress, toFunctionSelector } from 'viem';
+import { Address, getAbiItem, isAddress, toFunctionSelector } from 'viem';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { abis } from '@fractal-framework/fractal-contracts';
 
 const app = new Hono();
 
 // simple function selectors for now
 const functionSelectors = {
   disperseToken: toFunctionSelector('disperseToken(address,address[],uint256[])'),
+  createRoleHats: toFunctionSelector(
+    getAbiItem({
+      abi: abis.DecentHatsModificationModule,
+      name: 'createRoleHats',
+    }),
+  ),
+  createAndDeclareTree: toFunctionSelector(
+    getAbiItem({
+      abi: abis.DecentHatsCreationModule,
+      name: 'createAndDeclareTree',
+    }),
+  ),
 };
 
 type FunctionSelector = keyof typeof functionSelectors;
 
 const checkDataForFunction = (data: string, selector: FunctionSelector) => {
+  if (!data) return false;
   const functionSelector = functionSelectors[selector];
   return data.startsWith(functionSelector);
 };
@@ -54,7 +68,7 @@ const checkAddress = async (c: Context) => {
 };
 
 /**
- * @title Get the number of proposals that an address has submitted
+ * @title Get the number of proposals that an address has submitted, optionally filtered by passed status
  * @route GET /points/proposals
  * @param {string} address - Address parameter
  * @param {boolean} passed - Whether to filter for passed proposals
@@ -68,6 +82,13 @@ app.get('/proposals', async c => {
   return resf(c, { address, proposalCount });
 });
 
+/**
+ * @title Get the number of passing disperse proposals that an address has submitted
+ * @route GET /points/disperses
+ * @param {string} address - Address parameter
+ * @param {boolean} passed - Whether to filter for passed proposals
+ * @returns {address, disperseCount} - The address and the number of disperse proposals that the address has submitted
+ */
 app.get('/disperses', async c => {
   const address = await checkAddress(c);
   const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
@@ -87,6 +108,37 @@ app.get('/disperses', async c => {
   const disperseCount = hasOnchainDisperseProposal + hasSafeDisperseProposal;
 
   return resf(c, { address, disperseCount });
+});
+
+/**
+ * @title Get the number of passing role proposals that an address has submitted
+ * @route GET /points/roles
+ * @param {string} address - Address parameter
+ * @param {boolean} passed - Whether to filter for passed proposals
+ * @returns {address, roleCount} - The address and the number of role proposals that the address has submitted
+ */
+app.get('/roles', async c => {
+  const address = await checkAddress(c);
+  const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
+
+  const hasOnchainRoleProposal = onchainProposals.filter(proposal =>
+    proposal.transactions?.find(transaction =>
+      checkDataForFunction(transaction.data, 'createRoleHats') ||
+      checkDataForFunction(transaction.data, 'createAndDeclareTree')
+    ),
+  ).length;
+
+  const hasSafeRoleProposal = safeProposals.filter(proposal =>
+    proposal?.transactions?.parameters?.find(parameter =>
+      parameter.valueDecoded?.find(value =>
+        checkDataForFunction(value.data, 'createRoleHats') ||
+        checkDataForFunction(value.data, 'createAndDeclareTree')
+      ),
+    ),
+  ).length;
+
+  const roleCount = hasOnchainRoleProposal + hasSafeRoleProposal;
+  return resf(c, { address, roleCount });
 });
 
 export default app;
