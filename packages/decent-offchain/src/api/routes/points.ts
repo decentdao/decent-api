@@ -8,8 +8,12 @@ import { abis } from '@fractal-framework/fractal-contracts';
 
 const app = new Hono();
 
+// ================================
+// ====== HELPER FUNCTIONS ========
+// ================================
 // simple function selectors for now
 const functionSelectors = {
+  transfer: toFunctionSelector('transfer(address,uint256)'),
   disperseToken: toFunctionSelector('disperseToken(address,address[],uint256[])'),
   createRoleHats: toFunctionSelector(
     getAbiItem({
@@ -66,6 +70,8 @@ const checkAddress = async (c: Context) => {
   const address = _address.toLowerCase() as Address;
   return address;
 };
+// ================================
+// ================================
 
 /**
  * @title Get the number of proposals that an address has submitted, optionally filtered by passed status
@@ -83,10 +89,34 @@ app.get('/proposals', async c => {
 });
 
 /**
+ * @title Get the number of passing transfer proposals that an address has submitted
+ * @route GET /points/transfers
+ * @param {string} address - Address parameter
+ * @returns {address, transferCount} - The address and the number of transfer proposals that the address has submitted
+ */
+app.get('/transfers', async c => {
+  const address = await checkAddress(c);
+  const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
+
+  const hasOnchainTransferProposal = onchainProposals.filter(proposal =>
+    proposal.transactions?.find(transaction => checkDataForFunction(transaction.data, 'transfer')),
+  ).length;
+
+  const hasSafeTransferProposal = safeProposals.filter(proposal =>
+    proposal?.transactions?.parameters?.find(parameter =>
+      parameter.valueDecoded?.find(value => checkDataForFunction(value.data, 'transfer')),
+    ),
+  ).length;
+
+  const transferCount = hasOnchainTransferProposal + hasSafeTransferProposal;
+
+  return resf(c, { address, transferCount });
+});
+
+/**
  * @title Get the number of passing disperse proposals that an address has submitted
  * @route GET /points/disperses
  * @param {string} address - Address parameter
- * @param {boolean} passed - Whether to filter for passed proposals
  * @returns {address, disperseCount} - The address and the number of disperse proposals that the address has submitted
  */
 app.get('/disperses', async c => {
