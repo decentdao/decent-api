@@ -28,6 +28,7 @@ export const dao = onchainTable('dao', {
     requiredSignatures:     integer(),
     guardAddress:           hex(),
     fractalModuleAddress:   hex(),
+    erc20Address:           hex(),
     createdAt:              bigint('created_at'),
     updatedAt:              bigint('updated_at'),
   },
