@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import { Address } from 'viem';
+import { Address, isAddress } from 'viem';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import {
   daoTable,
   votingTokenTable,
@@ -27,41 +27,41 @@ const app = new Hono();
 app.get('/:chainId/:tokenAddress', async c => {
   const { chainId, tokenAddress } = c.req.param();
   const tokenQuery = tokenAddress?.toLowerCase() as Address;
+  if (!isAddress(tokenQuery)) throw new ApiError('Invalid token address', 400);
   const chainIdNumber = getChainId(chainId);
-  if (!tokenQuery) {
-    return resf(c, new ApiError('Token address is required', 400));
-  }
 
-  const daoIds = await db
+  const daos = await db
     .selectDistinct({
       name: daoTable.name,
       address: daoTable.address,
-      tokenType: votingTokenTable.type,
     })
     .from(daoTable)
-    .innerJoin(
+    .leftJoin(
       governanceModuleTable,
       and(
         eq(governanceModuleTable.daoChainId, daoTable.chainId),
         eq(governanceModuleTable.daoAddress, daoTable.address)
       )
     )
-    .innerJoin(
+    .leftJoin(
       votingStrategyTable,
       eq(votingStrategyTable.governanceModuleId, governanceModuleTable.address)
     )
-    .innerJoin(
+    .leftJoin(
       votingTokenTable,
       eq(votingTokenTable.votingStrategyId, votingStrategyTable.address)
     )
     .where(
       and(
         eq(daoTable.chainId, chainIdNumber),
-        eq(votingTokenTable.address, tokenQuery)
+        or(
+          eq(daoTable.erc20Address, tokenQuery),
+          eq(votingTokenTable.address, tokenQuery)
+        )
       )
     );
 
-  return resf(c, daoIds);
+  return resf(c, daos);
 });
 
 export default app;
