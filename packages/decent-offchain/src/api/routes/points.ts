@@ -27,6 +27,9 @@ const functionSelectors = {
       name: 'createAndDeclareTree',
     }),
   ),
+  createWithDurationsLT: toFunctionSelector(
+    'createWithDurationsLT(address,address,(address,address,uint128,bool,bool,(uint128,uint40)[],(address,uint256))[])',
+  ),
 };
 
 type FunctionSelector = keyof typeof functionSelectors;
@@ -171,6 +174,31 @@ app.get('/roles', async c => {
 
   const roleCount = hasOnchainRoleProposal + hasSafeRoleProposal;
   return resf(c, { address, roleCount });
+});
+
+/**
+ * @title Get the number of passing stream proposals that an address has submitted
+ * @route GET /points/streams
+ * @param {string} address - Address parameter
+ * @returns {address, streamCount} - The address and the number of stream proposals that the address has submitted
+ */
+app.get('/streams', async c => {
+  const address = await checkAddress(c);
+  const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
+
+  const hasOnchainStreamProposal = onchainProposals.filter(proposal =>
+    proposal.transactions?.find(transaction => checkDataForFunction(transaction.data, 'createWithDurationsLT')),
+  ).length;
+
+  const hasSafeStreamProposal = safeProposals.filter(proposal =>
+    proposal?.transactions?.parameters?.find(parameter =>
+      parameter.valueDecoded?.find(value => checkDataForFunction(value.data, 'createWithDurationsLT')),
+    ),
+  ).length;
+
+  const streamCount = hasOnchainStreamProposal + hasSafeStreamProposal;
+
+  return resf(c, { address, streamCount });
 });
 
 export default app;
