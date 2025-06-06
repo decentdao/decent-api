@@ -99,7 +99,7 @@ app.get('/:id/decode', daoCheck, async c => {
       ),
     );
 
-  return resf(c, 'ok');
+  return resf(c, stringifiedDecoded);
 });
 
 export default app;
