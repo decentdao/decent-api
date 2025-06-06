@@ -5,7 +5,7 @@ import { schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { formatProposal } from '@/api/utils/typeConverter';
-import { decodeTxData } from '@/api/utils/decodeTxData';
+import { formatTx } from '@/api/utils/decodeTxData';
 
 const app = new Hono();
 
@@ -80,12 +80,13 @@ app.get('/:id/decode', daoCheck, async c => {
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
   const decoded = await Promise.all(
-    proposal.transactions?.map(tx => decodeTxData(tx, dao.chainId)) || [],
+    proposal.transactions?.map(tx => formatTx(tx, dao.chainId)) || [],
   );
   const stringifiedDecoded = JSON.stringify(decoded, (_, value) =>
     typeof value === 'bigint' ? value.toString() : value,
   );
 
+  console.log(`Decoded transactions for proposal ${proposal.id}:`, stringifiedDecoded);
   await db
     .update(schema.onchainProposalTable)
     .set({
@@ -99,7 +100,7 @@ app.get('/:id/decode', daoCheck, async c => {
       ),
     );
 
-  return resf(c, stringifiedDecoded);
+  return resf(c, decoded);
 });
 
 export default app;
