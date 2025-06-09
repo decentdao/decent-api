@@ -11,6 +11,7 @@ import auth from '@/api/routes/auth';
 import dao from '@/api/routes/dao';
 import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
+// import decode from '@/api/routes/decode';
 
 const app = new Hono();
 const { websocket } = createBunWebSocket();
@@ -46,6 +47,7 @@ app.route('/auth', auth);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
+// app.route('/d/:chainId/:address/decode/:txs', decode);
 
 export default {
   ...app,

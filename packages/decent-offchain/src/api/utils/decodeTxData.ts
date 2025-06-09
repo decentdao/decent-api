@@ -1,27 +1,20 @@
 import {
   Abi,
-  AbiDecodingDataSizeTooSmallError,
-  AbiDecodingZeroDataError,
   AbiFunctionSignatureNotFoundError,
   AbiParameter,
   Address,
   ByteArray,
-  bytesToHex,
   decodeAbiParameters,
-  DecodeAbiParametersReturnType,
-  decodeFunctionData,
   DecodeFunctionDataParameters,
   Hex,
-  hexToBytes,
-  size,
   slice,
   toFunctionSelector,
 } from 'viem';
 import { Transaction } from '@/db/schema/onchain';
 import { Optional } from 'decent-sdk';
 import { formatAbiItem } from 'viem/utils';
-import { createCursor, Cursor } from 'node_modules/viem/_types/utils/cursor';
-import { getArrayComponents } from 'node_modules/viem/_types/utils/abi/encodeAbiParameters';
+import detectProxyTarget from 'evm-proxy-detection';
+import { EIP1193ProviderRequestFunc } from 'node_modules/evm-proxy-detection/build/cjs/types';
 
 type EtherscanContractSource = {
   SourceCode: string;
@@ -99,6 +92,7 @@ export async function decodeTxData(transaction: Transaction, chainId: number) {
 
 export type DecodedTransaction = {
   to: Address;
+  masterAddress?: Address;
   value?: Optional<bigint>;
   callData?: Optional<CallFunction>;
 };
@@ -166,9 +160,60 @@ export async function formatTx(
     };
   } else {
     const decoded = await decodeTxData(transaction, chainId);
+    const eip1193ProviderRequestFunc = getEip1193ProviderRequestFunc(chainId);
+    const masterAddress = await detectProxyTarget(transaction.to, eip1193ProviderRequestFunc);
     return {
       to: transaction.to,
+      masterAddress: masterAddress?.target as Address,
       callData: decoded,
     };
   }
+}
+export function getRpcUrl(chainId: number): string | undefined {
+  switch (chainId) {
+    case 1:
+      return process.env.PONDER_RPC_URL_1;
+    case 10:
+      return process.env.PONDER_RPC_URL_10;
+    case 137:
+      return process.env.PONDER_RPC_URL_137;
+    case 8453:
+      return process.env.PONDER_RPC_URL_8453;
+    case 11155111:
+      return process.env.PONDER_RPC_URL_11155111;
+    default:
+      return undefined;
+  }
+}
+
+const providerRequestFuncCache = new Map<number, EIP1193ProviderRequestFunc>();
+
+export function getEip1193ProviderRequestFunc(chainId: number): EIP1193ProviderRequestFunc {
+  if (providerRequestFuncCache.has(chainId)) {
+    return providerRequestFuncCache.get(chainId)!;
+  }
+
+  const rpcUrl = getRpcUrl(chainId);
+  if (!rpcUrl) throw new Error(`No RPC URL configured for chainId ${chainId}`);
+
+  const providerFunc: EIP1193ProviderRequestFunc = async ({ method, params }) => {
+    const response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params: params || [],
+      }),
+    });
+    const json = (await response.json()) as { result?: unknown; error?: { message: string } };
+    if (json && typeof json === 'object' && 'error' in json && json.error) {
+      throw new Error(json.error.message);
+    }
+    return json.result;
+  };
+
+  providerRequestFuncCache.set(chainId, providerFunc);
+  return providerFunc;
 }
