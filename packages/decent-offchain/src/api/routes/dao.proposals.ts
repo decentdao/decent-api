@@ -79,6 +79,10 @@ app.get('/:id/decode', daoCheck, async c => {
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
+  const json = JSON.stringify(proposal, (_, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  );
+  console.log(`Decoding transactions for proposal ${json}`);
   const decoded = await Promise.all(
     proposal.transactions?.map(tx => formatTx(tx, dao.chainId)) || [],
   );
