@@ -15,6 +15,7 @@ import { Optional } from 'decent-sdk';
 import { formatAbiItem } from 'viem/utils';
 import detectProxyTarget from 'evm-proxy-detection';
 import { EIP1193ProviderRequestFunc } from 'node_modules/evm-proxy-detection/build/cjs/types';
+import { getErc20Meta, humanReadableErc20Value, humanReadableNativeTokenValue } from './erc20';
 
 type EtherscanContractSource = {
   SourceCode: string;
@@ -146,7 +147,7 @@ export function decodeFunction<const abi extends Abi | readonly unknown[]>(
   };
 }
 
-export async function formatTx(
+export async function decodeTx(
   transaction: Transaction,
   chainId: number,
 ): Promise<DecodedTransaction> {
@@ -169,6 +170,7 @@ export async function formatTx(
     };
   }
 }
+
 export function getRpcUrl(chainId: number): string | undefined {
   switch (chainId) {
     case 1:
@@ -216,4 +218,125 @@ export function getEip1193ProviderRequestFunc(chainId: number): EIP1193ProviderR
 
   providerRequestFuncCache.set(chainId, providerFunc);
   return providerFunc;
+}
+
+export type FormattedTransaction = {
+  envelope: string;
+  function: string;
+  params?: Record<string, string>;
+};
+
+export function getNativeTokenSymbol(chainId: number): string {
+  switch (chainId) {
+    case 137:
+      return 'POL';
+
+    case 1:
+    case 10:
+    case 8453:
+    case 11155111:
+    default:
+      return 'ETH';
+  }
+}
+
+export async function paramsArrayToFormattedObject(
+  chainId: number,
+  params: CallParam[],
+): Promise<Record<string, string>> {
+  const result: Record<string, string> = {};
+
+  let erc20Meta: { symbol: string; decimals: number } | undefined;
+  let erc20Value: bigint | undefined;
+
+  async function formatValue(
+    name: string | undefined,
+    type: string,
+    value: unknown,
+  ): Promise<string> {
+    if (value === null || value === undefined) return '';
+
+    // Integer types
+    if (type.startsWith('uint') || type.startsWith('int')) {
+      if (!erc20Value && typeof value === 'bigint' && (name === 'value' || name === 'amount')) {
+        erc20Value = value;
+      }
+      return value.toString();
+    }
+    // Address
+    if (type === 'address') {
+      if (!erc20Meta) {
+        erc20Meta = await getErc20Meta(chainId, value as Address);
+      }
+      return String(value);
+    }
+    // Boolean
+    if (type === 'bool') {
+      return value ? 'true' : 'false';
+    }
+    // Bytes (fixed or dynamic)
+    if (type === 'bytes' || type.startsWith('bytes')) {
+      return typeof value === 'string' ? value : JSON.stringify(value);
+    }
+    // String
+    if (type === 'string') {
+      return String(value);
+    }
+    // Function type (20 bytes)
+    if (type === 'function') {
+      return String(value);
+    }
+    // Array types (fixed or dynamic)
+    if (type.endsWith(']') && Array.isArray(value)) {
+      // Extract base type for array elements
+      const baseType = type.replace(/\[.*\]$/, '');
+      return `[${(await Promise.all(value.map(v => formatValue(undefined, baseType, v)))).join(', ')}]`;
+    }
+    // Tuple (struct)
+    if (type === 'tuple' && Array.isArray(value)) {
+      // Format as JSON object
+      return JSON.stringify(value.map(v => (typeof v === 'object' ? v : String(v))));
+    }
+    // Fallback
+    return String(value);
+  }
+
+  for (const [idx, param] of params.entries()) {
+    const key = param.name && param.name.length > 0 ? param.name : `param${idx}`;
+    result[key] = await formatValue(param.name, param.type, param.value);
+  }
+
+  if (erc20Value && erc20Meta) {
+    const erc20 = await humanReadableErc20Value(erc20Meta, erc20Value);
+    result['tokenSymbol'] = erc20.symbol;
+    result['value'] = erc20.value;
+  }
+
+  return result;
+}
+
+export async function formatTx(
+  transaction: Transaction,
+  chainId: number,
+): Promise<FormattedTransaction> {
+  const decoded = await decodeTx(transaction, chainId);
+  if (!decoded.callData) {
+    // transfering ETH
+    return {
+      envelope: 'Native',
+      function: 'transfer',
+      params: {
+        to: decoded.to,
+        value: humanReadableNativeTokenValue(decoded.value || BigInt(0)),
+        tokenSymbol: getNativeTokenSymbol(chainId),
+      },
+    };
+  } else {
+    const params = decoded.callData.params || [];
+    return {
+      envelope: decoded.masterAddress ?? decoded.to,
+      function: decoded.callData.functionName,
+      params: await paramsArrayToFormattedObject(chainId, params),
+    };
+  }
 }

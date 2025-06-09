@@ -5,7 +5,7 @@ import { schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { formatProposal } from '@/api/utils/typeConverter';
-import { formatTx } from '@/api/utils/decodeTxData';
+import { decodeTx } from '@/api/utils/decodeTxData';
 
 const app = new Hono();
 
@@ -84,7 +84,7 @@ app.get('/:id/decode', daoCheck, async c => {
   );
   console.log(`Decoding transactions for proposal ${json}`);
   const decoded = await Promise.all(
-    proposal.transactions?.map(tx => formatTx(tx, dao.chainId)) || [],
+    proposal.transactions?.map(tx => decodeTx(tx, dao.chainId)) || [],
   );
   const stringifiedDecoded = JSON.stringify(decoded, (_, value) =>
     typeof value === 'bigint' ? value.toString() : value,

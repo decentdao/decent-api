@@ -45,9 +45,9 @@ app.route('/ws', socket);
 app.route('/docs', docs);
 app.route('/auth', auth);
 app.route('/d', dao);
+app.route('/d/:chainId/tx', tx);
 app.route('/d/:chainId/:address/proposals', proposals);
 app.route('/d/:chainId/:address/proposals/:slug/comments', comments);
-app.route('/d/:chainId/:address/tx', tx);
 
 export default {
   ...app,

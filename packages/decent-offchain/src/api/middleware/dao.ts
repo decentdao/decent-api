@@ -31,3 +31,12 @@ export const daoCheck = async (c: Context, next: Next) => {
   c.set('dao', formatDao(query));
   await next();
 };
+
+export const chainIdCheck = async (c: Context, next: Next) => {
+  const { chainId } = c.req.param();
+  const chainIdNumber = getChainId(chainId);
+
+  if (isNaN(chainIdNumber)) throw new ApiError('Chain ID must be a valid number', 400);
+
+  await next();
+};
