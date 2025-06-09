@@ -308,8 +308,8 @@ export async function paramsArrayToFormattedObject(
 
   if (erc20Value && erc20Meta) {
     const erc20 = await humanReadableErc20Value(erc20Meta, erc20Value);
-    result['tokenSymbol'] = erc20.symbol;
-    result['value'] = erc20.value;
+    result['erc20Symbol'] = erc20.symbol;
+    result['erc20Value'] = erc20.value;
   }
 
   return result;
