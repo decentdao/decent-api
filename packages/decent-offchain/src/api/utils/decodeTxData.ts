@@ -15,7 +15,8 @@ import { Optional } from 'decent-sdk';
 import { formatAbiItem } from 'viem/utils';
 import detectProxyTarget from 'evm-proxy-detection';
 import { EIP1193ProviderRequestFunc } from 'node_modules/evm-proxy-detection/build/cjs/types';
-import { getErc20Meta, humanReadableErc20Value, humanReadableNativeTokenValue } from './erc20';
+import { getErc20Meta, humanReadableErc20Value } from './erc20';
+import { decodeMultiSendTransactions } from './multiSend';
 
 type EtherscanContractSource = {
   SourceCode: string;
@@ -80,14 +81,14 @@ async function getAbi(address: Address, chainId: number) {
 export async function decodeTxData(transaction: Transaction, chainId: number) {
   try {
     const abi = await getAbi(transaction.to, chainId);
-    const decoded = decodeFunction({
+    const decoded = decodeFunction(chainId, {
       abi,
       data: transaction.data as `0x${string}`,
     });
     return decoded;
   } catch (error) {
     console.error(error);
-    return null;
+    return undefined;
   }
 }
 
@@ -125,9 +126,10 @@ export function decodeParameters<const params extends readonly AbiParameter[]>(
   return callparams;
 }
 
-export function decodeFunction<const abi extends Abi | readonly unknown[]>(
+export async function decodeFunction<const abi extends Abi | readonly unknown[]>(
+  chainId: number,
   parameters: DecodeFunctionDataParameters<abi>,
-): CallFunction {
+): Promise<CallFunction> {
   const { abi, data } = parameters as DecodeFunctionDataParameters;
   const signature = slice(data, 0, 4);
   const description = abi.find(
@@ -141,10 +143,34 @@ export function decodeFunction<const abi extends Abi | readonly unknown[]>(
     'inputs' in description && description.inputs && description.inputs.length > 0
       ? decodeParameters(description.inputs, slice(data, 4))
       : undefined;
-  return {
+  const call = {
     functionName: (description as { name: string }).name,
     params: params,
   };
+  return await transformCall(chainId, call);
+}
+
+async function transformCall(chainId: number, call: CallFunction): Promise<CallFunction> {
+  if (call.functionName === 'multiSend') {
+    const transactions = call.params?.find(p => p.name === 'transactions');
+    if (!transactions || transactions.type !== 'bytes' || !transactions.value) {
+      throw new Error('Invalid multiSend call data');
+    }
+    const multiSendCalls = decodeMultiSendTransactions(transactions.value as Hex);
+    console.log('Decoding multiSend multiSendCalls:', multiSendCalls);
+    call.functionName = 'multiSend';
+    call.params = call.params?.map(p => {
+      if (p.name === 'transactions') {
+        return {
+          ...p,
+          value: multiSendCalls,
+        };
+      }
+      return p;
+    });
+    return call;
+  }
+  return call;
 }
 
 export async function decodeTx(
@@ -211,6 +237,11 @@ export function getEip1193ProviderRequestFunc(chainId: number): EIP1193ProviderR
     });
     const json = (await response.json()) as { result?: unknown; error?: { message: string } };
     if (json && typeof json === 'object' && 'error' in json && json.error) {
+      const paramString = params ? params.toString() : '[]';
+      console.error(
+        `Error in provider request for chainId ${chainId} method ${method} params ${paramString}:`,
+        json.error.message,
+      );
       throw new Error(json.error.message);
     }
     return json.result;
@@ -223,7 +254,7 @@ export function getEip1193ProviderRequestFunc(chainId: number): EIP1193ProviderR
 export type FormattedTransaction = {
   envelope: string;
   function: string;
-  params?: Record<string, string>;
+  params?: Record<string, unknown>;
 };
 
 export function getNativeTokenSymbol(chainId: number): string {
@@ -240,11 +271,21 @@ export function getNativeTokenSymbol(chainId: number): string {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isTransaction(obj: any): obj is Transaction {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    !!obj.to &&
+    !!obj.data &&
+    typeof obj.operation === 'number'
+  );
+}
 export async function paramsArrayToFormattedObject(
   chainId: number,
   params: CallParam[],
-): Promise<Record<string, string>> {
-  const result: Record<string, string> = {};
+): Promise<Record<string, unknown>> {
+  const result: Record<string, unknown> = {};
 
   let erc20Meta: { symbol: string; decimals: number } | undefined;
   let erc20Value: bigint | undefined;
@@ -253,7 +294,7 @@ export async function paramsArrayToFormattedObject(
     name: string | undefined,
     type: string,
     value: unknown,
-  ): Promise<string> {
+  ): Promise<unknown> {
     if (value === null || value === undefined) return '';
 
     // Integer types
@@ -276,7 +317,23 @@ export async function paramsArrayToFormattedObject(
     }
     // Bytes (fixed or dynamic)
     if (type === 'bytes' || type.startsWith('bytes')) {
-      return typeof value === 'string' ? value : JSON.stringify(value);
+      if (isTransaction(value)) {
+        return formatTx(value, chainId);
+      } else {
+        if (Array.isArray(value)) {
+          return Promise.all(
+            value.map(async v => {
+              if (isTransaction(v)) {
+                return await formatTx(v, chainId);
+              } else {
+                return v;
+              }
+            }),
+          );
+        } else {
+          return value;
+        }
+      }
     }
     // String
     if (type === 'string') {
@@ -290,14 +347,11 @@ export async function paramsArrayToFormattedObject(
     if (type.endsWith(']') && Array.isArray(value)) {
       // Extract base type for array elements
       const baseType = type.replace(/\[.*\]$/, '');
-      return `[${(await Promise.all(value.map(v => formatValue(undefined, baseType, v)))).join(', ')}]`;
-    }
-    // Tuple (struct)
-    if (type === 'tuple' && Array.isArray(value)) {
-      // Format as JSON object
-      return JSON.stringify(value.map(v => (typeof v === 'object' ? v : String(v))));
+      console.log(`Formatting array of type ${baseType} with value:`, value);
+      return await Promise.all(value.map(v => formatValue(undefined, baseType, v)));
     }
     // Fallback
+    console.error(`Unsupported type "${type}" for value:`, value);
     return String(value);
   }
 
@@ -320,23 +374,22 @@ export async function formatTx(
   chainId: number,
 ): Promise<FormattedTransaction> {
   const decoded = await decodeTx(transaction, chainId);
-  if (!decoded.callData) {
-    // transfering ETH
-    return {
-      envelope: 'Native',
-      function: 'transfer',
-      params: {
-        to: decoded.to,
-        value: humanReadableNativeTokenValue(decoded.value || BigInt(0)),
-        tokenSymbol: getNativeTokenSymbol(chainId),
-      },
-    };
-  } else {
-    const params = decoded.callData.params || [];
-    return {
-      envelope: decoded.masterAddress ?? decoded.to,
-      function: decoded.callData.functionName,
-      params: await paramsArrayToFormattedObject(chainId, params),
-    };
-  }
+  return await humanReadableTx(decoded, chainId);
+}
+
+export async function humanReadableTx(
+  decoded: DecodedTransaction,
+  chainId: number,
+): Promise<FormattedTransaction> {
+  const envelope = decoded.to;
+  const functionName = decoded.callData?.functionName || '';
+  const params = decoded.callData?.params
+    ? await paramsArrayToFormattedObject(chainId, decoded.callData.params)
+    : {};
+
+  return {
+    envelope,
+    function: functionName,
+    params,
+  };
 }
