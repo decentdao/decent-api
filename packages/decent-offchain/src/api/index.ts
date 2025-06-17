@@ -13,6 +13,7 @@ import proposals from '@/api/routes/dao.proposals';
 import comments from '@/api/routes/dao.comments';
 import points from '@/api/routes/points';
 import token from '@/api/routes/token';
+import storage from '@/api/routes/storage';
 
 const app = new Hono();
 const { websocket } = createBunWebSocket();
@@ -52,6 +53,7 @@ app.route('/ws', socket);
 app.route('/docs', docs);
 app.route('/auth', auth);
 app.route('/points', points);
+app.route('/storage', storage);
 app.route('/t', token);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/proposals', proposals);
