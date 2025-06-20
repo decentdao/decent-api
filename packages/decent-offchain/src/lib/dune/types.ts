@@ -122,7 +122,7 @@ export type LogEntry = {
 
 export type Transaction = {
   chain: string;
-  chain_id: number;
+  chain_id: SupportedChainId;
   address: string;
   block_time: string;
   block_number: number;
@@ -144,5 +144,36 @@ export type Transaction = {
 
 export type TransactionData = {
   transactions: Transaction[];
+  next_offset?: string | null;
+};
+
+export type TokenInfo = {
+  chain_id: SupportedChainId;
+  chain: string;
+  price_usd?: number;
+  pool_size?: number;
+  total_supply?: string;
+  symbol: string;
+  name?: string;
+  decimals?: number;
+  logo?: string;
+};
+
+export type TokenQueryParams = {
+  /** The offset to paginate through result sets. This is a cursor being passed from the previous response, only use what the backend has returned on previous responses. */
+  offset?: string | null;
+
+  /** Maximum number of transactions to return */
+  limit?: number | null;
+
+  /** Comma separated list of chain ids to get transactions for */
+  chainIds?: string | null;
+};
+
+export type TokenData = {
+  // hacky: its not exactly TokenBalance, but it has most fields
+  // https://docs.sim.dune.com/evm/token-info
+  contract_address: string;
+  tokens: TokenInfo[];
   next_offset?: string | null;
 };

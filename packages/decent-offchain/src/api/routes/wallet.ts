@@ -37,8 +37,8 @@ function getStakedTokenPair(logs: LogEntry[], userAddress: Address): [Address, A
 }
 
 /**
- * @title Get DAOs that use specified token
- * @route GET /t/:walletAddress
+ * @title Get DAOs that wallet address holds tokens OR has staked tokens from
+ * @route GET /wallet/:walletAddress
  * @returns
  *  {
  *    chainId: number,
@@ -50,7 +50,9 @@ function getStakedTokenPair(logs: LogEntry[], userAddress: Address): [Address, A
  *      name: string,
  *      balance: string,
  *      decimals: number,
- *      logo: string
+ *      price_usd: number,
+ *      value_usd: number,
+ *      logo?: string
  *    },
  *    stakedToken?: {
  *      address: string,
@@ -58,7 +60,9 @@ function getStakedTokenPair(logs: LogEntry[], userAddress: Address): [Address, A
  *      name: string,
  *      balance: string,
  *      decimals: number,
- *      logo: string
+ *      price_usd: number,
+ *      value_usd: number,
+ *      logo?: string
  *    }
  *  }[]
  */
@@ -100,12 +104,12 @@ app.get('/:walletAddress', async c => {
       name: daoTable.name,
       address: daoTable.address,
       chainId: daoTable.chainId,
-      tokenAddress: sql<string>`
+      tokenAddress: sql<Address>`
         CASE 
           WHEN ${daoTable.erc20Address} IS NOT NULL THEN ${daoTable.erc20Address}
           ELSE ${votingTokenTable.address}
         END
-      `.as('tokenAddress')
+      `.as('tokenAddress'),
     })
     .from(daoTable)
     .leftJoin(
@@ -131,37 +135,65 @@ app.get('/:walletAddress', async c => {
     filteredTokens.map(token => [token.address.toLowerCase() as Address, token]),
   );
 
-  const daosWithTokens = await Promise.all(daos.map(async d => {
-    let tokenInfo = tokenMap.get(d.tokenAddress as Address);
-    if (!tokenInfo) {
-      const fetchedTokenInfo = await duneFetchToken(d.chainId, d.tokenAddress as Address);
-      tokenInfo = fetchedTokenInfo.tokens[0];
-    }
-    const stakedTokenInfo = tokenMap.get(stakedTokenMap.get(d.tokenAddress as Address) as Address)
+  const daosWithTokens = await Promise.all(
+    daos.map(async d => {
+      let tokenInfo = tokenMap.get(d.tokenAddress);
 
-    const ret = {
-      name: d.name,
-      chainId: d.chainId,
-      address: d.address,
-      token: {
-        address: tokenInfo?.address,
-        symbol: tokenInfo?.symbol,
-        name: tokenInfo?.name,
-        balance: tokenInfo?.amount || '0',
-        decimals: tokenInfo?.decimals,
-        logo: tokenInfo?.token_metadata?.logo,
-      },
-      stakedToken: stakedTokenInfo ? {
+      // If DAO token is not held by wallet (they only hold staked tokens), fetch it from Dune
+      if (!tokenInfo) {
+        const tokenQuery = await duneFetchToken(d.tokenAddress, {
+          chainIds: d.chainId.toString(),
+        });
+        const tokenData = tokenQuery.tokens[0];
+        if (!tokenData) {
+          throw new Error(`No token data found for ${d.tokenAddress}`);
+        }
+        tokenInfo = {
+          address: tokenQuery.contract_address,
+          chain: tokenData.chain,
+          chain_id: tokenData.chain_id,
+          amount: '0',
+          symbol: tokenData.symbol,
+          name: tokenData.name,
+          decimals: tokenData.decimals,
+          price_usd: tokenData.price_usd,
+          token_metadata: {
+            logo: tokenData.logo,
+          },
+        };
+      }
+      const stakedTokenKey = stakedTokenMap.get(d.tokenAddress);
+      const stakedTokenInfo = stakedTokenKey ? tokenMap.get(stakedTokenKey) : undefined;
+      const stakedToken = stakedTokenInfo && {
         address: stakedTokenInfo.address,
         symbol: stakedTokenInfo.symbol,
         name: stakedTokenInfo.name,
         balance: stakedTokenInfo.amount,
         decimals: stakedTokenInfo.decimals,
+        price_usd: stakedTokenInfo.price_usd,
+        value_usd: stakedTokenInfo.value_usd,
         logo: stakedTokenInfo.token_metadata?.logo,
-      } : undefined,
-    };
-    return ret;
-  }));
+      };
+
+      const ret = {
+        name: d.name,
+        chainId: d.chainId,
+        address: d.address,
+        token: {
+          address: tokenInfo?.address,
+          symbol: tokenInfo?.symbol,
+          name: tokenInfo?.name,
+          balance: tokenInfo?.amount || '0',
+          decimals: tokenInfo?.decimals,
+          price_usd: tokenInfo?.price_usd,
+          value_usd: tokenInfo?.value_usd,
+          logo: tokenInfo?.token_metadata?.logo,
+        },
+        stakedToken,
+      };
+      return ret;
+    }),
+  );
 
   return resf(c, daosWithTokens);
 });

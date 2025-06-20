@@ -4,14 +4,16 @@ import { Address } from 'viem';
 import {
   BalanceData,
   TokenBalancesParams,
+  TokenData,
+  TokenQueryParams,
   TransactionData,
   TransactionsParams,
 } from './types';
 
 const BASE_URL = 'https://api.sim.dune.com';
-const BALANCES_PREFIX = 'v1/evm/balances';
-const TRANSACTIONS_PREFIX = 'v1/evm/transactions';
-const TOKEN_PREFIX = 'v1/evm/token-info';
+const BALANCES_ROUTE = 'v1/evm/balances';
+const TRANSACTIONS_ROUTE = 'v1/evm/transactions';
+const TOKEN_ROUTE = 'v1/evm/token-info';
 
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 
@@ -42,6 +44,14 @@ const getTransactionsQueryParams = (params: TransactionsParams): URLSearchParams
   return queryParams;
 };
 
+const getTokenQueryParams = (params: TokenQueryParams): URLSearchParams => {
+  const queryParams = new URLSearchParams();
+  if (params.chainIds) queryParams.append('chain_ids', params.chainIds);
+  if (params.offset) queryParams.append('offset', params.offset.toString());
+  if (params.limit) queryParams.append('limit', params.limit.toString());
+  return queryParams;
+};
+
 export async function duneFetchBalances(
   address: Address,
   params: TokenBalancesParams,
@@ -50,7 +60,7 @@ export async function duneFetchBalances(
 
   const queryParams = getBalanceQueryParams(params);
 
-  const url = `${BASE_URL}/${BALANCES_PREFIX}/${address}?${queryParams.toString()}`;
+  const url = `${BASE_URL}/${BALANCES_ROUTE}/${address}?${queryParams.toString()}`;
 
   const response = await fetch(url, {
     method: 'GET',
@@ -71,7 +81,7 @@ export async function duneFetchTransactions(
   if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
 
   const queryParams = getTransactionsQueryParams(params);
-  const url = `${BASE_URL}/${TRANSACTIONS_PREFIX}/${address}?${queryParams.toString()}`;
+  const url = `${BASE_URL}/${TRANSACTIONS_ROUTE}/${address}?${queryParams.toString()}`;
 
   const response = await fetch(url, {
     method: 'GET',
@@ -85,19 +95,23 @@ export async function duneFetchTransactions(
   return response.json() as Promise<TransactionData>;
 }
 
-export async function duneFetchToken(chainId: number, address: Address) {
+export async function duneFetchToken(
+  address: Address,
+  params: TokenQueryParams,
+): Promise<TokenData> {
   if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
 
-  const url = `${BASE_URL}/${TOKEN_PREFIX}/${address}?chain_ids=${chainId}`;
+  const queryParams = getTokenQueryParams(params);
+  const url = `${BASE_URL}/${TOKEN_ROUTE}/${address}?${queryParams.toString()}`;
 
   const response = await fetch(url, {
     method: 'GET',
     headers,
   });
-  console.log(url);
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<TokenData>;
 }
