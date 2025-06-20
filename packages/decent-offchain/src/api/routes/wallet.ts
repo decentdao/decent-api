@@ -78,6 +78,7 @@ app.get('/:walletAddress', async c => {
 
   // Filter out tokens that have a space in the symbol, these are spam
   const filteredTokens = balances.filter(token => !token.symbol?.includes(' '));
+  if (filteredTokens.length === 0) throw new ApiError('No tokens found for wallet', 404);
 
   const dbSearchTokenSet = new Set(
     filteredTokens.map(token => token.address.toLowerCase() as Address),
@@ -93,6 +94,7 @@ app.get('/:walletAddress', async c => {
     transactions
       .map(tx => {
         const pair = getStakedTokenPair(tx.logs, walletQuery);
+        // Wallet may only hold the staked token so we need to add the token to the search
         if (pair) dbSearchTokenSet.add(pair[0]);
         return pair;
       })
@@ -134,6 +136,7 @@ app.get('/:walletAddress', async c => {
   const tokenMap = new Map(
     filteredTokens.map(token => [token.address.toLowerCase() as Address, token]),
   );
+  if (daos.length === 0) throw new ApiError('No associated DAO tokens found in wallet', 404);
 
   const daosWithTokens = await Promise.all(
     daos.map(async d => {
