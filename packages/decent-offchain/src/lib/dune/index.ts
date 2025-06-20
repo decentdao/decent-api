@@ -1,11 +1,18 @@
 // Modified from React Dune Hooks package
 // https://github.com/duneanalytics/hooks/blob/main/src/evm/duneApi.ts
 import { Address } from 'viem';
-import { BalanceData, TokenBalancesParams, TransactionData, TransactionsParams } from './types';
+import {
+  BalanceData,
+  TokenBalancesParams,
+  TransactionData,
+  TransactionsParams,
+} from './types';
 
 const BASE_URL = 'https://api.sim.dune.com';
 const BALANCES_PREFIX = 'v1/evm/balances';
 const TRANSACTIONS_PREFIX = 'v1/evm/transactions';
+const TOKEN_PREFIX = 'v1/evm/token-info';
+
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 
 const headers = {
@@ -76,4 +83,21 @@ export async function duneFetchTransactions(
   }
 
   return response.json() as Promise<TransactionData>;
+}
+
+export async function duneFetchToken(chainId: number, address: Address) {
+  if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
+
+  const url = `${BASE_URL}/${TOKEN_PREFIX}/${address}?chain_ids=${chainId}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+  });
+  console.log(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }

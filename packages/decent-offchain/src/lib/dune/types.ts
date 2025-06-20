@@ -2,11 +2,12 @@
 // https://github.com/duneanalytics/hooks/blob/main/src/evm/types.ts
 
 import { Address, Hex } from 'viem';
+import { SupportedChainId } from 'decent-sdk';
 
 // Use 'type' for simple type aliases
 type TokenBalance = {
   chain: string;
-  chain_id: number;
+  chain_id: SupportedChainId;
   address: string;
   amount: string;
   symbol?: string;
@@ -105,7 +106,7 @@ export type UseTokenBalancesConfig = {
   };
 };
 
-type LogEntry = {
+export type LogEntry = {
   address: Address;
   data: Hex;
   topics: Hex[];
