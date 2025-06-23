@@ -1,5 +1,5 @@
 import { Transaction } from '@/db/schema/onchain';
-import { Address } from 'viem';
+import { Address, isAddress, checksumAddress } from 'viem';
 
 export function decodeMultiSendTransactions(hex: string): Transaction[] {
   if (hex.startsWith('0x')) hex = hex.slice(2);
