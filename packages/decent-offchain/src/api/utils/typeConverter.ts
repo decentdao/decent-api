@@ -5,7 +5,7 @@ import { DbComment } from '@/db/schema';
 import { unixTimestamp } from './time';
 
 export const formatDao = (dbDao: DbDao): Dao => {
-  const dao: Dao = {
+  const dao = {
     chainId: dbDao.chainId,
     address: dbDao.address,
     safe: {
@@ -35,6 +35,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
       address: dbDao.gasTankAddress,
       enabled: Boolean(dbDao.gasTankAddress && dbDao.gasTankEnabled),
     },
+    creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
     updatedAt: dbDao.updatedAt || 0,

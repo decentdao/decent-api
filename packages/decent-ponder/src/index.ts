@@ -16,6 +16,9 @@ import {
 } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/Azorius';
 
+// @TODO ENG-1080
+// Use ZodiacModuleProxyFactory to get
+// initial data Safe and governance modules for the DAO
 const handleGovernanceData = async (
   entry: DaoInsert,
   context: Context,
@@ -77,6 +80,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
 
   if (key === 'daoName') {
     entry.name = value;
+    entry.creatorAddress = event.transaction.from;
 
   } else if (key === 'proposalTemplates') {
     entry.proposalTemplatesCID = value;
@@ -109,6 +113,12 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
 
+  } else if (key === 'erc20Address') {
+    if (!isAddress(value)) {
+      throw new Error(`Invalid erc20Address: ${value} for ${safeAddress}`);
+    }
+    entry.erc20Address = value;
+
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
@@ -137,6 +147,7 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
     chainId: context.network.chainId,
     address: daoAddress,
     name: daoName,
+    creatorAddress: event.transaction.from,
   }
 
   await handleGovernanceData(entry, context, event.block.timestamp);

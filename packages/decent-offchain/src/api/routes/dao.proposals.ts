@@ -5,7 +5,7 @@ import { schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { formatProposal } from '@/api/utils/typeConverter';
-import { decodeTx } from '@/api/utils/decodeTxData';
+import { decodeTx } from '../utils/decodeTxData';
 
 const app = new Hono();
 
