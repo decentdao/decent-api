@@ -6,6 +6,7 @@
         "@fractal-framework/fractal-contracts": "^1.5.0-rc.5",
         "decent-sdk": "^0.1.8",
         "drizzle-orm": "^0.40.0",
+        "evm-proxy-detection": "^2.1.0",
         "hono": "^4.7.4",
         "nanoid": "^5.1.3",
         "pg": "^8.14.0",
@@ -696,6 +697,8 @@
     "ethjs-util": ["ethjs-util@0.1.6", "", { "dependencies": { "is-hex-prefixed": "1.0.0", "strip-hex-prefix": "1.0.0" } }, "sha512-CUnVOQq7gSpDHZVVrQW8ExxUETWrnrvXYvYz55wOU8Uj4VCgw56XC2B/fVqQN+f7gmrnRHSLVnFAwsCuNwji8w=="],
 
     "eventemitter3": ["eventemitter3@5.0.1", "", {}, "sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA=="],
+
+    "evm-proxy-detection": ["evm-proxy-detection@2.1.0", "", {}, "sha512-6mOJrYVYoKRsLgiyt07zK6iSorK1l8YH8J4/0TsA+UNwZdQJuRlrr2eJw+7h5X2V99qSJXMUsixAz7Z+Ttj2Pw=="],
 
     "evp_bytestokey": ["evp_bytestokey@1.0.3", "", { "dependencies": { "md5.js": "^1.3.4", "safe-buffer": "^5.1.1" } }, "sha512-/f2Go4TognH/KvCISP7OUsHn85hT9nUkxxA9BEWxFn+Oj9o8ZNLm/40hdlgSLyuOimsrTKLUMEorQexp/aPQeA=="],
 

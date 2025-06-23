@@ -1,5 +1,4 @@
 import { Transaction } from '@/db/schema/onchain';
-import { ethers } from 'ethers';
 import { Address } from 'viem';
 
 export function decodeMultiSendTransactions(hex: string): Transaction[] {
@@ -14,7 +13,8 @@ export function decodeMultiSendTransactions(hex: string): Transaction[] {
     cursor += 2;
 
     // 2. to (20 bytes = 40 hex chars)
-    const to = ethers.getAddress('0x' + hex.slice(cursor, cursor + 40));
+    const toRaw = '0x' + hex.slice(cursor, cursor + 40);
+    const to = isAddress(toRaw) ? checksumAddress(toRaw) : toRaw;
     cursor += 40;
 
     // 3. value (32 bytes = 64 hex chars)
