@@ -875,6 +875,50 @@
           }
         }
       }
+    },
+    "/d/{chainId}/{address}/splits": {
+      "get": {
+        "tags": ["splits"],
+        "summary": "Get DAO splits",
+        "description": "Retrieve all split distributions for a specific DAO",
+        "security": [],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Split" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1668,6 +1712,25 @@
           }
         },
         "required": ["totalUsdValue", "fungible", "nonFungible"]
+      },
+      "Split": {
+        "type": "object",
+        "properties": {
+          "address": { "type": "string" },
+          "name": { "type": "string", "nullable": true },
+          "splits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "address": { "type": "string" },
+                "percentage": { "type": "integer" }
+              },
+              "required": ["address", "percentage"]
+            }
+          }
+        },
+        "required": ["address", "splits"]
       }
     },
     "securitySchemes": {
@@ -1702,6 +1765,10 @@
     {
       "name": "comments",
       "description": "Comment-related operations"
+    },
+    {
+      "name": "splits",
+      "description": "Split-related operations"
     }
   ]
 }

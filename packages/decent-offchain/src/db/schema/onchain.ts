@@ -108,6 +108,27 @@ export const onchainProposalTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] })],
 );
 
+export const splitTable = onchainSchema.table(
+  'split',
+  {
+    daoChainId: integer('dao_chain_id').notNull().$type<SupportedChainId>(),
+    daoAddress: hex('dao_address').notNull(),
+    address: hex('split_address').notNull(),
+    name: text('split_name'),
+  },
+  t => [primaryKey({ columns: [t.daoChainId, t.daoAddress, t.address] })],
+);
+
+export const splitRecipientTable = onchainSchema.table(
+  'split_recipient',
+  {
+    splitAddress: hex('split_address').notNull(),
+    recipientAddress: hex('recipient_address').notNull(),
+    percentage: integer('percentage').notNull(),
+  },
+  t => [primaryKey({ columns: [t.splitAddress, t.recipientAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -169,6 +190,22 @@ export const onchainProposalTableRelations = relations(onchainProposalTable, ({ 
   }),
 }));
 
+// Relations for splits
+export const splitTableRelations = relations(splitTable, ({ one, many }) => ({
+  dao: one(daoTable, {
+    fields: [splitTable.daoChainId, splitTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+  recipients: many(splitRecipientTable),
+}));
+
+export const splitRecipientTableRelations = relations(splitRecipientTable, ({ one }) => ({
+  split: one(splitTable, {
+    fields: [splitRecipientTable.splitAddress],
+    references: [splitTable.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -188,3 +225,7 @@ export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect;
+export type DbSplitRecipient = typeof splitRecipientTable.$inferSelect;
+export type DbSplit = typeof splitTable.$inferSelect & {
+  recipients: DbSplitRecipient[];
+};

@@ -5,6 +5,7 @@ import { sessionTable } from './offchain/sessions';
 import { temperatureCheckTable } from './offchain/temperatureChecks';
 import { commentTable } from './offchain/comments';
 import { safeProposalTable } from './offchain/safeProposals';
+import { splitTable, splitRecipientTable } from './onchain';
 
 const proposalRelations = relations(proposalTable, ({ one }) => ({
   dao: one(onchainSchema.daoTable, {
@@ -37,6 +38,8 @@ export const schema = {
   proposalRelations,
   commentRelations,
   temperatureCheckRelations,
+  splitTable,
+  splitRecipientTable,
 };
 
 export type DbProposal = typeof proposalTable.$inferSelect;
@@ -46,3 +49,7 @@ export type DbComment = typeof commentTable.$inferSelect;
 export type DbNewComment = typeof commentTable.$inferInsert;
 export type DbTemperatureCheck = typeof temperatureCheckTable.$inferSelect;
 export type DbNewTemperatureCheck = typeof temperatureCheckTable.$inferInsert;
+export type DbSplit = typeof splitTable.$inferSelect & {
+  recipients: (typeof splitRecipientTable.$inferSelect)[];
+};
+export type DbSplitRecipient = typeof splitRecipientTable.$inferSelect;
