@@ -6,32 +6,32 @@ import { AzoriusAbi } from './abis/Azorius';
 import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactory';
 
 export default createConfig({
-  networks: {
+  chains: {
     // sepolia: {
     //   chainId: 11155111,
     //   transport: http(process.env.PONDER_RPC_URL_11155111),
     // },
     mainnet: {
-      chainId: 1,
-      transport: http(process.env.PONDER_RPC_URL_1),
+      id: 1,
+      rpc: http(process.env.PONDER_RPC_URL_1),
     },
     base: {
-      chainId: 8453,
-      transport: http(process.env.PONDER_RPC_URL_8453),
+      id: 8453,
+      rpc: http(process.env.PONDER_RPC_URL_8453),
     },
     optimism: {
-      chainId: 10,
-      transport: http(process.env.PONDER_RPC_URL_10),
+      id: 10,
+      rpc: http(process.env.PONDER_RPC_URL_10),
     },
     polygon: {
-      chainId: 137,
-      transport: http(process.env.PONDER_RPC_URL_137),
+      id: 137,
+      rpc: http(process.env.PONDER_RPC_URL_137),
     },
   },
   contracts: {
     KeyValuePairs: {
       abi: KeyValuePairsAbi,
-      network: {
+      chain: {
         // sepolia: {
         //   address: "0xC0E08581b70cF745770154f3E9a9A8890198b024",
         //   startBlock: 4916643,
@@ -56,7 +56,7 @@ export default createConfig({
     },
     FractalRegistry: {
       abi: FractalRegistryAbi,
-      network: {
+      chain: {
         // sepolia: {
         //   address: "0x4791FF2a6E84F012402c0679C12Cb1d9260450A6",
         //   startBlock: 4916634,
@@ -81,7 +81,7 @@ export default createConfig({
     },
     ZodiacModules: {
       abi: AzoriusAbi,
-      network: {
+      chain: {
         mainnet: {
           startBlock: 17389302,
           address: factory({

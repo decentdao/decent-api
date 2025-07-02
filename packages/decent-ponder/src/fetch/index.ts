@@ -30,7 +30,7 @@ export async function fetchGovernance(
 ): Promise<GovernanceInsert> {
   try {
     const safeAddress = getAddress(_safeAddress);
-    const daoChainId = context.network.chainId;
+    const daoChainId = context.chain.id;
     const { threshold, owners, version, guard, modules } = await safeInfo(context, safeAddress);
 
     const signers: SignerInsert[] = owners.map(owner => ({
