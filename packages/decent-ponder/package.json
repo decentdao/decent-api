@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fractal-framework/fractal-contracts": "^1.4.2",
-    "ponder": "^0.11.23"
+    "ponder": "^0.11.24"
   },
   "devDependencies": {
     "@types/bun": "^1.2.5",
