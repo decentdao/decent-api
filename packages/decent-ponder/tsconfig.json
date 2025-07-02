@@ -19,7 +19,10 @@
     "target": "ES2022",
 
     // Skip type checking for node modules
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    
+    // Types
+    "types": ["bun"]
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules"]

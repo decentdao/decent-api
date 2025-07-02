@@ -32,9 +32,12 @@ const handleGovernanceData = async (
   entry.fractalModuleAddress = governance.fractalModuleAddress;
   entry.requiredSignatures = governance.threshold;
 
-  await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate({
-    ...entry,
-    updatedAt: timestamp,
+  await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate(() => {
+    const { chainId, address, ...rest } = entry;
+    return {
+      ...rest,
+      updatedAt: timestamp,
+    }
   });
 
   if (governance.governanceModules.length > 0) {
@@ -74,7 +77,7 @@ const handleGovernanceData = async (
 ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   const { theAddress: safeAddress, key, value } = event.args;
   const entry: DaoInsert = {
-    chainId: context.network.chainId,
+    chainId: context.chain.id,
     address: safeAddress,
   }
 
@@ -102,7 +105,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else if (key === 'hatIdToStreamId') {
     const [hatId, streamId] = value.split(':');
     const hatIdToStreamIdData: HatIdToStreamIdInsert = {
-      daoChainId: context.network.chainId,
+      daoChainId: context.chain.id,
       daoAddress: safeAddress,
       hatId: hatId,
       streamId: streamId,
@@ -122,7 +125,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
-    console.log('Network:', context.network.chainId);
+    console.log('Network:', context.chain.id);
     console.log(`DAO: ${entry.chainId}:${entry.address}`);
     console.log('Value:', value);
     console.log('--------------------------------');
@@ -144,7 +147,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
 ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
   const { daoAddress, daoName } = event.args;
   const entry: DaoInsert = {
-    chainId: context.network.chainId,
+    chainId: context.chain.id,
     address: daoAddress,
     name: daoName,
     creatorAddress: event.transaction.from,
@@ -156,7 +159,7 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
 ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) => {
   const { parentDAOAddress, subDAOAddress } = event.args;
   const entry: DaoInsert = {
-    chainId: context.network.chainId,
+    chainId: context.chain.id,
     address: subDAOAddress,
     subDaoOf: parentDAOAddress,
   }
@@ -177,7 +180,7 @@ ponder.on('ZodiacModules:ProposalCreated', async ({ event, context }) => {
     const { title, description } = JSON.parse(metadata);
     await context.db.insert(proposal).values({
       id: proposalId,
-      daoChainId: context.network.chainId,
+      daoChainId: context.chain.id,
       daoAddress,
       proposer,
       votingStrategyAddress: strategy,
@@ -204,7 +207,7 @@ ponder.on('ZodiacModules:ProposalExecuted', async ({ event, context }) => {
     await context.db.update(proposal, {
       id: BigInt(proposalId),
       daoAddress,
-      daoChainId: context.network.chainId,
+      daoChainId: context.chain.id,
     }).set({
       executedTxHash: event.transaction.hash,
     });
