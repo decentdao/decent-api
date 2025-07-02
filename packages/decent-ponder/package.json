@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "ponder dev --schema onchain",
-    "start": "ponder start --schema onchain",
+    "dev": "ponder dev --schema=onchain",
+    "start": "ponder start --schema=${RAILWAY_DEPLOYMENT_ID:-onchain} --views-schema=onchain",
     "ponder:list": "ponder db list",
     "lint": "eslint ./**/*.ts ./**/*.*.ts"
   },
