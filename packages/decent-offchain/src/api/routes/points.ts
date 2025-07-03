@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 import { Address, getAbiItem, isAddress, toFunctionSelector } from 'viem';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
-import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { ApiError } from '@/api/utils/responseFormatter';
 import { abis } from '@fractal-framework/fractal-contracts';
 
 const app = new Hono();
@@ -81,21 +81,22 @@ const checkAddress = async (c: Context) => {
  * @route GET /points/proposals
  * @param {string} address - Address parameter
  * @param {boolean} passed - Whether to filter for passed proposals
- * @returns {address, proposalCount} - The address and the number of proposals that the address has submitted
+ * @returns {address, proposalCount, status} - The address and the number of proposals that the address has submitted and 'success' or 'failed'
  */
 app.get('/proposals', async c => {
   const address = await checkAddress(c);
   const passed = c.req.query('passed') === 'true';
   const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed });
   const proposalCount = onchainProposals.length + safeProposals.length;
-  return resf(c, { address, proposalCount });
+  const status = proposalCount > 0 ? 'success' : 'failed';
+  return c.json({ address, proposalCount, status });
 });
 
 /**
  * @title Get the number of passing transfer proposals that an address has submitted
  * @route GET /points/transfers
  * @param {string} address - Address parameter
- * @returns {address, transferCount} - The address and the number of transfer proposals that the address has submitted
+ * @returns {address, transferCount, status} - The address and the number of transfer proposals that the address has submitted and 'success' or 'failed'
  */
 app.get('/transfers', async c => {
   const address = await checkAddress(c);
@@ -112,15 +113,15 @@ app.get('/transfers', async c => {
   ).length;
 
   const transferCount = hasOnchainTransferProposal + hasSafeTransferProposal;
-
-  return resf(c, { address, transferCount });
+  const status = transferCount > 0 ? 'success' : 'failed';
+  return c.json({ address, transferCount, status });
 });
 
 /**
  * @title Get the number of passing disperse proposals that an address has submitted
  * @route GET /points/disperses
  * @param {string} address - Address parameter
- * @returns {address, disperseCount} - The address and the number of disperse proposals that the address has submitted
+ * @returns {address, disperseCount, status} - The address and the number of disperse proposals that the address has submitted and 'success' or 'failed'
  */
 app.get('/disperses', async c => {
   const address = await checkAddress(c);
@@ -139,8 +140,8 @@ app.get('/disperses', async c => {
   ).length;
 
   const disperseCount = hasOnchainDisperseProposal + hasSafeDisperseProposal;
-
-  return resf(c, { address, disperseCount });
+  const status = disperseCount > 0 ? 'success' : 'failed';
+  return c.json({ address, disperseCount, status });
 });
 
 /**
@@ -148,7 +149,7 @@ app.get('/disperses', async c => {
  * @route GET /points/roles
  * @param {string} address - Address parameter
  * @param {boolean} passed - Whether to filter for passed proposals
- * @returns {address, roleCount} - The address and the number of role proposals that the address has submitted
+ * @returns {address, roleCount, status} - The address and the number of role proposals that the address has submitted and 'success' or 'failed'
  */
 app.get('/roles', async c => {
   const address = await checkAddress(c);
@@ -173,36 +174,33 @@ app.get('/roles', async c => {
   ).length;
 
   const roleCount = hasOnchainRoleProposal + hasSafeRoleProposal;
-  return resf(c, { address, roleCount });
+  const status = roleCount > 0 ? 'success' : 'failed';
+  return c.json({ address, roleCount, status });
 });
 
 /**
  * @title Get the number of passing stream proposals that an address has submitted
  * @route GET /points/streams
  * @param {string} address - Address parameter
- * @returns {address, streamCount} - The address and the number of stream proposals that the address has submitted
+ * @returns {address, streamCount, status} - The address and the number of stream proposals that the address has submitted and 'success' or 'failed'
  */
 app.get('/streams', async c => {
   const address = await checkAddress(c);
   const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
 
   const hasOnchainStreamProposal = onchainProposals.filter(proposal =>
-    proposal.transactions?.find(transaction =>
-      checkDataForFunction(transaction.data, 'createWithDurationsLT'),
-    ),
+    proposal.transactions?.find(transaction => checkDataForFunction(transaction.data, 'createWithDurationsLT')),
   ).length;
 
   const hasSafeStreamProposal = safeProposals.filter(proposal =>
     proposal?.transactions?.parameters?.find(parameter =>
-      parameter.valueDecoded?.find(value =>
-        checkDataForFunction(value.data, 'createWithDurationsLT'),
-      ),
+      parameter.valueDecoded?.find(value => checkDataForFunction(value.data, 'createWithDurationsLT')),
     ),
   ).length;
 
   const streamCount = hasOnchainStreamProposal + hasSafeStreamProposal;
-
-  return resf(c, { address, streamCount });
+  const status = streamCount > 0 ? 'success' : 'failed';
+  return c.json({ address, streamCount, status });
 });
 
 export default app;
