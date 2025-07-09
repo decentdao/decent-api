@@ -8,6 +8,7 @@ import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
 import { getCIDFromSafeTransaction, getExecutedSafeTransactions } from '@/lib/safe';
 import { schema } from '@/db/schema';
+import { DAO_SELECT_FIELDS, DAO_GOVERNANCE_MODULE_JOIN_CONDITION } from '@/db/queries';
 import { fetchMetadata } from '@/api/utils/metadata';
 
 const app = new Hono();
@@ -20,10 +21,13 @@ const app = new Hono();
  */
 app.get('/', async c => {
   const nameQueryParam = c.req.query('name');
-  const daos = (await db.query.daoTable.findMany({
-    where: (dao, { ilike }) =>
-      nameQueryParam ? ilike(dao.name, `%${nameQueryParam}%`) : undefined,
-  }));
+  const daos = await db
+    .select(DAO_SELECT_FIELDS)
+    .from(schema.daoTable)
+    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
+    .where(
+      nameQueryParam ? sql`${schema.daoTable.name} ilike ${`%${nameQueryParam}%`}` : undefined,
+    );
   return resf(c, daos);
 });
 
@@ -36,9 +40,11 @@ app.get('/', async c => {
 app.get('/:chainId', async c => {
   const { chainId } = c.req.param();
   const chainIdNumber = getChainId(chainId);
-  const daos = (await db.query.daoTable.findMany({
-    where: (dao, { eq }) => eq(dao.chainId, chainIdNumber),
-  }));
+  const daos = await db
+    .select(DAO_SELECT_FIELDS)
+    .from(schema.daoTable)
+    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
+    .where(sql`${schema.daoTable.chainId} = ${chainIdNumber}`);
 
   return resf(c, daos);
 });

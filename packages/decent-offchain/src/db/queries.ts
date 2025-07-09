@@ -1,3 +1,6 @@
+import { sql } from 'drizzle-orm';
+import { schema } from './schema';
+
 export const DEFAULT_DAO_WITH = {
   governanceModules: {
     columns: {
@@ -36,3 +39,29 @@ export const DEFAULT_DAO_WITH = {
     },
   },
 };
+
+export const DAO_SELECT_FIELDS = {
+  chainId: schema.daoTable.chainId,
+  address: schema.daoTable.address,
+  name: schema.daoTable.name,
+  proposalTemplatesCID: schema.daoTable.proposalTemplatesCID,
+  snapshotENS: schema.daoTable.snapshotENS,
+  subDaoOf: schema.daoTable.subDaoOf,
+  topHatId: schema.daoTable.topHatId,
+  gasTankEnabled: schema.daoTable.gasTankEnabled,
+  gasTankAddress: schema.daoTable.gasTankAddress,
+  creatorAddress: schema.daoTable.creatorAddress,
+  requiredSignatures: schema.daoTable.requiredSignatures,
+  guardAddress: schema.daoTable.guardAddress,
+  fractalModuleAddress: schema.daoTable.fractalModuleAddress,
+  erc20Address: schema.daoTable.erc20Address,
+  createdAt: schema.daoTable.createdAt,
+  updatedAt: schema.daoTable.updatedAt,
+  governanceModuleAddresses: sql<string[]>`
+    array_remove(array_agg(${schema.governanceModuleTable.address}) OVER (
+      PARTITION BY ${schema.daoTable.chainId}, ${schema.daoTable.address}
+    ), NULL)
+  `.as('governanceModuleAddresses'),
+};
+
+export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
