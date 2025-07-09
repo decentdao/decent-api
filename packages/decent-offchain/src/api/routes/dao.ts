@@ -2,11 +2,8 @@ import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { DEFAULT_DAO_WITH } from '@/db/queries';
 import { bearerAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
-import { DbDao } from '@/db/schema/onchain';
-import { formatDao } from '@/api/utils/typeConverter';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
 import { getCIDFromSafeTransaction, getExecutedSafeTransactions } from '@/lib/safe';
@@ -23,12 +20,10 @@ const app = new Hono();
  */
 app.get('/', async c => {
   const nameQueryParam = c.req.query('name');
-  const query = (await db.query.daoTable.findMany({
+  const daos = (await db.query.daoTable.findMany({
     where: (dao, { ilike }) =>
       nameQueryParam ? ilike(dao.name, `%${nameQueryParam}%`) : undefined,
-    with: DEFAULT_DAO_WITH,
-  })) as DbDao[];
-  const daos = query.map(formatDao);
+  }));
   return resf(c, daos);
 });
 
@@ -41,12 +36,9 @@ app.get('/', async c => {
 app.get('/:chainId', async c => {
   const { chainId } = c.req.param();
   const chainIdNumber = getChainId(chainId);
-  const query = (await db.query.daoTable.findMany({
+  const daos = (await db.query.daoTable.findMany({
     where: (dao, { eq }) => eq(dao.chainId, chainIdNumber),
-    with: DEFAULT_DAO_WITH,
-  })) as DbDao[];
-
-  const daos = query.map(formatDao);
+  }));
 
   return resf(c, daos);
 });
