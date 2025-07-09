@@ -57,11 +57,11 @@ export const DAO_SELECT_FIELDS = {
   erc20Address: schema.daoTable.erc20Address,
   createdAt: schema.daoTable.createdAt,
   updatedAt: schema.daoTable.updatedAt,
-  governanceModuleAddresses: sql<string[]>`
+  governanceModules: sql<string[]>`
     array_remove(array_agg(${schema.governanceModuleTable.address}) OVER (
       PARTITION BY ${schema.daoTable.chainId}, ${schema.daoTable.address}
     ), NULL)
-  `.as('governanceModuleAddresses'),
+  `.as('governanceModules'),
 };
 
 export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
