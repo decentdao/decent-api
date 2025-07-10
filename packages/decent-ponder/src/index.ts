@@ -32,9 +32,12 @@ const handleGovernanceData = async (
   entry.fractalModuleAddress = governance.fractalModuleAddress;
   entry.requiredSignatures = governance.threshold;
 
-  await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate({
-    ...entry,
-    updatedAt: timestamp,
+  await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate(() => {
+    const { chainId, address, ...rest } = entry;
+    return {
+      ...rest,
+      updatedAt: timestamp,
+    }
   });
 
   if (governance.governanceModules.length > 0) {
