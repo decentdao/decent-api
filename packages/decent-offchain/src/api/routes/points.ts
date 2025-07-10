@@ -189,12 +189,16 @@ app.get('/streams', async c => {
   const { onchainProposals, safeProposals } = await getProposalsByAuthor({ address, passed: true });
 
   const hasOnchainStreamProposal = onchainProposals.filter(proposal =>
-    proposal.transactions?.find(transaction => checkDataForFunction(transaction.data, 'createWithDurationsLT')),
+    proposal.transactions?.find(transaction =>
+      checkDataForFunction(transaction.data, 'createWithDurationsLT'),
+    ),
   ).length;
 
   const hasSafeStreamProposal = safeProposals.filter(proposal =>
     proposal?.transactions?.parameters?.find(parameter =>
-      parameter.valueDecoded?.find(value => checkDataForFunction(value.data, 'createWithDurationsLT')),
+      parameter.valueDecoded?.find(value =>
+        checkDataForFunction(value.data, 'createWithDurationsLT'),
+      ),
     ),
   ).length;
 

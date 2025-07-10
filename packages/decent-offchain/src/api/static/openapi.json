@@ -1257,7 +1257,15 @@
             "nullable": true
           }
         },
-        "required": ["daoChainId", "daoAddress", "proposer", "safeNonce", "safeTxHash", "transactions", "submissionDate"]
+        "required": [
+          "daoChainId",
+          "daoAddress",
+          "proposer",
+          "safeNonce",
+          "safeTxHash",
+          "transactions",
+          "submissionDate"
+        ]
       },
       "PaymentStream": {
         "type": "object",
