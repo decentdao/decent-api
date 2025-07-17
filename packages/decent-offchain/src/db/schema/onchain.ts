@@ -98,7 +98,6 @@ export const onchainProposalTable = onchainSchema.table(
     proposer: hex('proposer').notNull(),
     votingStrategyAddress: hex('voting_strategy_address').notNull(),
     transactions: json('transactions').$type<Transaction[]>(),
-    decodedTransactions: json('decoded_transactions'),
     title: text('title').notNull(),
     description: text('description').notNull(),
     createdAt: bigint('created_at', { mode: 'number' }).notNull(),
