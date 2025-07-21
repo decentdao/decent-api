@@ -189,7 +189,7 @@ ponder.on('ZodiacModules:ProposalCreated', async ({ event, context }) => {
       description,
       createdAt: event.block.timestamp,
       proposedTxHash: event.transaction.hash,
-    });
+    }).onConflictDoNothing();
   } catch (error) {
     console.log('assuming not Azorius module, skipping...');
   }
