@@ -14,18 +14,33 @@ const app = new Hono();
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
  * @returns {Proposal[]} Array of proposal objects
+ * TODO: Unify types for multisig and module DAO
  */
 app.get('/', daoCheck, async c => {
   const dao = c.get('dao');
-  const proposals = await db.query.onchainProposalTable.findMany({
-    where: and(
-      eq(schema.onchainProposalTable.daoChainId, dao.chainId),
-      eq(schema.onchainProposalTable.daoAddress, dao.address),
-    ),
-  });
+  const isMultisig = dao?.governanceModules?.length === 0 ;
 
-  const ret = proposals.map(formatProposal);
-  return resf(c, ret);
+  if (isMultisig) {
+    const proposals = await db.query.safeProposalTable.findMany({
+      where: and(
+        eq(schema.safeProposalTable.daoChainId, dao.chainId),
+        eq(schema.safeProposalTable.daoAddress, dao.address),
+      ),
+      orderBy: schema.safeProposalTable.safeNonce
+    });
+
+    return resf(c, proposals);
+  } else {
+    const proposals = await db.query.onchainProposalTable.findMany({
+      where: and(
+        eq(schema.onchainProposalTable.daoChainId, dao.chainId),
+        eq(schema.onchainProposalTable.daoAddress, dao.address),
+      ),
+    });
+
+    const ret = proposals.map(formatProposal);
+    return resf(c, ret);
+  }
 });
 
 /**

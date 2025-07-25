@@ -20,22 +20,23 @@ const API_URL = (chainId: SupportedChainId) => {
   return `https://safe-transaction-${chain}.safe.global/api/v2`;
 };
 
-export const getExecutedSafeTransactions = async (
+export const getSafeTransactions = async (
   chainId: SupportedChainId,
   _address: string,
   since?: Date,
 ) => {
   const url = API_URL(chainId);
   const address = getAddress(_address);
-  const params = new URLSearchParams();
-  if (since) {
-    params.set('submission_date__gte', since.toISOString());
-  }
+  const params = new URLSearchParams({
+    limit: '1000',
+    submission_date__gte: since?.toISOString() || ''
+  });
+
   const response = await fetch(
     `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
   );
-  const data = await response.json();
-  return data as ListResponse<SafeMultisigTransactionResponse>;
+  const data = await response.json() as ListResponse<SafeMultisigTransactionResponse>;
+  return data;
 };
 
 export const getCIDFromSafeTransaction = (tx: SafeMultisigTransactionResponse): string | null => {

@@ -6,7 +6,7 @@ import { bearerAuth } from '@/api/middleware/auth';
 import { daoCheck } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
-import { getCIDFromSafeTransaction, getExecutedSafeTransactions } from '@/lib/safe';
+import { getCIDFromSafeTransaction, getSafeTransactions } from '@/lib/safe';
 import { schema } from '@/db/schema';
 import { DAO_SELECT_FIELDS, DAO_GOVERNANCE_MODULE_JOIN_CONDITION } from '@/db/queries';
 import { fetchMetadata } from '@/api/utils/metadata';
@@ -62,8 +62,8 @@ app.get('/:chainId/:address', daoCheck, async c => {
 });
 
 /**
- * @title Get all Safe proposals for a DAO
- * @route GET /d/{chainId}/{address}/safe-proposals
+ * @title Fetch all Safe proposals from Safe API and save to our DB
+ * @route POST /d/{chainId}/{address}/safe-proposals
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
  * @returns {SafeProposal[]} Array of Safe proposal objects
@@ -78,7 +78,7 @@ app.post('/:chainId/:address/safe-proposals', daoCheck, async c => {
   });
   const since = latestProposal ? new Date(latestProposal.submissionDate.getTime() + 1) : undefined;
 
-  const transactions = await getExecutedSafeTransactions(dao.chainId, dao.address, since);
+  const transactions = await getSafeTransactions(dao.chainId, dao.address, since);
   if (transactions.results.length === 0) return resf(c, []);
 
   const proposals = await Promise.all(
