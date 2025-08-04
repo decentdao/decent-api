@@ -3,14 +3,15 @@ import { getAbiItem, http } from 'viem';
 import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
 import { FractalRegistryAbi } from './abis/FractalRegistry';
 import { AzoriusAbi } from './abis/Azorius';
+import { LinearERC20VotingAbi } from './abis/LinearERC20Voting';
 import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactory';
+import { LinearERC721VotingAbi } from './abis/LinearERC721Voting';
+import { MultisigFreezeGuardAbi } from './abis/MultisigFreezeGuard';
+import { MultisigFreezeVotingAbi } from './abis/MultisigFreezeVoting';
+import { AzoriusFreezeGuardAbi } from './abis/AzoriusFreezeGuard';
 
 export default createConfig({
   chains: {
-    // sepolia: {
-    //   chainId: 11155111,
-    //   transport: http(process.env.PONDER_RPC_URL_11155111),
-    // },
     mainnet: {
       id: 1,
       rpc: http(process.env.PONDER_RPC_URL_1),
@@ -32,10 +33,6 @@ export default createConfig({
     KeyValuePairs: {
       abi: KeyValuePairsAbi,
       chain: {
-        // sepolia: {
-        //   address: "0xC0E08581b70cF745770154f3E9a9A8890198b024",
-        //   startBlock: 4916643,
-        // },
         mainnet: {
           address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
           startBlock: 17389311,
@@ -57,10 +54,6 @@ export default createConfig({
     FractalRegistry: {
       abi: FractalRegistryAbi,
       chain: {
-        // sepolia: {
-        //   address: "0x4791FF2a6E84F012402c0679C12Cb1d9260450A6",
-        //   startBlock: 4916634,
-        // },
         mainnet: {
           address: '0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3',
           startBlock: 17389302,
@@ -79,7 +72,7 @@ export default createConfig({
         },
       },
     },
-    ZodiacModules: {
+    Azorius: {
       abi: AzoriusAbi,
       chain: {
         mainnet: {
@@ -124,6 +117,236 @@ export default createConfig({
           }),
         },
       },
+    },
+    LinearERC20Voting: {
+      abi: LinearERC20VotingAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    LinearERC721Voting: {
+      abi: LinearERC721VotingAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      }
+    },
+    MultisigFreezeGuard: {
+      abi: MultisigFreezeGuardAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      }
+    },
+    AzoriusFreezeGuard: {
+      abi: AzoriusFreezeGuardAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      }
+    },
+    MultisigFreezeVoting: {
+      abi: MultisigFreezeVotingAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0x31Bf73048056fe947B827C0Fe159ACcB5Ae30237',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      }
     }
   },
 });

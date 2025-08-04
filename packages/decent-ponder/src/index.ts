@@ -1,20 +1,14 @@
 import { isAddress } from 'viem';
 import { Context, ponder } from 'ponder:registry';
-import { replaceBigInts } from 'ponder';
 import { fetchGovernance } from './fetch';
 import {
   dao,
   DaoInsert,
-  governanceModule,
   signer,
   signerToDao,
-  votingStrategy,
-  votingToken,
   hatIdToStreamId,
   HatIdToStreamIdInsert,
-  proposal
 } from 'ponder:schema';
-import { AzoriusAbi } from '../abis/Azorius';
 
 // @TODO ENG-1080
 // Use ZodiacModuleProxyFactory to get
@@ -28,8 +22,6 @@ const handleGovernanceData = async (
 
   let governance = null;
   governance = await fetchGovernance(context, address);
-  entry.guardAddress = governance.guard;
-  entry.fractalModuleAddress = governance.fractalModuleAddress;
   entry.requiredSignatures = governance.threshold;
 
   await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate(() => {
@@ -39,24 +31,6 @@ const handleGovernanceData = async (
       updatedAt: timestamp,
     }
   });
-
-  if (governance.governanceModules.length > 0) {
-    await context.db.insert(governanceModule).values(
-      governance.governanceModules
-    ).onConflictDoNothing();
-  }
-
-  if (governance.votingStrategies.length > 0) {
-    await context.db.insert(votingStrategy).values(
-      governance.votingStrategies
-    ).onConflictDoNothing();
-  }
-
-  if (governance.votingTokens.length > 0) {
-    await context.db.insert(votingToken).values(
-      governance.votingTokens
-    ).onConflictDoNothing();
-  }
 
   if (governance.signers.length > 0) {
     await context.db.insert(signer).values(
@@ -165,53 +139,4 @@ ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) =>
   }
 
   await handleGovernanceData(entry, context, event.block.timestamp);
-});
-
-
-ponder.on('ZodiacModules:ProposalCreated', async ({ event, context }) => {
-  try {
-    const { proposalId, proposer, transactions, metadata, strategy } = event.args;
-    if (!event.transaction.to) return;
-    const daoAddress = await context.client.readContract({
-      address: event.transaction.to,
-      abi: AzoriusAbi,
-      functionName: 'target',
-    });
-    const { title, description } = JSON.parse(metadata);
-    await context.db.insert(proposal).values({
-      id: proposalId,
-      daoChainId: context.chain.id,
-      daoAddress,
-      proposer,
-      votingStrategyAddress: strategy,
-      transactions: replaceBigInts(transactions, (x) => x.toString()),
-      title,
-      description,
-      createdAt: event.block.timestamp,
-      proposedTxHash: event.transaction.hash,
-    }).onConflictDoNothing();
-  } catch (error) {
-    console.log('assuming not Azorius module, skipping...');
-  }
-});
-
-ponder.on('ZodiacModules:ProposalExecuted', async ({ event, context }) => {
-  try {
-    const { proposalId } = event.args;
-    if (!event.transaction.to) return;
-    const daoAddress = await context.client.readContract({
-      address: event.transaction.to,
-      abi: AzoriusAbi,
-      functionName: 'target'
-    });
-    await context.db.update(proposal, {
-      id: BigInt(proposalId),
-      daoAddress,
-      daoChainId: context.chain.id,
-    }).set({
-      executedTxHash: event.transaction.hash,
-    });
-  } catch (error) {
-    console.log('event.transaction.to is not Azorius module, skipping...');
-  }
 });

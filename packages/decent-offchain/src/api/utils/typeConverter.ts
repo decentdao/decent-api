@@ -14,17 +14,24 @@ export const formatDao = (dbDao: DbDao): Dao => {
     proposalTemplatesCID: dbDao.proposalTemplatesCID,
     governanceModules: dbDao.governanceModules.map(module => ({
       address: module.address,
+      executionPeriod: module.executionPeriod,
+      timelockPeriod: module.timelockPeriod,
       strategies: module.votingStrategies.map(strategy => ({
         address: strategy.address,
         version: 1, // TODO: [ENG-551] add version to db
+        requiredProposerWeight: strategy.requiredProposerWeight,
+        votingPeriod: strategy.votingPeriod,
+        basisNumerator: strategy.basisNumerator,
+        quorumNumerator: strategy.quorumNumerator,
         votingTokens: strategy.votingTokens.map(token => ({
           address: token.address,
           type: token.type,
+          weight: token.weight,
         })),
       })),
     })),
-    guardAddress: dbDao.guardAddress || zeroAddress,
-    fractalModuleAddress: dbDao.fractalModuleAddress,
+    guardAddress: zeroAddress,
+    fractalModuleAddress: zeroAddress,
     hatIdToStreamIds: dbDao.hatIdToStreamIds.map(hatIdToStreamId => ({
       hatId: hatIdToStreamId.hatId,
       streamId: hatIdToStreamId.streamId,
@@ -52,7 +59,6 @@ export const formatProposal = (dbProposal: DbOnchainProposal) => {
     proposer: dbProposal.proposer,
     votingStrategyAddress: dbProposal.votingStrategyAddress,
     transactions: dbProposal.transactions,
-    decodedTransactions: dbProposal.decodedTransactions,
     proposedTxHash: dbProposal.proposedTxHash,
     executedTxHash: dbProposal.executedTxHash,
     createdAt: dbProposal.createdAt,

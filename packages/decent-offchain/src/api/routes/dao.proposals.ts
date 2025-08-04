@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
@@ -26,7 +26,7 @@ app.get('/', daoCheck, async c => {
         eq(schema.safeProposalTable.daoChainId, dao.chainId),
         eq(schema.safeProposalTable.daoAddress, dao.address),
       ),
-      orderBy: schema.safeProposalTable.safeNonce
+      orderBy: desc(schema.safeProposalTable.safeNonce)
     });
 
     return resf(c, proposals);
@@ -36,6 +36,7 @@ app.get('/', daoCheck, async c => {
         eq(schema.onchainProposalTable.daoChainId, dao.chainId),
         eq(schema.onchainProposalTable.daoAddress, dao.address),
       ),
+      orderBy: desc(schema.onchainProposalTable.id)
     });
 
     const ret = proposals.map(formatProposal);

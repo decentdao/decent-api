@@ -5,22 +5,24 @@ export const DEFAULT_DAO_WITH = {
   governanceModules: {
     columns: {
       address: true,
-      name: true,
-      description: true,
+      executionPeriod: true,
+      timelockPeriod: true,
     },
     with: {
       votingStrategies: {
         columns: {
           address: true,
-          minProposerBalance: true,
-          name: true,
-          description: true,
+          requiredProposerWeight: true,
+          votingPeriod: true,
+          basisNumerator: true,
+          quorumNumerator: true,
         },
         with: {
           votingTokens: {
             columns: {
               address: true,
               type: true,
+              weight: true,
             },
           },
         },
@@ -52,8 +54,6 @@ export const DAO_SELECT_FIELDS = {
   gasTankAddress: schema.daoTable.gasTankAddress,
   creatorAddress: schema.daoTable.creatorAddress,
   requiredSignatures: schema.daoTable.requiredSignatures,
-  guardAddress: schema.daoTable.guardAddress,
-  fractalModuleAddress: schema.daoTable.fractalModuleAddress,
   erc20Address: schema.daoTable.erc20Address,
   createdAt: schema.daoTable.createdAt,
   updatedAt: schema.daoTable.updatedAt,

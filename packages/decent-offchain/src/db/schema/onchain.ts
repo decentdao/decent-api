@@ -29,43 +29,50 @@ export const daoTable = onchainSchema.table(
     gasTankAddress: hex(),
     creatorAddress: hex(),
     requiredSignatures: integer(),
-    guardAddress: hex(),
-    fractalModuleAddress: hex(),
     erc20Address: hex(),
-    createdAt: bigint('created_at', { mode: 'number' }),
-    updatedAt: bigint('updated_at', { mode: 'number' }),
+    createdAt: bigint({ mode: 'number' }),
+    updatedAt: bigint({ mode: 'number' }),
   },
   t => [primaryKey({ columns: [t.chainId, t.address] })],
 );
 
+export const moduleType = onchainSchema.enum('module_type', ['AZORIUS', 'FRACTAL']);
 export const governanceModuleTable = onchainSchema.table('governance_module', {
   address: hex('governance_module_address').primaryKey(),
-  daoChainId: integer('dao_chain_id').notNull(),
-  daoAddress: hex('dao_address').notNull(),
-  name: text('governance_module_name'),
-  description: text('governance_module_description'),
+  daoChainId: integer().notNull(),
+  daoAddress: hex().notNull(),
+  executionPeriod: bigint({ mode: 'number' }),
+  timelockPeriod: bigint({ mode: 'number' }),
+  moduleType: moduleType(),
 });
 
 export const votingStrategyTable = onchainSchema.table('voting_strategy', {
   address: hex('voting_strategy_address').primaryKey(),
-  governanceModuleId: hex('governance_module_id').notNull(), // references governanceModule.address
-  minProposerBalance: text('min_proposer_balance'),
-  name: text('voting_strategy_name'),
-  description: text('voting_strategy_description'),
-  enabledAt: bigint('voting_strategy_enabled_at', { mode: 'number' }),
-  disabledAt: bigint('voting_strategy_disabled_at', { mode: 'number' }),
+  governanceModuleId: hex(), // references governanceModule.address
+  requiredProposerWeight: bigint({ mode: 'number' }),
+  votingPeriod: integer(),
+  basisNumerator: bigint({ mode: 'number' }),
+  quorumNumerator: bigint({ mode: 'number' }),
 });
 
-export const tokenTypeEnum = onchainSchema.enum('token_type', ['ERC20', 'ERC721', 'ERC1155']);
+export const freezeVotingStrategy = onchainSchema.table('voting_strategy_freeze', {
+  address:                hex('voting_strategy_address').primaryKey(),
+  governanceModuleId:     hex(), // references governanceModule.address
+  freezePeriod:           integer(),
+  freezeProposalPeriod:   integer(),
+  freezeVotesThreshold:   bigint({ mode: 'number'}),
+})
+
+export const tokenTypeEnum = onchainSchema.enum('token_type', ['ERC20', 'ERC721']);
 export const votingTokenTable = onchainSchema.table('voting_token', {
   address: hex('voting_token_address').primaryKey(),
-  votingStrategyId: hex('voting_strategy_id').notNull(), // references votingStrategy.address
-  type: tokenTypeEnum('type').notNull(),
+  votingStrategyId: hex(), // references votingStrategy.address
+  type: tokenTypeEnum().notNull(),
+  weight: bigint({ mode: 'number' }), // ERC721 has weight
 });
 
 export const signerTable = onchainSchema.table('signer', {
   address: hex('signer_address').primaryKey(),
-  label: text('signer_label'),
 });
 
 export const signerToDaoTable = onchainSchema.table(
@@ -81,10 +88,10 @@ export const signerToDaoTable = onchainSchema.table(
 export const hatIdToStreamIdTable = onchainSchema.table(
   'hat_id_to_stream_id',
   {
-    hatId: text('hat_id').notNull(),
-    streamId: text('stream_id').notNull(),
-    daoChainId: integer('dao_chain_id').notNull(),
-    daoAddress: hex('dao_address').notNull(),
+    hatId: text().notNull(),
+    streamId: text().notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
   },
   t => [primaryKey({ columns: [t.hatId, t.streamId] })],
 );
@@ -93,16 +100,16 @@ export const onchainProposalTable = onchainSchema.table(
   'proposal',
   {
     id: bigint('proposal_id', { mode: 'number' }).notNull(),
-    daoChainId: integer('dao_chain_id').notNull(),
-    daoAddress: hex('dao_address').notNull(),
-    proposer: hex('proposer').notNull(),
-    votingStrategyAddress: hex('voting_strategy_address').notNull(),
-    transactions: json('transactions').$type<Transaction[]>(),
-    title: text('title').notNull(),
-    description: text('description').notNull(),
-    createdAt: bigint('created_at', { mode: 'number' }).notNull(),
-    proposedTxHash: hex('proposed_tx_hash').notNull(),
-    executedTxHash: hex('executed_tx_hash'),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    proposer: hex().notNull(),
+    votingStrategyAddress: hex().notNull(),
+    transactions: json().$type<Transaction[]>(),
+    title: text().notNull(),
+    description: text().notNull(),
+    createdAt: bigint({ mode: 'number' }).notNull(),
+    proposedTxHash: hex().notNull(),
+    executedTxHash: hex(),
   },
   t => [primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] })],
 );
