@@ -1,22 +1,6 @@
-# Dependencies
 node_modules/
-
-# Generated files
-generated/
-*.generated.ts
-*.generated.js
-
-# Build output
-dist/
-build/
-.ponder/
-
-# Environment files
-.env
-.env.*
-
-# Large ABI files (if you want to skip formatting them)
-# abis/*.ts
-
-# Specific files to ignore
-# ponder-env.d.ts
+generated/*
+abis/*.ts
+ponder-env.d.ts
+package*
+.*
