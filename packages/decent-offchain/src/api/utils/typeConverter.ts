@@ -1,4 +1,3 @@
-import { zeroAddress } from 'viem';
 import { Dao } from 'decent-sdk';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 
@@ -30,23 +29,16 @@ export const formatDao = (dbDao: DbDao): Dao => {
         })),
       })),
     })),
-    guardAddress: zeroAddress,
-    fractalModuleAddress: zeroAddress,
     hatIdToStreamIds: dbDao.hatIdToStreamIds.map(hatIdToStreamId => ({
       hatId: hatIdToStreamId.hatId,
       streamId: hatIdToStreamId.streamId,
     })),
-    gastank: {
-      address: dbDao.gasTankAddress,
-      enabled: Boolean(dbDao.gasTankAddress && dbDao.gasTankEnabled),
-    },
     creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
     updatedAt: dbDao.updatedAt || 0,
     parent: null,
     children: null,
-    cycle: null,
   };
   return dao;
 };
