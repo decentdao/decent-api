@@ -808,4 +808,3 @@ export const AzoriusAbi = [
     type: 'function',
   },
 ] as const;
-

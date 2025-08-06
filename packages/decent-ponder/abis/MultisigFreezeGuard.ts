@@ -12,11 +12,11 @@ export const MultisigFreezeGuardAbi = [
         indexed: false,
         internalType: 'uint32',
         name: 'executionPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'ExecutionPeriodUpdated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -25,11 +25,11 @@ export const MultisigFreezeGuardAbi = [
         indexed: false,
         internalType: 'uint8',
         name: 'version',
-        type: 'uint8'
-      }
+        type: 'uint8',
+      },
     ],
     name: 'Initialized',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -38,29 +38,29 @@ export const MultisigFreezeGuardAbi = [
         indexed: false,
         internalType: 'address',
         name: 'creator',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'owner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'freezeVoting',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'childGnosisSafe',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'MultisigFreezeGuardSetup',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -69,17 +69,17 @@ export const MultisigFreezeGuardAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousOwner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newOwner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'OwnershipTransferred',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -88,11 +88,11 @@ export const MultisigFreezeGuardAbi = [
         indexed: false,
         internalType: 'uint32',
         name: 'timelockPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'TimelockPeriodUpdated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -101,33 +101,33 @@ export const MultisigFreezeGuardAbi = [
         indexed: true,
         internalType: 'address',
         name: 'timelocker',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'bytes32',
         name: 'transactionHash',
-        type: 'bytes32'
+        type: 'bytes32',
       },
       {
         indexed: true,
         internalType: 'bytes',
         name: 'signatures',
-        type: 'bytes'
-      }
+        type: 'bytes',
+      },
     ],
     name: 'TransactionTimelocked',
-    type: 'event'
+    type: 'event',
   },
   {
     inputs: [
       { internalType: 'bytes32', name: '', type: 'bytes32' },
-      { internalType: 'bool', name: '', type: 'bool' }
+      { internalType: 'bool', name: '', type: 'bool' },
     ],
     name: 'checkAfterExecution',
     outputs: [],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
@@ -141,26 +141,26 @@ export const MultisigFreezeGuardAbi = [
       { internalType: 'address', name: '', type: 'address' },
       { internalType: 'address payable', name: '', type: 'address' },
       { internalType: 'bytes', name: 'signatures', type: 'bytes' },
-      { internalType: 'address', name: '', type: 'address' }
+      { internalType: 'address', name: '', type: 'address' },
     ],
     name: 'checkTransaction',
     outputs: [],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'childGnosisSafe',
-    outputs: [ { internalType: 'contract ISafe', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'contract ISafe', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'executionPeriod',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
@@ -169,65 +169,65 @@ export const MultisigFreezeGuardAbi = [
       {
         internalType: 'contract IBaseFreezeVoting',
         name: '',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes32',
         name: '_signaturesHash',
-        type: 'bytes32'
-      }
+        type: 'bytes32',
+      },
     ],
     name: 'getTransactionTimelockedBlock',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'owner',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes',
         name: 'initializeParams',
-        type: 'bytes'
-      }
+        type: 'bytes',
+      },
     ],
     name: 'setUp',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' } ],
+    inputs: [{ internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' }],
     name: 'supportsInterface',
-    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'pure',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'timelockPeriod',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
@@ -237,7 +237,7 @@ export const MultisigFreezeGuardAbi = [
       {
         internalType: 'enum Enum.Operation',
         name: 'operation',
-        type: 'uint8'
+        type: 'uint8',
       },
       { internalType: 'uint256', name: 'safeTxGas', type: 'uint256' },
       { internalType: 'uint256', name: 'baseGas', type: 'uint256' },
@@ -246,47 +246,47 @@ export const MultisigFreezeGuardAbi = [
       {
         internalType: 'address payable',
         name: 'refundReceiver',
-        type: 'address'
+        type: 'address',
       },
       { internalType: 'bytes', name: 'signatures', type: 'bytes' },
-      { internalType: 'uint256', name: 'nonce', type: 'uint256' }
+      { internalType: 'uint256', name: 'nonce', type: 'uint256' },
     ],
     name: 'timelockTransaction',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: 'newOwner', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'uint32',
         name: '_executionPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'updateExecutionPeriod',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'uint32',
         name: '_timelockPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'updateTimelockPeriod',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;

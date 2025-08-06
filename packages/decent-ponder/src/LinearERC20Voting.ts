@@ -6,26 +6,32 @@ ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
   try {
     const { azoriusModule } = event.args;
     const address = event.log.address;
-    await context.db.insert(votingStrategy).values({
-      address,
-      governanceModuleId: azoriusModule
-    }).onConflictDoUpdate({ governanceModuleId: azoriusModule });
+    await context.db
+      .insert(votingStrategy)
+      .values({
+        address,
+        governanceModuleId: azoriusModule,
+      })
+      .onConflictDoUpdate({ governanceModuleId: azoriusModule });
 
     // no event for ERC20 voting token so do it manually here
     try {
       const token = await context.client.readContract({
         address,
         abi: LinearERC20VotingAbi,
-        functionName: 'governanceToken'
+        functionName: 'governanceToken',
       });
-      await context.db.insert(votingToken).values({
-        address: token,
-        type: 'ERC20',
-        votingStrategyId: address
-      }).onConflictDoUpdate({
-        type: 'ERC20',
-        votingStrategyId: address
-      });
+      await context.db
+        .insert(votingToken)
+        .values({
+          address: token,
+          type: 'ERC20',
+          votingStrategyId: address,
+        })
+        .onConflictDoUpdate({
+          type: 'ERC20',
+          votingStrategyId: address,
+        });
     } catch {
       // ERC721 has the same event signature so it will end up here
       // insertion of token info is handled in `LinearERC721Voting.ts`
@@ -39,10 +45,13 @@ ponder.on('LinearERC20Voting:RequiredProposerWeightUpdated', async ({ event, con
   try {
     const { requiredProposerWeight } = event.args;
     const strategy = event.log.address;
-    await context.db.insert(votingStrategy).values({
-      address: strategy,
-      requiredProposerWeight,
-    }).onConflictDoUpdate({ requiredProposerWeight });
+    await context.db
+      .insert(votingStrategy)
+      .values({
+        address: strategy,
+        requiredProposerWeight,
+      })
+      .onConflictDoUpdate({ requiredProposerWeight });
   } catch (e) {
     console.error('LinearERC20Voting:RequiredProposerWeightUpdated', e);
   }
@@ -52,10 +61,13 @@ ponder.on('LinearERC20Voting:QuorumNumeratorUpdated', async ({ event, context })
   try {
     const { quorumNumerator } = event.args;
     const strategy = event.log.address;
-    await context.db.insert(votingStrategy).values({
-      address: strategy,
-      quorumNumerator,
-    }).onConflictDoUpdate({ quorumNumerator });
+    await context.db
+      .insert(votingStrategy)
+      .values({
+        address: strategy,
+        quorumNumerator,
+      })
+      .onConflictDoUpdate({ quorumNumerator });
   } catch (e) {
     console.error('LinearERC20Voting:QuorumNumeratorUpdated', e);
   }
@@ -65,11 +77,14 @@ ponder.on('LinearERC20Voting:BasisNumeratorUpdated', async ({ event, context }) 
   try {
     const { basisNumerator } = event.args;
     const strategy = event.log.address;
-    await context.db.insert(votingStrategy).values({
-      address: strategy,
-      basisNumerator
-    }).onConflictDoUpdate({ basisNumerator })
-  } catch(e) {
+    await context.db
+      .insert(votingStrategy)
+      .values({
+        address: strategy,
+        basisNumerator,
+      })
+      .onConflictDoUpdate({ basisNumerator });
+  } catch (e) {
     console.error('LinearERC20Voting:BasisNumeratorUpdated', e);
   }
 });
@@ -79,11 +94,14 @@ ponder.on('LinearERC20Voting:VotingPeriodUpdated', async ({ event, context }) =>
   try {
     const { votingPeriod } = event.args;
     const strategy = event.log.address;
-    await context.db.insert(votingStrategy).values({
-      address: strategy,
-      votingPeriod
-    }).onConflictDoUpdate({ votingPeriod })
-  } catch(e) {
+    await context.db
+      .insert(votingStrategy)
+      .values({
+        address: strategy,
+        votingPeriod,
+      })
+      .onConflictDoUpdate({ votingPeriod });
+  } catch (e) {
     console.error('LinearERC20Voting:VotingPeriodUpdated', e);
   }
-})
+});

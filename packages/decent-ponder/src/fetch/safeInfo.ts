@@ -1,9 +1,6 @@
 import { Address, getAddress } from 'viem';
 import { Context } from 'ponder:registry';
-import {
-  SignerInsert,
-  SignerToDaoInsert,
-} from 'ponder:schema';
+import { SignerInsert, SignerToDaoInsert } from 'ponder:schema';
 import { GnosisSafeL2Abi } from '../../abis/GnosisSafeL2';
 
 export type GovernanceInsert = {
@@ -20,10 +17,7 @@ export async function fetchSafeInfo(
   try {
     const address = getAddress(_safeAddress);
     const daoChainId = context.chain.id;
-    const [
-      threshold,
-      owners,
-    ] = await context.client.multicall({
+    const [threshold, owners] = await context.client.multicall({
       contracts: [
         {
           abi: GnosisSafeL2Abi,

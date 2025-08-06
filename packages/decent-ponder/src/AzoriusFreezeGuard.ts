@@ -4,7 +4,7 @@ import { freezeVotingStrategy } from 'ponder:schema';
 // other freeze voting settings are covered by the common
 // event topics in `MultisigFreezeVoting`
 
-ponder.on('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', async({ event, context }) => {
+ponder.on('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', async ({ event, context }) => {
   try {
     const { freezeVoting } = event.args;
     const address = event.log.address;

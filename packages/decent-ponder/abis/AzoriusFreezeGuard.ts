@@ -8,23 +8,23 @@ export const AzoriusFreezeGuardAbi = [
         indexed: true,
         internalType: 'address',
         name: 'creator',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'owner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'freezeVoting',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'AzoriusFreezeGuardSetUp',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -33,11 +33,11 @@ export const AzoriusFreezeGuardAbi = [
         indexed: false,
         internalType: 'uint8',
         name: 'version',
-        type: 'uint8'
-      }
+        type: 'uint8',
+      },
     ],
     name: 'Initialized',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -46,27 +46,27 @@ export const AzoriusFreezeGuardAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousOwner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newOwner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'OwnershipTransferred',
-    type: 'event'
+    type: 'event',
   },
   {
     inputs: [
       { internalType: 'bytes32', name: '', type: 'bytes32' },
-      { internalType: 'bool', name: '', type: 'bool' }
+      { internalType: 'bool', name: '', type: 'bool' },
     ],
     name: 'checkAfterExecution',
     outputs: [],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
@@ -80,12 +80,12 @@ export const AzoriusFreezeGuardAbi = [
       { internalType: 'address', name: '', type: 'address' },
       { internalType: 'address payable', name: '', type: 'address' },
       { internalType: 'bytes', name: '', type: 'bytes' },
-      { internalType: 'address', name: '', type: 'address' }
+      { internalType: 'address', name: '', type: 'address' },
     ],
     name: 'checkTransaction',
     outputs: [],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
@@ -94,51 +94,51 @@ export const AzoriusFreezeGuardAbi = [
       {
         internalType: 'contract IBaseFreezeVoting',
         name: '',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'owner',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes',
         name: 'initializeParams',
-        type: 'bytes'
-      }
+        type: 'bytes',
+      },
     ],
     name: 'setUp',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' } ],
+    inputs: [{ internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' }],
     name: 'supportsInterface',
-    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'pure',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: 'newOwner', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;

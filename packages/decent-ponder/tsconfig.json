@@ -22,7 +22,7 @@
     "skipLibCheck": true,
     // Show full error messages and types
     "noErrorTruncation": true,
-    
+
     // Types
     "types": ["bun"]
   },

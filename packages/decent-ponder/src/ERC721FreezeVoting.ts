@@ -7,9 +7,7 @@ import { freezeVotingStrategy } from 'ponder:schema';
 ponder.on('ERC721FreezeVoting:ERC721FreezeVotingSetUp', async ({ event, context }) => {
   try {
     const address = event.log.address;
-    await context.db
-      .update(freezeVotingStrategy, { address })
-      .set({ freezeVoteType: 'ERC721' });
+    await context.db.update(freezeVotingStrategy, { address }).set({ freezeVoteType: 'ERC721' });
   } catch (e) {
     console.error('ERC721FreezeVoting:ERC721FreezeVotingSetUp', e);
   }

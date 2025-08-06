@@ -1,9 +1,9 @@
 export const FractalModuleAbi = [
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   {
-    inputs: [ { internalType: 'address', name: 'guard_', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: 'guard_', type: 'address' }],
     name: 'NotIERC165Compliant',
-    type: 'error'
+    type: 'error',
   },
   { inputs: [], name: 'TxFailed', type: 'error' },
   { inputs: [], name: 'Unauthorized', type: 'error' },
@@ -14,17 +14,17 @@ export const FractalModuleAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousAvatar',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newAvatar',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'AvatarSet',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -33,11 +33,11 @@ export const FractalModuleAbi = [
         indexed: false,
         internalType: 'address',
         name: 'guard',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'ChangedGuard',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -46,11 +46,11 @@ export const FractalModuleAbi = [
         indexed: false,
         internalType: 'address[]',
         name: 'controllers',
-        type: 'address[]'
-      }
+        type: 'address[]',
+      },
     ],
     name: 'ControllersAdded',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -59,11 +59,11 @@ export const FractalModuleAbi = [
         indexed: false,
         internalType: 'address[]',
         name: 'controllers',
-        type: 'address[]'
-      }
+        type: 'address[]',
+      },
     ],
     name: 'ControllersRemoved',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -72,11 +72,11 @@ export const FractalModuleAbi = [
         indexed: false,
         internalType: 'uint8',
         name: 'version',
-        type: 'uint8'
-      }
+        type: 'uint8',
+      },
     ],
     name: 'Initialized',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -85,17 +85,17 @@ export const FractalModuleAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousOwner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newOwner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'OwnershipTransferred',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -104,139 +104,139 @@ export const FractalModuleAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousTarget',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newTarget',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'TargetSet',
-    type: 'event'
+    type: 'event',
   },
   {
     inputs: [
       {
         internalType: 'address[]',
         name: '_controllers',
-        type: 'address[]'
-      }
+        type: 'address[]',
+      },
     ],
     name: 'addControllers',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'avatar',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: '', type: 'address' }],
     name: 'controllers',
-    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'bytes', name: 'execTxData', type: 'bytes' } ],
+    inputs: [{ internalType: 'bytes', name: 'execTxData', type: 'bytes' }],
     name: 'execTx',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'getGuard',
-    outputs: [ { internalType: 'address', name: '_guard', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '_guard', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'guard',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'owner',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'address[]',
         name: '_controllers',
-        type: 'address[]'
-      }
+        type: 'address[]',
+      },
     ],
     name: 'removeControllers',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: '_avatar', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: '_avatar', type: 'address' }],
     name: 'setAvatar',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: '_guard', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: '_guard', type: 'address' }],
     name: 'setGuard',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: '_target', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: '_target', type: 'address' }],
     name: 'setTarget',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes',
         name: 'initializeParams',
-        type: 'bytes'
-      }
+        type: 'bytes',
+      },
     ],
     name: 'setUp',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'target',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: 'newOwner', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;

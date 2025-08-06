@@ -58,8 +58,8 @@ export default createConfig({
         },
         sepolia: {
           address: '0xC0E08581b70cF745770154f3E9a9A8890198b024',
-          startBlock: 4916643
-        }
+          startBlock: 4916643,
+        },
       },
     },
     FractalRegistry: {
@@ -83,8 +83,8 @@ export default createConfig({
         },
         sepolia: {
           address: '0x4791FF2a6E84F012402c0679C12Cb1d9260450A6',
-          startBlock: 4916634
-        }
+          startBlock: 4916634,
+        },
       },
     },
     Azorius: {
@@ -136,12 +136,12 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
+          }),
+        },
       },
     },
     FractalModule: {
@@ -193,12 +193,12 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
+          }),
+        },
       },
     },
     LinearERC20Voting: {
@@ -250,12 +250,12 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
+          }),
+        },
       },
     },
     LinearERC721Voting: {
@@ -307,13 +307,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
+          }),
+        },
+      },
     },
     MultisigFreezeGuard: {
       abi: MultisigFreezeGuardAbi,
@@ -364,13 +364,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
+          }),
+        },
+      },
     },
     AzoriusFreezeGuard: {
       abi: AzoriusFreezeGuardAbi,
@@ -421,13 +421,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
+          }),
+        },
+      },
     },
     MultisigFreezeVoting: {
       abi: MultisigFreezeVotingAbi,
@@ -478,13 +478,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
+          }),
+        },
+      },
     },
     ERC20FreezeVoting: {
       abi: ERC20FreezeVotingAbi,
@@ -535,13 +535,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
+          }),
+        },
+      },
     },
     ERC721FreezeVoting: {
       abi: ERC721FreezeVotingAbi,
@@ -592,13 +592,13 @@ export default createConfig({
           address: factory({
             address: [
               '0x000000000000aDdB49795b0f9bA5BC298cDda236',
-              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3'
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
-          })
-        }
-      }
-    }
+          }),
+        },
+      },
+    },
   },
 });

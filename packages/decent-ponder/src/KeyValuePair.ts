@@ -10,23 +10,22 @@ import {
   HatIdToStreamIdInsert,
 } from 'ponder:schema';
 
-const handleDataEntry = async (
-  entry: DaoInsert,
-  context: Context,
-  timestamp: bigint,
-) => {
+const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
-  await context.db.insert(dao).values({
-    ...entry,
-    createdAt: timestamp
-  }).onConflictDoUpdate(() => {
-    newDao = false;
-    const { chainId, address, ...rest } = entry;
-    return {
-      ...rest,
-      updatedAt: timestamp,
-    }
-  });
+  await context.db
+    .insert(dao)
+    .values({
+      ...entry,
+      createdAt: timestamp,
+    })
+    .onConflictDoUpdate(() => {
+      newDao = false;
+      const { chainId, address, ...rest } = entry;
+      return {
+        ...rest,
+        updatedAt: timestamp,
+      };
+    });
 
   if (newDao) {
     const { address, chainId } = entry;
@@ -39,19 +38,15 @@ const handleDataEntry = async (
     }
 
     await context.db.update(dao, { address, chainId }).set({
-      requiredSignatures: safeInfo.threshold
+      requiredSignatures: safeInfo.threshold,
     });
 
     if (safeInfo.signers.length > 0) {
-      await context.db.insert(signer).values(
-        safeInfo.signers
-      ).onConflictDoNothing();
+      await context.db.insert(signer).values(safeInfo.signers).onConflictDoNothing();
     }
 
     if (safeInfo.signerToDaos.length > 0) {
-      await context.db.insert(signerToDao).values(
-        safeInfo.signerToDaos
-      ).onConflictDoNothing();
+      await context.db.insert(signerToDao).values(safeInfo.signerToDaos).onConflictDoNothing();
     }
   }
 };
@@ -64,29 +59,24 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   const entry: DaoInsert = {
     chainId: context.chain.id,
     address: safeAddress,
-    creatorAddress: event.transaction.from
-  }
+    creatorAddress: event.transaction.from,
+  };
 
   if (key === 'daoName') {
     entry.name = value;
-
   } else if (key === 'proposalTemplates') {
     entry.proposalTemplatesCID = value;
-
   } else if (key === 'snapshotENS' || key === 'snapshotURL') {
     const cleanedValue = value === '' ? null : value;
     entry.snapshotENS = cleanedValue;
-
   } else if (key === 'childDao') {
     if (!isAddress(value)) {
       throw new Error(`Invalid childDao: ${value} for ${safeAddress}`);
     }
     entry.address = value;
     entry.subDaoOf = safeAddress;
-
   } else if (key === 'topHatId') {
     entry.topHatId = value;
-
   } else if (key === 'hatIdToStreamId') {
     const [hatId, streamId] = value.split(':');
     const hatIdToStreamIdData: HatIdToStreamIdInsert = {
@@ -94,19 +84,16 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
       daoAddress: safeAddress,
       hatId: hatId,
       streamId: streamId,
-    }
+    };
     await context.db.insert(hatIdToStreamId).values(hatIdToStreamIdData).onConflictDoNothing();
     return;
-
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
-
   } else if (key === 'erc20Address') {
     if (!isAddress(value)) {
       throw new Error(`Invalid erc20Address: ${value} for ${safeAddress}`);
     }
     entry.erc20Address = value;
-
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
@@ -136,7 +123,7 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
     address: daoAddress,
     name: daoName,
     creatorAddress: event.transaction.from,
-  }
+  };
 
   await handleDataEntry(entry, context, event.block.timestamp);
 });
@@ -147,7 +134,7 @@ ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) =>
     chainId: context.chain.id,
     address: subDAOAddress,
     subDaoOf: parentDAOAddress,
-  }
+  };
 
   await handleDataEntry(entry, context, event.block.timestamp);
 });

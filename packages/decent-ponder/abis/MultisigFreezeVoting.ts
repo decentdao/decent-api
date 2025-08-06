@@ -8,11 +8,11 @@ export const MultisigFreezeVotingAbi = [
         indexed: false,
         internalType: 'uint32',
         name: 'freezePeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'FreezePeriodUpdated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -21,11 +21,11 @@ export const MultisigFreezeVotingAbi = [
         indexed: true,
         internalType: 'address',
         name: 'creator',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'FreezeProposalCreated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -34,11 +34,11 @@ export const MultisigFreezeVotingAbi = [
         indexed: false,
         internalType: 'uint32',
         name: 'freezeProposalPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'FreezeProposalPeriodUpdated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -47,17 +47,17 @@ export const MultisigFreezeVotingAbi = [
         indexed: true,
         internalType: 'address',
         name: 'voter',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: false,
         internalType: 'uint256',
         name: 'votesCast',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'FreezeVoteCast',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -66,11 +66,11 @@ export const MultisigFreezeVotingAbi = [
         indexed: false,
         internalType: 'uint256',
         name: 'freezeVotesThreshold',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'FreezeVotesThresholdUpdated',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -79,11 +79,11 @@ export const MultisigFreezeVotingAbi = [
         indexed: false,
         internalType: 'uint8',
         name: 'version',
-        type: 'uint8'
-      }
+        type: 'uint8',
+      },
     ],
     name: 'Initialized',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -92,17 +92,17 @@ export const MultisigFreezeVotingAbi = [
         indexed: true,
         internalType: 'address',
         name: 'owner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'parentGnosisSafe',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'MultisigFreezeVotingSetup',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -111,158 +111,156 @@ export const MultisigFreezeVotingAbi = [
         indexed: true,
         internalType: 'address',
         name: 'previousOwner',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
         name: 'newOwner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'OwnershipTransferred',
-    type: 'event'
+    type: 'event',
   },
   {
     inputs: [],
     name: 'castFreezeVote',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'freezePeriod',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'freezeProposalCreatedBlock',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'freezeProposalPeriod',
-    outputs: [ { internalType: 'uint32', name: '', type: 'uint32' } ],
+    outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'freezeProposalVoteCount',
-    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'freezeVotesThreshold',
-    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'isFrozen',
-    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'owner',
-    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'parentGnosisSafe',
-    outputs: [ { internalType: 'contract ISafe', name: '', type: 'address' } ],
+    outputs: [{ internalType: 'contract ISafe', name: '', type: 'address' }],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes',
         name: 'initializeParams',
-        type: 'bytes'
-      }
+        type: 'bytes',
+      },
     ],
     name: 'setUp',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [ { internalType: 'address', name: 'newOwner', type: 'address' } ],
+    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
     name: 'unfreeze',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
-    inputs: [
-      { internalType: 'uint32', name: '_freezePeriod', type: 'uint32' }
-    ],
+    inputs: [{ internalType: 'uint32', name: '_freezePeriod', type: 'uint32' }],
     name: 'updateFreezePeriod',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'uint32',
         name: '_freezeProposalPeriod',
-        type: 'uint32'
-      }
+        type: 'uint32',
+      },
     ],
     name: 'updateFreezeProposalPeriod',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'uint256',
         name: '_freezeVotesThreshold',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'updateFreezeVotesThreshold',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [
       { internalType: 'address', name: '', type: 'address' },
-      { internalType: 'uint256', name: '', type: 'uint256' }
+      { internalType: 'uint256', name: '', type: 'uint256' },
     ],
     name: 'userHasFreezeVoted',
-    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ] as const;
