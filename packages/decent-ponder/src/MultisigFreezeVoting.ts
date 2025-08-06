@@ -1,14 +1,23 @@
 import { ponder } from 'ponder:registry';
 import { freezeVotingStrategy } from 'ponder:schema';
 
+ponder.on('MultisigFreezeVoting:MultisigFreezeVotingSetup', async ({ event, context }) => {
+  try {
+    const address = event.log.address;
+    await context.db
+      .update(freezeVotingStrategy, { address })
+      .set({ freezeVoteType: 'MULTISIG' });
+  } catch (e) {
+    console.error('MultisigFreezeVoting:MultisigFreezeVotingSetup', e);
+  }
+});
+
 ponder.on('MultisigFreezeVoting:FreezePeriodUpdated', async ({ event, context }) => {
   try {
     const { freezePeriod } = event.args;
     const address = event.log.address;
-    const daoChainId = context.chain.id;
     await context.db.insert(freezeVotingStrategy).values({
       address,
-      daoChainId,
       freezePeriod,
     }).onConflictDoUpdate({ freezePeriod });
   } catch (e) {

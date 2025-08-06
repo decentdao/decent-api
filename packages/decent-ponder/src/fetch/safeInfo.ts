@@ -1,10 +1,10 @@
 import { Address, getAddress } from 'viem';
 import { Context } from 'ponder:registry';
-import { safeInfo } from './safe';
 import {
   SignerInsert,
   SignerToDaoInsert,
 } from 'ponder:schema';
+import { GnosisSafeL2Abi } from '../../abis/GnosisSafeL2';
 
 export type GovernanceInsert = {
   address: Address;
@@ -13,14 +13,31 @@ export type GovernanceInsert = {
   signerToDaos: SignerToDaoInsert[];
 };
 
-export async function fetchGovernance(
+export async function fetchSafeInfo(
   context: Context,
   _safeAddress: Address,
-): Promise<GovernanceInsert> {
+): Promise<GovernanceInsert | undefined> {
   try {
-    const safeAddress = getAddress(_safeAddress);
+    const address = getAddress(_safeAddress);
     const daoChainId = context.chain.id;
-    const { threshold, owners } = await safeInfo(context, safeAddress);
+    const [
+      threshold,
+      owners,
+    ] = await context.client.multicall({
+      contracts: [
+        {
+          abi: GnosisSafeL2Abi,
+          address,
+          functionName: 'getThreshold',
+        },
+        {
+          abi: GnosisSafeL2Abi,
+          address,
+          functionName: 'getOwners',
+        },
+      ],
+      allowFailure: false,
+    });
 
     const signers: SignerInsert[] = owners.map(owner => ({
       address: owner,
@@ -29,17 +46,16 @@ export async function fetchGovernance(
     const signerToDaos: SignerToDaoInsert[] = signers.map(signer => ({
       address: signer.address,
       daoChainId,
-      daoAddress: safeAddress,
+      daoAddress: address,
     }));
 
     return {
-      address: safeAddress,
+      address,
       threshold: Number(threshold ? threshold : 0),
       signers,
       signerToDaos,
     };
   } catch (error) {
-    console.error(error);
-    throw new Error(`Failed to fetch safe: ${_safeAddress}`);
+    return undefined;
   }
 }

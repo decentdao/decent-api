@@ -3,18 +3,22 @@ import { ponder } from 'ponder:registry';
 import { governanceModule, proposal } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/Azorius';
 
-ponder.on('Azorius:AzoriusSetUp', async ({ event, context }) => {
+ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {
-    const { target } = event.args;
     const address = event.log.address;
+    const daoAddress = await context.client.readContract({
+      address,
+      abi: AzoriusAbi,
+      functionName: 'target'
+    });
     const daoChainId = context.chain.id;
     await context.db.insert(governanceModule).values({
       address,
-      daoAddress: target,
+      daoAddress,
       daoChainId
-    }).onConflictDoUpdate({ daoAddress: target, daoChainId });
+    }).onConflictDoUpdate({ daoAddress, daoChainId });
   } catch (e) {
-    console.error('Azorius:AzoriusSetUp', e);
+    console.error('Azorius:EnabledStrategy', e);
   }
 });
 
@@ -22,10 +26,9 @@ ponder.on('Azorius:ExecutionPeriodUpdated', async ({ event, context }) => {
   try {
     const { executionPeriod } = event.args;
     const address = event.log.address;
-    await context.db.insert(governanceModule).values({
-      address,
-      executionPeriod
-    }).onConflictDoUpdate({ executionPeriod });
+    await context.db.update(
+      governanceModule, { address }
+    ).set({ executionPeriod});
   } catch (e) {
     console.error('Azorius:ExecutionPeriodUpdated', e);
   }
@@ -35,10 +38,9 @@ ponder.on('Azorius:TimelockPeriodUpdated', async ({ event, context }) => {
   try {
     const { timelockPeriod } = event.args;
     const address = event.log.address;
-    await context.db.insert(governanceModule).values({
-      address,
-      timelockPeriod
-    }).onConflictDoUpdate({ timelockPeriod });
+    await context.db.update(
+      governanceModule, { address }
+    ).set({ timelockPeriod});
   } catch (e) {
     console.error('Azorius:TimelockPeriodUpdated', e);
   }

@@ -1,26 +1,16 @@
 import { ponder } from 'ponder:registry';
-import { freezeVotingStrategy, governanceModule } from 'ponder:schema';
+import { freezeVotingStrategy } from 'ponder:schema';
+
+// other freeze voting settings are covered by the common
+// event topics in `MultisigFreezeVoting`
 
 ponder.on('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', async({ event, context }) => {
   try {
-    const { owner, freezeVoting } = event.args;
+    const { freezeVoting } = event.args;
     const address = event.log.address;
-    const daoChainId = context.chain.id;
-    await context.db.insert(governanceModule).values({
-      address,
-      daoAddress: owner,
-      daoChainId,
-      moduleType: 'FRACTAL'
-    }).onConflictDoUpdate({
-      daoAddress: owner,
-      daoChainId,
-      moduleType: 'FRACTAL'
-    });
-
-    await context.db.insert(freezeVotingStrategy).values({
-      address: freezeVoting,
-      governanceModuleId: address
-    }).onConflictDoUpdate({ governanceModuleId: address })
+    await context.db
+      .update(freezeVotingStrategy, { address: freezeVoting })
+      .set({ governanceGuardId: address });
   } catch (e) {
     console.error('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', e);
   }

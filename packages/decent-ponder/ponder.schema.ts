@@ -33,7 +33,10 @@ export const dao = onchainTable('dao', {
   (t) => ({ pk: primaryKey({ columns: [t.chainId, t.address] }) })
 );
 
-export const moduleType = onchainEnum('module_type', ['AZORIUS', 'FRACTAL']);
+export const moduleType = onchainEnum('module_type', [
+  'AZORIUS',
+  'FRACTAL',
+]);
 export const governanceModule = onchainTable('governance_module', {
   address:          hex('governance_module_address').primaryKey(),
   daoChainId:       integer(),
@@ -52,12 +55,26 @@ export const votingStrategy = onchainTable('voting_strategy', {
   quorumNumerator:        bigint(),
 });
 
+export const governanceGuard = onchainTable('governance_guard', {
+  address:          hex('governance_guard_address').primaryKey(),
+  daoChainId:       integer(),
+  daoAddress:       hex(),
+  executionPeriod:  integer(),
+  timelockPeriod:   integer(),
+});
+
+export const freezeVoteType = onchainEnum('freeze_vote_type', [
+  'MULTISIG',
+  'ERC20',
+  'ERC721'
+]);
 export const freezeVotingStrategy = onchainTable('voting_strategy_freeze', {
-  address:                hex('voting_strategy_address').primaryKey(),
-  governanceModuleId:     hex(), // references governanceModule.address
-  freezePeriod:           integer(),
-  freezeProposalPeriod:   integer(),
-  freezeVotesThreshold:   bigint(),
+  address:              hex('voting_strategy_address').primaryKey(),
+  governanceGuardId:    hex(), // references governanceGuard.address
+  freezePeriod:         integer(),
+  freezeProposalPeriod: integer(),
+  freezeVotesThreshold: bigint(),
+  freezeVoteType:       freezeVoteType(),
 })
 
 export const tokenType = onchainEnum('token_type', ['ERC20', 'ERC721']);

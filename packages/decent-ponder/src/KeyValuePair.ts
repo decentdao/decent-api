@@ -1,6 +1,6 @@
 import { isAddress } from 'viem';
 import { Context, ponder } from 'ponder:registry';
-import { fetchGovernance } from './fetch';
+import { fetchSafeInfo } from './fetch/safeInfo';
 import {
   dao,
   DaoInsert,
@@ -10,21 +10,17 @@ import {
   HatIdToStreamIdInsert,
 } from 'ponder:schema';
 
-// @TODO ENG-1080
-// Use ZodiacModuleProxyFactory to get
-// initial data Safe and governance modules for the DAO
-const handleGovernanceData = async (
+const handleDataEntry = async (
   entry: DaoInsert,
   context: Context,
   timestamp: bigint,
 ) => {
-  const { address } = entry;
-
-  let governance = null;
-  governance = await fetchGovernance(context, address);
-  entry.requiredSignatures = governance.threshold;
-
-  await context.db.insert(dao).values({ ...entry, createdAt: timestamp }).onConflictDoUpdate(() => {
+  let newDao = true;
+  await context.db.insert(dao).values({
+    ...entry,
+    createdAt: timestamp
+  }).onConflictDoUpdate(() => {
+    newDao = false;
     const { chainId, address, ...rest } = entry;
     return {
       ...rest,
@@ -32,16 +28,31 @@ const handleGovernanceData = async (
     }
   });
 
-  if (governance.signers.length > 0) {
-    await context.db.insert(signer).values(
-      governance.signers
-    ).onConflictDoNothing();
-  }
+  if (newDao) {
+    const { address, chainId } = entry;
+    const safeInfo = await fetchSafeInfo(context, address);
 
-  if (governance.signerToDaos.length > 0) {
-    await context.db.insert(signerToDao).values(
-      governance.signerToDaos
-    ).onConflictDoNothing();
+    // if theres no safeInfo, its not a safe, delete
+    if (!safeInfo) {
+      await context.db.delete(dao, { address, chainId });
+      return;
+    }
+
+    await context.db.update(dao, { address, chainId }).set({
+      requiredSignatures: safeInfo.threshold
+    });
+
+    if (safeInfo.signers.length > 0) {
+      await context.db.insert(signer).values(
+        safeInfo.signers
+      ).onConflictDoNothing();
+    }
+
+    if (safeInfo.signerToDaos.length > 0) {
+      await context.db.insert(signerToDao).values(
+        safeInfo.signerToDaos
+      ).onConflictDoNothing();
+    }
   }
 };
 
@@ -53,11 +64,11 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   const entry: DaoInsert = {
     chainId: context.chain.id,
     address: safeAddress,
+    creatorAddress: event.transaction.from
   }
 
   if (key === 'daoName') {
     entry.name = value;
-    entry.creatorAddress = event.transaction.from;
 
   } else if (key === 'proposalTemplates') {
     entry.proposalTemplatesCID = value;
@@ -106,7 +117,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   }
 
   try {
-    await handleGovernanceData(entry, context, event.block.timestamp);
+    await handleDataEntry(entry, context, event.block.timestamp);
   } catch (error) {
     console.log('--------------------------------');
     console.log('Error handling governance data:', error);
@@ -127,7 +138,7 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
     creatorAddress: event.transaction.from,
   }
 
-  await handleGovernanceData(entry, context, event.block.timestamp);
+  await handleDataEntry(entry, context, event.block.timestamp);
 });
 
 ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) => {
@@ -138,5 +149,5 @@ ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) =>
     subDaoOf: parentDAOAddress,
   }
 
-  await handleGovernanceData(entry, context, event.block.timestamp);
+  await handleDataEntry(entry, context, event.block.timestamp);
 });
