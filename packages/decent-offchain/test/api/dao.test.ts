@@ -8,7 +8,7 @@ describe('DAO API', () => {
   let daoChainId: number | undefined;
 
   it('GET all DAOs', async () => {
-    const res = await app.request('/d');
+    const res = await app.request('/d/8453');
     expect(res.status).toBe(200);
     const { data } = (await res.json()) as ApiResponse<Dao[]>;
     expect(data).toBeDefined();
@@ -27,6 +27,7 @@ describe('DAO API', () => {
 
   it('GET DAO by chainId and address', async () => {
     const res = await app.request(`/d/${daoChainId}/${daoAddress}`);
+    console.log(res);
     expect(res.status).toBe(200);
     const { data } = (await res.json()) as ApiResponse<Dao>;
     expect(data).toBeDefined();
