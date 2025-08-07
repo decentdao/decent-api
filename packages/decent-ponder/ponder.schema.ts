@@ -73,12 +73,16 @@ export const freezeVotingStrategy = onchainTable('voting_strategy_freeze', {
 });
 
 export const tokenType = onchainEnum('token_type', ['ERC20', 'ERC721']);
-export const votingToken = onchainTable('voting_token', {
-  address: hex('voting_token_address').primaryKey(),
-  votingStrategyId: hex(), // references votingStrategy.address
-  type: tokenType().notNull(),
-  weight: bigint().default(BigInt(1)), // ERC721 has weight
-});
+export const votingToken = onchainTable(
+  'voting_token',
+  {
+    address: hex('voting_token_address').notNull(),
+    votingStrategyId: hex().notNull(), // references votingStrategy.address
+    type: tokenType().notNull(),
+    weight: bigint(), // ERC721 has weight
+  },
+  t => ({ pk: primaryKey({ columns: [t.address, t.votingStrategyId] }) }),
+);
 
 export const signer = onchainTable('signer', {
   address: hex('signer_address').primaryKey(),
