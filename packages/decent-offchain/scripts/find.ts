@@ -2,7 +2,11 @@
 
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { onchainProposalTable, votingStrategyTable, votingTokenTable } from '../src/db/schema/onchain';
+import {
+  onchainProposalTable,
+  votingStrategyTable,
+  votingTokenTable,
+} from '../src/db/schema/onchain';
 
 // Database connections
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -224,9 +228,7 @@ function compareVotingStrategies(remoteVotingStrategies: any[], localVotingStrat
       const differences: Record<string, { remote: any; local: any }> = {};
 
       // Compare all fields
-      const fieldsToCompare = [
-        'governanceModuleId',
-      ];
+      const fieldsToCompare = ['governanceModuleId'];
 
       fieldsToCompare.forEach(field => {
         const remoteValue = remoteStrategy[field];
@@ -298,10 +300,7 @@ function compareVotingTokens(remoteVotingTokens: any[], localVotingTokens: any[]
       const differences: Record<string, { remote: any; local: any }> = {};
 
       // Compare all fields
-      const fieldsToCompare = [
-        'votingStrategyId',
-        'type',
-      ];
+      const fieldsToCompare = ['votingStrategyId', 'type'];
 
       fieldsToCompare.forEach(field => {
         const remoteValue = remoteToken[field];
@@ -359,7 +358,10 @@ async function main() {
     // Compare data
     console.log('🔄 Comparing data...');
     const proposalInconsistencies = compareProposals(remoteProposals, localProposals);
-    const votingStrategyInconsistencies = compareVotingStrategies(remoteVotingStrategies, localVotingStrategies);
+    const votingStrategyInconsistencies = compareVotingStrategies(
+      remoteVotingStrategies,
+      localVotingStrategies,
+    );
     const votingTokenInconsistencies = compareVotingTokens(remoteVotingTokens, localVotingTokens);
 
     console.log('');
@@ -391,7 +393,9 @@ async function main() {
     if (votingStrategyInconsistencies.length === 0) {
       console.log('✅ No voting strategy inconsistencies found!');
     } else {
-      console.log(`❌ Found ${votingStrategyInconsistencies.length} voting strategy inconsistencies:`);
+      console.log(
+        `❌ Found ${votingStrategyInconsistencies.length} voting strategy inconsistencies:`,
+      );
       console.log('');
 
       votingStrategyInconsistencies.forEach((inconsistency, index) => {
@@ -414,7 +418,9 @@ async function main() {
       console.log('');
 
       votingTokenInconsistencies.forEach((inconsistency, index) => {
-        console.log(`${index + 1}. Voting Token Address: ${inconsistency.address}, Strategy: ${inconsistency.votingStrategyId}`);
+        console.log(
+          `${index + 1}. Voting Token Address: ${inconsistency.address}, Strategy: ${inconsistency.votingStrategyId}`,
+        );
 
         Object.entries(inconsistency.differences).forEach(([field, { remote, local }]) => {
           console.log(`   ${field}:`);
@@ -433,7 +439,9 @@ async function main() {
     console.log(`Local database voting strategies:  ${localVotingStrategies.length}`);
     console.log(`Remote database voting tokens: ${remoteVotingTokens.length}`);
     console.log(`Local database voting tokens:  ${localVotingTokens.length}`);
-    console.log(`Total inconsistencies found: ${proposalInconsistencies.length + votingStrategyInconsistencies.length + votingTokenInconsistencies.length}`);
+    console.log(
+      `Total inconsistencies found: ${proposalInconsistencies.length + votingStrategyInconsistencies.length + votingTokenInconsistencies.length}`,
+    );
   } catch (error) {
     console.error('❌ Error during comparison:', error);
     process.exit(1);

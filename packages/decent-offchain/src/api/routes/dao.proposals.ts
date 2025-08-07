@@ -18,7 +18,7 @@ const app = new Hono();
  */
 app.get('/', daoCheck, async c => {
   const dao = c.get('dao');
-  const isMultisig = dao?.governanceModules?.length === 0 ;
+  const isMultisig = dao?.governanceModules?.length === 0;
 
   if (isMultisig) {
     const proposals = await db.query.safeProposalTable.findMany({
@@ -26,7 +26,7 @@ app.get('/', daoCheck, async c => {
         eq(schema.safeProposalTable.daoChainId, dao.chainId),
         eq(schema.safeProposalTable.daoAddress, dao.address),
       ),
-      orderBy: desc(schema.safeProposalTable.safeNonce)
+      orderBy: desc(schema.safeProposalTable.safeNonce),
     });
 
     return resf(c, proposals);
@@ -36,7 +36,7 @@ app.get('/', daoCheck, async c => {
         eq(schema.onchainProposalTable.daoChainId, dao.chainId),
         eq(schema.onchainProposalTable.daoAddress, dao.address),
       ),
-      orderBy: desc(schema.onchainProposalTable.id)
+      orderBy: desc(schema.onchainProposalTable.id),
     });
 
     const ret = proposals.map(formatProposal);
