@@ -1,5 +1,5 @@
 import { ponder } from 'ponder:registry';
-import { votingStrategy, votingToken } from 'ponder:schema';
+import { vote, votingStrategy, votingToken } from 'ponder:schema';
 import { LinearERC20VotingAbi } from '../abis/LinearERC20Voting';
 
 ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
@@ -103,5 +103,23 @@ ponder.on('LinearERC20Voting:VotingPeriodUpdated', async ({ event, context }) =>
       .onConflictDoUpdate({ votingPeriod });
   } catch (e) {
     console.error('LinearERC20Voting:VotingPeriodUpdated', e);
+  }
+});
+
+ponder.on('LinearERC20Voting:Voted', async ({ event, context }) => {
+  try {
+    const { voter, proposalId, voteType, weight } = event.args;
+    const votingStrategyAddress = event.log.address;
+    const votedAt = event.block.timestamp;
+    await context.db.insert(vote).values({
+      voter,
+      proposalId: BigInt(proposalId),
+      votingStrategyAddress,
+      voteType,
+      weight,
+      votedAt,
+    });
+  } catch (e) {
+    console.error('LinearERC20Voting:Voted', e);
   }
 });
