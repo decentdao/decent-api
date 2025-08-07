@@ -29,13 +29,13 @@ export const getSafeTransactions = async (
   const address = getAddress(_address);
   const params = new URLSearchParams({
     limit: '1000',
-    submission_date__gte: since?.toISOString() || ''
+    submission_date__gte: since?.toISOString() || '',
   });
 
   const response = await fetch(
     `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
   );
-  const data = await response.json() as ListResponse<SafeMultisigTransactionResponse>;
+  const data = (await response.json()) as ListResponse<SafeMultisigTransactionResponse>;
   return data;
 };
 

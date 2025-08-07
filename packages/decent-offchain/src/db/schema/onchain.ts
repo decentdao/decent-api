@@ -56,20 +56,24 @@ export const votingStrategyTable = onchainSchema.table('voting_strategy', {
 });
 
 export const freezeVotingStrategy = onchainSchema.table('voting_strategy_freeze', {
-  address:                hex('voting_strategy_address').primaryKey(),
-  governanceModuleId:     hex(), // references governanceModule.address
-  freezePeriod:           integer(),
-  freezeProposalPeriod:   integer(),
-  freezeVotesThreshold:   bigint({ mode: 'number'}),
-})
+  address: hex('voting_strategy_address').primaryKey(),
+  governanceModuleId: hex(), // references governanceModule.address
+  freezePeriod: integer(),
+  freezeProposalPeriod: integer(),
+  freezeVotesThreshold: bigint({ mode: 'number' }),
+});
 
 export const tokenTypeEnum = onchainSchema.enum('token_type', ['ERC20', 'ERC721']);
-export const votingTokenTable = onchainSchema.table('voting_token', {
-  address: hex('voting_token_address').primaryKey(),
-  votingStrategyId: hex(), // references votingStrategy.address
-  type: tokenTypeEnum().notNull(),
-  weight: bigint({ mode: 'number' }), // ERC721 has weight
-});
+export const votingTokenTable = onchainSchema.table(
+  'voting_token',
+  {
+    address: hex('voting_token_address').notNull(),
+    votingStrategyId: hex().notNull(), // references votingStrategy.address
+    type: tokenTypeEnum().notNull(),
+    weight: bigint({ mode: 'number' }), // ERC721 has weight
+  },
+  t => [primaryKey({ columns: [t.address, t.votingStrategyId] })],
+);
 
 export const signerTable = onchainSchema.table('signer', {
   address: hex('signer_address').primaryKey(),

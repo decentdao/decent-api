@@ -25,7 +25,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
         votingTokens: strategy.votingTokens.map(token => ({
           address: token.address,
           type: token.type,
-          weight: token.weight,
+          weight: token?.weight || undefined,
         })),
       })),
     })),

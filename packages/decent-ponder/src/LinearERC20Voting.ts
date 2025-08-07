@@ -28,10 +28,7 @@ ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
           type: 'ERC20',
           votingStrategyId: address,
         })
-        .onConflictDoUpdate({
-          type: 'ERC20',
-          votingStrategyId: address,
-        });
+        .onConflictDoNothing();
     } catch {
       // ERC721 has the same event signature so it will end up here
       // insertion of token info is handled in `LinearERC721Voting.ts`

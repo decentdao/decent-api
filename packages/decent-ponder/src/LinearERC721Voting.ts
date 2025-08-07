@@ -22,7 +22,8 @@ ponder.on('LinearERC721Voting:GovernanceTokenAdded', async ({ event, context }) 
 ponder.on('LinearERC721Voting:GovernanceTokenRemoved', async ({ event, context }) => {
   try {
     const { token } = event.args;
-    await context.db.delete(votingToken, { address: token });
+    const votingStrategyId = event.log.address;
+    await context.db.delete(votingToken, { address: token, votingStrategyId });
   } catch (e) {
     console.error('LinearERC721Voting:GovernanceTokenRemoved', e);
   }
