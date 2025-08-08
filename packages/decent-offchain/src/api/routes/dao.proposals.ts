@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { formatProposal } from '@/api/utils/typeConverter';
+import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 
 const app = new Hono();
 
@@ -65,11 +65,8 @@ app.get('/:id', daoCheck, async c => {
     ),
     with: {
       votes: {
-        columns: {
-          voter: true,
-          voteType: true,
-          weight: true,
-          votedAt: true
+        extras: {
+          weight: bigIntText(schema.voteTable.weight)
         },
       },
     },
@@ -77,7 +74,7 @@ app.get('/:id', daoCheck, async c => {
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  return resf(c, proposal);
+  return resf(c, formatProposal(proposal));
 });
 
 export default app;

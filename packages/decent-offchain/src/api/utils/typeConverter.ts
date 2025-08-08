@@ -1,5 +1,11 @@
+import { sql } from 'drizzle-orm';
+import { PgColumn } from 'drizzle-orm/pg-core';
 import { Dao } from 'decent-sdk';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
+
+export const bigIntText = (column: PgColumn, alias?: string) => {
+  return sql<string>`${column}::text`.as(alias || column.name);
+};
 
 export const formatDao = (dbDao: DbDao): Dao => {
   const dao = {
@@ -46,7 +52,6 @@ export const formatDao = (dbDao: DbDao): Dao => {
 const voteChoice = ['NO', 'YES', 'ABSTAIN'];
 
 export const formatProposal = (dbProposal: DbOnchainProposal) => {
-  console.dir(dbProposal.votes)
   const proposal = {
     id: dbProposal.id, // Already a string
     title: dbProposal.title,
@@ -60,7 +65,7 @@ export const formatProposal = (dbProposal: DbOnchainProposal) => {
     votes: dbProposal.votes?.map(v => ({
       voter: v.voter,
       choice: voteChoice[v.voteType],
-      weight: v.weight?.toString() // Should already be a string from num78 type
+      weight: v.weight
     }))
   };
   return proposal;
