@@ -43,9 +43,12 @@ export const formatDao = (dbDao: DbDao): Dao => {
   return dao;
 };
 
+const voteChoice = ['NO', 'YES', 'ABSTAIN'];
+
 export const formatProposal = (dbProposal: DbOnchainProposal) => {
+  console.dir(dbProposal.votes)
   const proposal = {
-    id: dbProposal.id,
+    id: dbProposal.id, // Already a string
     title: dbProposal.title,
     description: dbProposal.description,
     proposer: dbProposal.proposer,
@@ -53,7 +56,12 @@ export const formatProposal = (dbProposal: DbOnchainProposal) => {
     transactions: dbProposal.transactions,
     proposedTxHash: dbProposal.proposedTxHash,
     executedTxHash: dbProposal.executedTxHash,
-    createdAt: dbProposal.createdAt,
+    createdAt: dbProposal.createdAt, // Already a string
+    votes: dbProposal.votes?.map(v => ({
+      voter: v.voter,
+      choice: voteChoice[v.voteType],
+      weight: v.weight?.toString() // Should already be a string from num78 type
+    }))
   };
   return proposal;
 };

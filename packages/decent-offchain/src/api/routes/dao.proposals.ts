@@ -63,12 +63,21 @@ app.get('/:id', daoCheck, async c => {
       eq(schema.onchainProposalTable.daoChainId, dao.chainId),
       eq(schema.onchainProposalTable.daoAddress, dao.address),
     ),
+    with: {
+      votes: {
+        columns: {
+          voter: true,
+          voteType: true,
+          weight: true,
+          votedAt: true
+        },
+      },
+    },
   });
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  const ret = formatProposal(proposal);
-  return resf(c, ret);
+  return resf(c, proposal);
 });
 
 export default app;
