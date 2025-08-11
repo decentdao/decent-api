@@ -127,6 +127,19 @@ export const proposal = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] }) }),
 );
 
+export const vote = onchainTable(
+  'vote',
+  {
+    voter: hex().notNull(),
+    proposalId: bigint().notNull(),
+    votingStrategyAddress: hex().notNull(),
+    voteType: integer().notNull(), // ['NO', 'YES', 'ABSTAIN']
+    weight: bigint().notNull(),
+    votedAt: bigint().notNull(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] }) }),
+);
+
 // ================================
 // ========= Relations ============
 // ================================

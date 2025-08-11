@@ -118,6 +118,19 @@ export const onchainProposalTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] })],
 );
 
+export const voteTable = onchainSchema.table(
+  'vote',
+  {
+    voter: hex().notNull(),
+    proposalId: bigint({ mode: 'number' }),
+    votingStrategyAddress: hex().notNull(),
+    voteType: integer().notNull(), // ['NO', 'YES', 'ABSTAIN']
+    weight: bigint({ mode: 'number' }),
+    votedAt: text().notNull(),
+  },
+  t => [primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -156,6 +169,8 @@ export const votingStrategyTableRelations = relations(votingStrategyTable, ({ on
     references: [governanceModuleTable.address],
   }),
   votingTokens: many(votingTokenTable),
+  proposals: many(onchainProposalTable),
+  votes: many(voteTable),
 }));
 
 export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) => ({
@@ -172,10 +187,26 @@ export const hatIdToStreamIdTableRelations = relations(hatIdToStreamIdTable, ({ 
   }),
 }));
 
-export const onchainProposalTableRelations = relations(onchainProposalTable, ({ one }) => ({
+export const onchainProposalTableRelations = relations(onchainProposalTable, ({ one, many }) => ({
   dao: one(daoTable, {
     fields: [onchainProposalTable.daoChainId, onchainProposalTable.daoAddress],
     references: [daoTable.chainId, daoTable.address],
+  }),
+  votingStrategy: one(votingStrategyTable, {
+    fields: [onchainProposalTable.votingStrategyAddress],
+    references: [votingStrategyTable.address],
+  }),
+  votes: many(voteTable)
+}));
+
+export const voteTableRelations = relations(voteTable, ({ one }) => ({
+  proposal: one(onchainProposalTable, {
+    fields: [voteTable.proposalId, voteTable.votingStrategyAddress],
+    references: [onchainProposalTable.id, onchainProposalTable.votingStrategyAddress],
+  }),
+  votingStrategy: one(votingStrategyTable, {
+    fields: [voteTable.votingStrategyAddress],
+    references: [votingStrategyTable.address],
   }),
 }));
 
@@ -197,4 +228,7 @@ export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
-export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect;
+export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
+  votes?: DbVote[]
+};
+export type DbVote = typeof voteTable.$inferSelect;
