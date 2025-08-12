@@ -131,6 +131,19 @@ export const voteTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] })],
 );
 
+export const splitWalletTable = onchainSchema.table(
+  'split_wallet',
+  {
+    address: hex('split_address').notNull(),
+    daoChainId: integer('dao_chain_id').notNull(),
+    daoAddress: hex('dao_address').notNull(),
+    name: text(), // comes from a KeyValuePair event
+    createdAt: bigint({ mode: 'number' }).notNull(),
+    updatedAt: bigint({ mode: 'number' }),
+  },
+  t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -138,6 +151,7 @@ export const daoTableRelations = relations(daoTable, ({ many }) => ({
   signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
   hatIdToStreamIds: many(hatIdToStreamIdTable),
+  splitWallets: many(splitWalletTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
@@ -210,6 +224,13 @@ export const voteTableRelations = relations(voteTable, ({ one }) => ({
   }),
 }));
 
+export const splitWalletTableRelations = relations(splitWalletTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [splitWalletTable.daoChainId, splitWalletTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -217,6 +238,7 @@ export type DbDao = typeof daoTable.$inferSelect & {
   signers: DbSignerToDao[];
   governanceModules: DbGovernanceModule[];
   hatIdToStreamIds: DbHatIdToStreamId[];
+  splitWallets: SplitWallet[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
   votingStrategies: DbVotingStrategy[];
@@ -232,3 +254,4 @@ export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
   votes?: DbVote[]
 };
 export type DbVote = typeof voteTable.$inferSelect;
+export type SplitWallet = typeof splitWalletTable.$inferSelect;

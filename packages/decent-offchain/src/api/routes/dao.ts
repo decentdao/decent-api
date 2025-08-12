@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bearerAuth } from '@/api/middleware/auth';
@@ -59,6 +59,37 @@ app.get('/:chainId', async c => {
 app.get('/:chainId/:address', daoCheck, async c => {
   const dao = c.get('dao');
   return resf(c, dao);
+});
+
+/**
+ * @title Get split wallets for a DAO
+ * @route GET /d/{chainId}/{address}/splits
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @returns {SplitWallet[]} Array of split wallet objects
+ */
+app.get('/:chainId/:address/splits', daoCheck, async c => {
+  const dao = c.get('dao');
+  if (!dao.splitWallets) throw new ApiError('No split wallets found for DAO', 404);
+
+  const splitsWithRecipients = await db.select({
+    name: schema.splitWalletTable.name,
+    address: schema.splitWalletTable.address,
+    splits: schema.splitRecipientTable.recipients
+  })
+    .from(schema.splitWalletTable)
+    .leftJoin(
+      schema.splitRecipientTable,
+      eq(schema.splitWalletTable.address, schema.splitRecipientTable.splitAddress)
+    )
+    .where(
+      and(
+        eq(schema.splitWalletTable.daoChainId, dao.chainId),
+        eq(schema.splitWalletTable.daoAddress, dao.address)
+      )
+    );
+
+  return resf(c, splitsWithRecipients);
 });
 
 /**
