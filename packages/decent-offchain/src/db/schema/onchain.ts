@@ -244,7 +244,6 @@ export type DbDao = typeof daoTable.$inferSelect & {
   signers: DbSignerToDao[];
   governanceModules: DbGovernanceModule[];
   hatIdToStreamIds: DbHatIdToStreamId[];
-  splitWallets: SplitWallet[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
   votingStrategies: DbVotingStrategy[];
