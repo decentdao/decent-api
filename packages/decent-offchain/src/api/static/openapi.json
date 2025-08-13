@@ -625,6 +625,81 @@
         }
       }
     },
+    "/d/{chainId}/{address}/splits": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get split wallets for a DAO",
+        "description": "Retrieve all split wallets for a specific DAO",
+        "security": [],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/SplitWallet"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "message": {
+                              "type": "string",
+                              "example": "No split wallets for DAO"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/points/proposals": {
       "get": {
         "tags": ["points"],
@@ -1716,6 +1791,38 @@
           }
         },
         "required": ["name", "chainId", "address", "token"]
+      },
+      "Split": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "percentage": {
+            "type": "number"
+          }
+        },
+        "required": ["address", "percentage"]
+      },
+      "SplitWallet": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string"
+          },
+          "splits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Split"
+            },
+            "nullable": true
+          }
+        },
+        "required": ["address"]
       }
     },
     "securitySchemes": {
