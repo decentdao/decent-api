@@ -70,8 +70,8 @@ export const formatProposal = (dbProposal: DbOnchainProposal) => {
     votes: dbProposal.votes?.map(v => ({
       voter: v.voter,
       choice: voteChoice[v.voteType],
-      weight: v.weight
-    }))
+      weight: v.weight,
+    })),
   };
   return proposal;
 };

@@ -66,7 +66,7 @@ app.get('/:id', daoCheck, async c => {
     with: {
       votes: {
         extras: {
-          weight: bigIntText(schema.voteTable.weight)
+          weight: bigIntText(schema.voteTable.weight),
         },
       },
     },

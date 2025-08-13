@@ -11,6 +11,11 @@ export type Transaction = {
   operation: number;
 };
 
+export type Split = {
+  address: Address;
+  percentage: number;
+};
+
 // ================================
 // ========= Tables ===============
 // ================================
@@ -138,7 +143,8 @@ export const splitWalletTable = onchainSchema.table(
     daoChainId: integer('dao_chain_id').notNull(),
     daoAddress: hex('dao_address').notNull(),
     name: text(), // comes from a KeyValuePair event
-    createdAt: bigint({ mode: 'number' }).notNull(),
+    splits: json().$type<Split[]>(),
+    createdAt: bigint({ mode: 'number' }),
     updatedAt: bigint({ mode: 'number' }),
   },
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
@@ -210,7 +216,7 @@ export const onchainProposalTableRelations = relations(onchainProposalTable, ({ 
     fields: [onchainProposalTable.votingStrategyAddress],
     references: [votingStrategyTable.address],
   }),
-  votes: many(voteTable)
+  votes: many(voteTable),
 }));
 
 export const voteTableRelations = relations(voteTable, ({ one }) => ({
@@ -251,7 +257,7 @@ export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
-  votes?: DbVote[]
+  votes?: DbVote[];
 };
 export type DbVote = typeof voteTable.$inferSelect;
 export type SplitWallet = typeof splitWalletTable.$inferSelect;

@@ -40,14 +40,6 @@ export const DEFAULT_DAO_WITH = {
       streamId: true,
     },
   },
-  splitWallets: {
-    columns: {
-      name: true,
-      address: true,
-      createdAt: true,
-      updatedAt: true,
-    }
-  }
 };
 
 export const DAO_SELECT_FIELDS = {

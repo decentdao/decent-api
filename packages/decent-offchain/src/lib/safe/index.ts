@@ -14,6 +14,8 @@ const API_URL = (chainId: SupportedChainId) => {
     chain = 'base';
   } else if (chainId === 10) {
     chain = 'optimism';
+  } else if (chainId === 11155111) {
+    chain = 'sepolia';
   } else {
     throw new Error(`Unsupported chainId: ${chainId}`);
   }

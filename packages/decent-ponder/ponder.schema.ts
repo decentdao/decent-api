@@ -145,10 +145,16 @@ export const splitWallet = onchainTable(
   'split_wallet',
   {
     address: hex('split_address').notNull(),
-    daoChainId: integer('dao_chain_id').notNull(),
-    daoAddress: hex('dao_address').notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
     name: text(), // comes from a KeyValuePair event
-    createdAt: bigint().notNull(),
+    splits: json().$type<
+      {
+        address: string;
+        percentage: number;
+      }[]
+    >(),
+    createdAt: bigint(),
     updatedAt: bigint(),
   },
   t => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }),

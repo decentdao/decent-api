@@ -10,15 +10,7 @@ import { getChainId } from '@/api/utils/chains';
 
 declare module 'hono' {
   interface ContextVariableMap {
-    dao: Dao & {
-      // TODO: Add splitWallets to types in sdk
-      splitWallets?: {
-        name: string | null,
-        address: Address
-        createdAt: number,
-        updatedAt: number | null,
-      }[]
-    };
+    dao: Dao;
   }
 }
 

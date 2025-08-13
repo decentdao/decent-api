@@ -10,6 +10,7 @@ import {
   HatIdToStreamIdInsert,
   splitWallet,
 } from 'ponder:schema';
+import { sql } from 'ponder';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
@@ -109,18 +110,20 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
           daoChainId: context.chain.id,
           daoAddress: safeAddress,
           name,
-          createdAt: event.block.timestamp,
         };
       });
 
-      if (wallets.length > 0) {
+      // TODO: is there a better way to update multiple?
+      for (let i = 0; i < wallets.length; i++) {
+        const wallet = wallets[i];
+        if (!wallet) return;
         await context.db
-          .insert(splitWallet)
-          .values(wallets)
-          .onConflictDoUpdate((row) => ({
-            name: row.name,
-            updatedAt: event.block.timestamp,
-          }));
+          .update(splitWallet, {
+            daoAddress: wallet.daoAddress,
+            daoChainId: wallet.daoChainId,
+            address: wallet.address,
+          })
+          .set({ name: wallet.name });
       }
     } catch (e) {
       console.error('Failed to parse revShareWallets:', e);
