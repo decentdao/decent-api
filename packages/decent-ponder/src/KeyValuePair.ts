@@ -10,7 +10,6 @@ import {
   HatIdToStreamIdInsert,
   splitWallet,
 } from 'ponder:schema';
-import { sql } from 'ponder';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
