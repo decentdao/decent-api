@@ -127,7 +127,6 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     } catch (e) {
       console.error('Failed to parse revShareWallets:', e);
     }
-    return;
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
