@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { Address, isAddress } from 'viem';
+import { isAddress } from 'viem';
 import { Dao } from 'decent-sdk';
 import { db } from '@/db';
 import { DEFAULT_DAO_WITH } from '@/db/queries';
