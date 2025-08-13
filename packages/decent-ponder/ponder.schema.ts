@@ -140,7 +140,6 @@ export const vote = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] }) }),
 );
 
-// recipients recorded in offchain table for flexibility
 export const splitWallet = onchainTable(
   'split_wallet',
   {
