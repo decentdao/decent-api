@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { Dao } from 'decent-sdk';
 import { PgColumn } from 'drizzle-orm/pg-core';
+import { Dao } from 'decent-sdk';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
