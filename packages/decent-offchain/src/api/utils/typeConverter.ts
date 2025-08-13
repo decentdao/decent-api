@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import { Dao } from 'decent-sdk';
 import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 
@@ -6,7 +7,7 @@ export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
 };
 
-export const formatDao = (dbDao: DbDao) => {
+export const formatDao = (dbDao: DbDao): Dao => {
   const dao = {
     chainId: dbDao.chainId,
     address: dbDao.address,
@@ -37,12 +38,6 @@ export const formatDao = (dbDao: DbDao) => {
     hatIdToStreamIds: dbDao.hatIdToStreamIds.map(hatIdToStreamId => ({
       hatId: hatIdToStreamId.hatId,
       streamId: hatIdToStreamId.streamId,
-    })),
-    splitWallets: dbDao?.splitWallets?.map(split => ({
-      name: split.name,
-      address: split.address,
-      createdAt: split.createdAt,
-      updatedAt: split?.updatedAt,
     })),
     creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
