@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { sql } from 'drizzle-orm';
+import { sql, asc } from 'drizzle-orm';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bearerAuth } from '@/api/middleware/auth';
@@ -27,6 +27,9 @@ app.get('/', async c => {
     .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
     .where(
       nameQueryParam ? sql`${schema.daoTable.name} ilike ${`%${nameQueryParam}%`}` : undefined,
+    )
+    .orderBy(
+      asc(schema.daoTable.chainId)
     );
   return resf(c, daos);
 });
