@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { splitWalletTable } from '@/db/schema/onchain';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
+import { duneFetchBalances } from '@/lib/dune';
 
 const app = new Hono();
 
@@ -12,7 +13,13 @@ const app = new Hono();
  * @route GET /d/{chainId}/{address}/splits
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
- * @returns {SplitWallet[]} Array of split wallet objects
+ * @returns
+ *  {
+ *    name: string | null;
+ *    address: `0x${string}`;
+ *    splits: Split[];
+ *    tokens: Address[]
+ *  }[]
  */
 app.get('/', daoCheck, async c => {
   const dao = c.get('dao');
@@ -33,7 +40,24 @@ app.get('/', daoCheck, async c => {
 
   if (splitWallets.length === 0) throw new ApiError('No split wallets for DAO', 404);
 
-  return resf(c, splitWallets);
+  const splitWalletsWithTokenHoldings = await Promise.all(
+    splitWallets.map(async (wallet) => {
+      const { balances } = await duneFetchBalances(wallet.address, {
+        chainIds: String(dao.chainId),
+        excludeSpamTokens: true,
+        metadata: false
+      });
+
+      const tokens = balances.map(b => b.address);
+
+      return {
+        ...wallet,
+        tokens
+      }
+    })
+  );
+
+  return resf(c, splitWalletsWithTokenHoldings);
 });
 
 export default app;

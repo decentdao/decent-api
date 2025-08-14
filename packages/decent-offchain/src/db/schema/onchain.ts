@@ -143,8 +143,8 @@ export const splitWalletTable = onchainSchema.table(
     daoChainId: integer('dao_chain_id').notNull(),
     daoAddress: hex('dao_address').notNull(),
     name: text(), // comes from a KeyValuePair event
-    splits: json().$type<Split[]>(),
-    createdAt: bigint({ mode: 'number' }),
+    splits: json().$type<Split[]>().notNull(),
+    createdAt: bigint({ mode: 'number' }).notNull(),
     updatedAt: bigint({ mode: 'number' }),
   },
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
