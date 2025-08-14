@@ -11,6 +11,11 @@ export type Transaction = {
   operation: number;
 };
 
+export type Split = {
+  address: Address;
+  percentage: number;
+};
+
 // ================================
 // ========= Tables ===============
 // ================================
@@ -131,6 +136,20 @@ export const voteTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] })],
 );
 
+export const splitWalletTable = onchainSchema.table(
+  'split_wallet',
+  {
+    address: hex('split_address').notNull(),
+    daoChainId: integer('dao_chain_id').notNull(),
+    daoAddress: hex('dao_address').notNull(),
+    name: text(), // comes from a KeyValuePair event
+    splits: json().$type<Split[]>(),
+    createdAt: bigint({ mode: 'number' }),
+    updatedAt: bigint({ mode: 'number' }),
+  },
+  t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -138,6 +157,7 @@ export const daoTableRelations = relations(daoTable, ({ many }) => ({
   signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
   hatIdToStreamIds: many(hatIdToStreamIdTable),
+  splitWallets: many(splitWalletTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
@@ -196,7 +216,7 @@ export const onchainProposalTableRelations = relations(onchainProposalTable, ({ 
     fields: [onchainProposalTable.votingStrategyAddress],
     references: [votingStrategyTable.address],
   }),
-  votes: many(voteTable)
+  votes: many(voteTable),
 }));
 
 export const voteTableRelations = relations(voteTable, ({ one }) => ({
@@ -207,6 +227,13 @@ export const voteTableRelations = relations(voteTable, ({ one }) => ({
   votingStrategy: one(votingStrategyTable, {
     fields: [voteTable.votingStrategyAddress],
     references: [votingStrategyTable.address],
+  }),
+}));
+
+export const splitWalletTableRelations = relations(splitWalletTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [splitWalletTable.daoChainId, splitWalletTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
   }),
 }));
 
@@ -229,6 +256,7 @@ export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
-  votes?: DbVote[]
+  votes?: DbVote[];
 };
 export type DbVote = typeof voteTable.$inferSelect;
+export type SplitWallet = typeof splitWalletTable.$inferSelect;

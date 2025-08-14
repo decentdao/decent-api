@@ -140,6 +140,25 @@ export const vote = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] }) }),
 );
 
+export const splitWallet = onchainTable(
+  'split_wallet',
+  {
+    address: hex('split_address').notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    name: text(), // comes from a KeyValuePair event
+    splits: json().$type<
+      {
+        address: string;
+        percentage: number;
+      }[]
+    >(),
+    createdAt: bigint(),
+    updatedAt: bigint(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }),
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -148,6 +167,7 @@ export const daoRelations = relations(dao, ({ many }) => ({
   governanceModules: many(governanceModule),
   hatIdToStreamIds: many(hatIdToStreamId),
   proposals: many(proposal),
+  splitWallets: many(splitWallet),
 }));
 
 export const governanceModuleRelations = relations(governanceModule, ({ one, many }) => ({
@@ -202,6 +222,13 @@ export const proposalRelations = relations(proposal, ({ one }) => ({
   }),
 }));
 
+export const splitWalletRelations = relations(splitWallet, ({ one }) => ({
+  dao: one(dao, {
+    fields: [splitWallet.daoChainId, splitWallet.daoAddress],
+    references: [dao.chainId, dao.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -219,3 +246,5 @@ export type SignerToDao = typeof signerToDao.$inferSelect;
 export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
 export type HatIdToStreamId = typeof hatIdToStreamId.$inferSelect;
 export type HatIdToStreamIdInsert = typeof hatIdToStreamId.$inferInsert;
+export type SplitWallet = typeof splitWallet.$inferSelect;
+export type SplitWalletInsert = typeof splitWallet.$inferInsert;

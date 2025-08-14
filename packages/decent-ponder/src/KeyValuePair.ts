@@ -1,6 +1,6 @@
 import { isAddress } from 'viem';
 import { Context, ponder } from 'ponder:registry';
-import { fetchSafeInfo } from './fetch/safeInfo';
+import { fetchSafeInfo } from './utils/safeInfo';
 import {
   dao,
   DaoInsert,
@@ -8,6 +8,7 @@ import {
   signerToDao,
   hatIdToStreamId,
   HatIdToStreamIdInsert,
+  splitWallet,
 } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
@@ -94,6 +95,38 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
       throw new Error(`Invalid erc20Address: ${value} for ${safeAddress}`);
     }
     entry.erc20Address = value;
+  } else if (key === 'revShareWallets') {
+    try {
+      // Parse JSON array: ["0x123:WalletA", "0x456:WalletB"]
+      const walletPairs = JSON.parse(value) as string[];
+      const wallets = walletPairs.map(item => {
+        const [address, name] = item.trim().split(':');
+        if (!address || !isAddress(address)) {
+          throw new Error(`Invalid split address: ${address}`);
+        }
+        return {
+          address,
+          daoChainId: context.chain.id,
+          daoAddress: safeAddress,
+          name,
+        };
+      });
+
+      // TODO: is there a better way to update multiple?
+      for (let i = 0; i < wallets.length; i++) {
+        const wallet = wallets[i];
+        if (!wallet) return;
+        await context.db
+          .update(splitWallet, {
+            daoAddress: wallet.daoAddress,
+            daoChainId: wallet.daoChainId,
+            address: wallet.address,
+          })
+          .set({ name: wallet.name });
+      }
+    } catch (e) {
+      console.error('Failed to parse revShareWallets:', e);
+    }
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);

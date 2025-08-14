@@ -12,6 +12,8 @@ import { AzoriusFreezeGuardAbi } from './abis/AzoriusFreezeGuard';
 import { FractalModuleAbi } from './abis/FractalModule';
 import { ERC20FreezeVotingAbi } from './abis/ERC20FreezeVoting';
 import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVoting';
+import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
+import { SplitV2Abi } from './abis/SplitV2Abi';
 
 export default createConfig({
   chains: {
@@ -596,6 +598,51 @@ export default createConfig({
             ],
             event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
             parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    SplitV2: {
+      abi: SplitV2Abi,
+      chain: {
+        mainnet: {
+          startBlock: 22870483,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
+          }),
+        },
+        base: {
+          startBlock: 32572184,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
+          }),
+        },
+        optimism: {
+          startBlock: 138165378,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
+          }),
+        },
+        polygon: {
+          startBlock: 73707056,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
+          }),
+        },
+        sepolia: {
+          startBlock: 8715311,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
           }),
         },
       },
