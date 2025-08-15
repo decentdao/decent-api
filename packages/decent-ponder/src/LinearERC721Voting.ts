@@ -1,5 +1,5 @@
 import { ponder } from 'ponder:registry';
-import { votingStrategy, votingToken } from 'ponder:schema';
+import { votingStrategy, votingToken, vote } from 'ponder:schema';
 
 ponder.on('LinearERC721Voting:GovernanceTokenAdded', async ({ event, context }) => {
   try {
@@ -58,5 +58,30 @@ ponder.on('LinearERC721Voting:QuorumThresholdUpdated', async ({ event, context }
       .onConflictDoUpdate({ quorumNumerator: quorumThreshold });
   } catch (e) {
     console.error('LinearERC721Voting:QuorumThresholdUpdated', e);
+  }
+});
+
+ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
+  try {
+    const { voter, proposalId, voteType, tokenAddresses } = event.args
+    const votingStrategyAddress = event.log.address;
+    const votedAt = event.block.timestamp;
+
+    // app has weight hardcoded as 1 even though this is not correct
+    // TODO: ENG-1385 proper vote calculation
+    const tokenWeight = 1;
+    const calculatedWeight = tokenWeight * tokenAddresses.length;
+    await context.db
+      .insert(vote)
+      .values({
+        voter,
+        proposalId: BigInt(proposalId),
+        votingStrategyAddress,
+        voteType,
+        weight: BigInt(calculatedWeight),
+        votedAt,
+      })
+  } catch (e) {
+    console.error('LinearERC721Voting:Voted');
   }
 });
