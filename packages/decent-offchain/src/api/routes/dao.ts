@@ -25,12 +25,8 @@ app.get('/', async c => {
     .select(DAO_SELECT_FIELDS)
     .from(schema.daoTable)
     .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
-    .where(
-      nameQueryParam ? sql`${schema.daoTable.name} ilike ${`%${nameQueryParam}%`}` : undefined,
-    )
-    .orderBy(
-      asc(schema.daoTable.chainId)
-    );
+    .where(nameQueryParam ? sql`${schema.daoTable.name} ilike ${`%${nameQueryParam}%`}` : undefined)
+    .orderBy(asc(schema.daoTable.chainId));
   return resf(c, daos);
 });
 

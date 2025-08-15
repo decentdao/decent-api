@@ -41,20 +41,20 @@ app.get('/', daoCheck, async c => {
   if (splitWallets.length === 0) throw new ApiError('No split wallets for DAO', 404);
 
   const splitWalletsWithTokenHoldings = await Promise.all(
-    splitWallets.map(async (wallet) => {
+    splitWallets.map(async wallet => {
       const { balances } = await duneFetchBalances(wallet.address, {
         chainIds: String(dao.chainId),
         excludeSpamTokens: true,
-        metadata: false
+        metadata: false,
       });
 
       const tokens = balances.map(b => b.address);
 
       return {
         ...wallet,
-        tokens
-      }
-    })
+        tokens,
+      };
+    }),
   );
 
   return resf(c, splitWalletsWithTokenHoldings);

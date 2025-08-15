@@ -107,7 +107,7 @@ app.get('/:walletAddress', async c => {
       address: daoTable.address,
       chainId: daoTable.chainId,
       tokenAddress: sql<Address>`
-        CASE 
+        CASE
           WHEN ${daoTable.erc20Address} IS NOT NULL THEN ${daoTable.erc20Address}
           ELSE ${votingTokenTable.address}
         END

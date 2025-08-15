@@ -147,12 +147,14 @@ export const splitWallet = onchainTable(
     daoChainId: integer().notNull(),
     daoAddress: hex().notNull(),
     name: text(), // comes from a KeyValuePair event
-    splits: json().$type<
-      {
-        address: string;
-        percentage: number;
-      }[]
-    >().notNull(),
+    splits: json()
+      .$type<
+        {
+          address: string;
+          percentage: number;
+        }[]
+      >()
+      .notNull(),
     createdAt: bigint().notNull(),
     updatedAt: bigint(),
   },
