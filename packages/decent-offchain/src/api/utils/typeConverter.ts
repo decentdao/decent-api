@@ -19,6 +19,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
     proposalTemplatesCID: dbDao.proposalTemplatesCID,
     governanceModules: dbDao.governanceModules.map(module => ({
       address: module.address,
+      type: module.moduleType,
       executionPeriod: module.executionPeriod,
       timelockPeriod: module.timelockPeriod,
       strategies: module.votingStrategies.map(strategy => ({
@@ -43,8 +44,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
     updatedAt: dbDao.updatedAt || 0,
-    parent: null,
-    children: null,
+    parentAddress: dbDao.subDaoOf,
   };
   return dao;
 };

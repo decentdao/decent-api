@@ -1,10 +1,12 @@
 import { sql } from 'drizzle-orm';
 import { schema } from './schema';
+import { bigIntText } from '@/api/utils/typeConverter';
 
 export const DEFAULT_DAO_WITH = {
   governanceModules: {
     columns: {
       address: true,
+      moduleType: true,
       executionPeriod: true,
       timelockPeriod: true,
     },
@@ -12,10 +14,12 @@ export const DEFAULT_DAO_WITH = {
       votingStrategies: {
         columns: {
           address: true,
-          requiredProposerWeight: true,
           votingPeriod: true,
           basisNumerator: true,
           quorumNumerator: true,
+        },
+        extras: {
+          requiredProposerWeight: bigIntText(schema.votingStrategyTable.requiredProposerWeight),
         },
         with: {
           votingTokens: {
