@@ -59,4 +59,4 @@ a [Ponder](https://github.com/ponder-sh/ponder) project for indexing contracts a
   - [SplitV2](https://github.com/0xSplits/splits-contracts-monorepo/blob/splits-contracts-v2.2/packages/splits-v2/src/splitters/SplitWalletV2.sol)
 ### [decent-offchain](./packages/decent-offchain)
 
-API to access DAO information, proposals, comments, temperature checks, and SIWE authentication
+API to access DAO information, DAOs, proposals and SIWE authentication
