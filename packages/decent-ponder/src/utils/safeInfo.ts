@@ -1,7 +1,7 @@
 import { Address, getAddress } from 'viem';
 import { Context } from 'ponder:registry';
 import { SignerInsert, SignerToDaoInsert } from 'ponder:schema';
-import { GnosisSafeL2Abi } from '../../abis/GnosisSafeL2';
+import { GnosisSafeL2Abi } from '../../abis/GnosisSafeL2Abi';
 
 export type GovernanceInsert = {
   address: Address;

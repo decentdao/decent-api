@@ -1,7 +1,7 @@
 import { replaceBigInts } from 'ponder';
 import { ponder } from 'ponder:registry';
 import { governanceModule, proposal } from 'ponder:schema';
-import { AzoriusAbi } from '../abis/Azorius';
+import { AzoriusAbi } from '../abis/AzoriusAbi';
 
 ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {

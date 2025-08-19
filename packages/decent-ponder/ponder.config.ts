@@ -1,19 +1,20 @@
 import { createConfig, factory } from 'ponder';
 import { getAbiItem, http } from 'viem';
 import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
-import { FractalRegistryAbi } from './abis/FractalRegistry';
-import { AzoriusAbi } from './abis/Azorius';
-import { LinearERC20VotingAbi } from './abis/LinearERC20Voting';
-import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactory';
-import { LinearERC721VotingAbi } from './abis/LinearERC721Voting';
-import { MultisigFreezeGuardAbi } from './abis/MultisigFreezeGuard';
-import { MultisigFreezeVotingAbi } from './abis/MultisigFreezeVoting';
-import { AzoriusFreezeGuardAbi } from './abis/AzoriusFreezeGuard';
-import { FractalModuleAbi } from './abis/FractalModule';
-import { ERC20FreezeVotingAbi } from './abis/ERC20FreezeVoting';
-import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVoting';
+import { FractalRegistryAbi } from './abis/FractalRegistryAbi';
+import { AzoriusAbi } from './abis/AzoriusAbi';
+import { LinearERC20VotingAbi } from './abis/LinearERC20VotingAbi';
+import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactoryAbi';
+import { LinearERC721VotingAbi } from './abis/LinearERC721VotingAbi';
+import { MultisigFreezeGuardAbi } from './abis/MultisigFreezeGuardAbi';
+import { MultisigFreezeVotingAbi } from './abis/MultisigFreezeVotingAbi';
+import { AzoriusFreezeGuardAbi } from './abis/AzoriusFreezeGuardAbi';
+import { FractalModuleAbi } from './abis/FractalModuleAbi';
+import { ERC20FreezeVotingAbi } from './abis/ERC20FreezeVotingAbi';
+import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVotingAbi';
 import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
 import { SplitV2Abi } from './abis/SplitV2Abi';
+import { HatsAbi } from './abis/HatsAbi';
 
 export default createConfig({
   chains: {

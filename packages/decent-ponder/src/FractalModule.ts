@@ -1,7 +1,7 @@
 import { getAddress, zeroAddress } from 'viem';
 import { ponder } from 'ponder:registry';
 import { governanceGuard, governanceModule } from 'ponder:schema';
-import { FractalModuleAbi } from '../abis/FractalModule';
+import { FractalModuleAbi } from '../abis/FractalModuleAbi';
 
 // keccak256("guard_manager.guard.address")
 // https://github.com/safe-global/safe-smart-account/blob/1c8b24a0a438e8c2cd089a9d830d1688a47a28d5/contracts/base/GuardManager.sol#L66

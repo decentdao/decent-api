@@ -1,6 +1,6 @@
 import { ponder } from 'ponder:registry';
 import { vote, votingStrategy, votingToken } from 'ponder:schema';
-import { LinearERC20VotingAbi } from '../abis/LinearERC20Voting';
+import { LinearERC20VotingAbi } from '../abis/LinearERC20VotingAbi';
 
 ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
   try {
