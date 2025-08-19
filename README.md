@@ -54,7 +54,7 @@ a [Ponder](https://github.com/ponder-sh/ponder) project for indexing contracts a
   - [AzoriusFreezeGuard](https://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/AzoriusFreezeGuard.sol)
   - [MultisigFreezeVoting](https://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/MultisigFreezeVoting.sol)
   - [ERC20FreezeVoting](https://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/ERC20FreezeVoting.sol)
-  - [ERC721FreezeVoting](hhttps://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/ERC721FreezeVoting.sol)
+  - [ERC721FreezeVoting](https://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/ERC721FreezeVoting.sol)
 - [SplitV2o2Factory](https://github.com/0xSplits/splits-contracts-monorepo/blob/splits-contracts-v2.2/packages/splits-v2/src/splitters/SplitFactoryV2.sol)  *(used with ponder.sh [factory pattern w/ non-factory contracts](https://ponder.sh/docs/guides/factory#usage-with-non-factory-contracts))*
   - [SplitV2](https://github.com/0xSplits/splits-contracts-monorepo/blob/splits-contracts-v2.2/packages/splits-v2/src/splitters/SplitWalletV2.sol)
 ### [decent-offchain](./packages/decent-offchain)
