@@ -1,6 +1,7 @@
 import { isAddress } from 'viem';
 import { Context, ponder } from 'ponder:registry';
 import { fetchSafeInfo } from './utils/safeInfo';
+import { hatIdToTreeId } from './utils/hats';
 import {
   dao,
   DaoInsert,
@@ -77,7 +78,8 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     entry.address = value;
     entry.subDaoOf = safeAddress;
   } else if (key === 'topHatId') {
-    entry.topHatId = value;
+    entry.topHatId = value; // can we get rid of this? we may only need treeId
+    entry.treeId = hatIdToTreeId(value);
   } else if (key === 'hatIdToStreamId') {
     const [hatId, streamId] = value.split(':');
     const hatIdToStreamIdData: HatIdToStreamIdInsert = {

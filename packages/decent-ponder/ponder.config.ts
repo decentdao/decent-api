@@ -648,5 +648,30 @@ export default createConfig({
         },
       },
     },
+    Hats: {
+      abi: HatsAbi,
+      chain: {
+        mainnet: {
+          startBlock: 17671864,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+        base: {
+          startBlock: 7526679,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+        },
+        optimism: {
+          startBlock: 106747286,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+        },
+        polygon: {
+          startBlock: 44952020,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+        },
+        sepolia: {
+          startBlock: 4654775,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        }
+      }
+    }
   },
 });

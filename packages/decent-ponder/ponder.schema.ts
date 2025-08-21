@@ -23,6 +23,7 @@ export const dao = onchainTable(
     proposalTemplatesCID: text(),
     snapshotENS: text(),
     subDaoOf: hex(),
+    treeId: integer(),
     topHatId: text(),
     gasTankEnabled: boolean(),
     gasTankAddress: hex(),
@@ -109,6 +110,18 @@ export const hatIdToStreamId = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.hatId, t.streamId] }) }),
 );
 
+export const role = onchainTable(
+  'role',
+  {
+    hatId: text().notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    detailsCID: text(),
+    wearerAddress: hex(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.hatId, t.daoChainId] }) }),
+);
+
 export const proposal = onchainTable(
   'proposal',
   {
@@ -170,6 +183,7 @@ export const daoRelations = relations(dao, ({ many }) => ({
   hatIdToStreamIds: many(hatIdToStreamId),
   proposals: many(proposal),
   splitWallets: many(splitWallet),
+  roles: many(role),
 }));
 
 export const governanceModuleRelations = relations(governanceModule, ({ one, many }) => ({
@@ -231,6 +245,13 @@ export const splitWalletRelations = relations(splitWallet, ({ one }) => ({
   }),
 }));
 
+export const roleRelations = relations(role, ({ one }) => ({
+  dao: one(dao, {
+    fields: [role.daoChainId, role.daoAddress],
+    references: [dao.chainId, dao.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -248,5 +269,7 @@ export type SignerToDao = typeof signerToDao.$inferSelect;
 export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
 export type HatIdToStreamId = typeof hatIdToStreamId.$inferSelect;
 export type HatIdToStreamIdInsert = typeof hatIdToStreamId.$inferInsert;
+export type Role = typeof role.$inferSelect;
+export type RoleInsert = typeof role.$inferInsert;
 export type SplitWallet = typeof splitWallet.$inferSelect;
 export type SplitWalletInsert = typeof splitWallet.$inferInsert;
