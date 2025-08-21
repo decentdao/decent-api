@@ -18,15 +18,6 @@ ponder.on('SplitV2:SplitUpdated', async ({ event, context }) => {
     const { recipients, allocations } = _split;
     if (recipients.length !== allocations.length) return;
 
-    const splits = _split.recipients.map((recipient, index) => {
-      const allocation = _split.allocations[index];
-      if (!allocation) throw new Error(`Allocation length mismatch for recipient ${recipient}`);
-      return {
-        address: recipient,
-        percentage: allocationToPercent(allocation),
-      };
-    });
-
     const daoAddress = await context.client.readContract({
       address,
       abi: SplitV2Abi,
@@ -39,6 +30,15 @@ ponder.on('SplitV2:SplitUpdated', async ({ event, context }) => {
     });
 
     if (!daoExists) return;
+
+    const splits = _split.recipients.map((recipient, index) => {
+      const allocation = _split.allocations[index];
+      if (!allocation) throw new Error(`Allocation length mismatch for recipient ${recipient}`);
+      return {
+        address: recipient,
+        percentage: allocationToPercent(allocation),
+      };
+    });
 
     await context.db
       .insert(splitWallet)
