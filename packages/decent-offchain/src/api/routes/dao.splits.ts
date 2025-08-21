@@ -8,6 +8,8 @@ import { duneFetchBalances } from '@/lib/dune';
 
 const app = new Hono();
 
+const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
 /**
  * @title Get split wallets for a DAO
  * @route GET /d/{chainId}/{address}/splits
@@ -48,7 +50,12 @@ app.get('/', daoCheck, async c => {
         metadata: false,
       });
 
-      const tokens = balances.map(b => b.address);
+      const tokens = balances
+        .filter(b => b.amount !== '1') // SplitsV2 leaves 1 wei on distribute so filter out
+        .map(b => {
+          if (b.address === 'native') return NATIVE_TOKEN_ADDRESS; // Dune returns as 'native' but we like to use NATIVE_TOKEN_ADDRESS
+          return b.address;
+        });
 
       return {
         ...wallet,
