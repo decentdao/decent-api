@@ -15,6 +15,7 @@ import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVotingAbi';
 import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
 import { SplitV2Abi } from './abis/SplitV2Abi';
 import { HatsAbi } from './abis/HatsAbi';
+import { SablierV2LockupLinearAbi } from './abis/SablierV2LockupLinearAbi';
 
 export default createConfig({
   chains: {
@@ -652,26 +653,35 @@ export default createConfig({
       abi: HatsAbi,
       chain: {
         mainnet: {
-          startBlock: 17671864,
+          startBlock: 21130150,
           address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
         },
         base: {
-          startBlock: 7526679,
-          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+          startBlock: 22747340,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
         },
         optimism: {
-          startBlock: 106747286,
-          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+          startBlock: 128342611,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
         },
         polygon: {
-          startBlock: 44952020,
-          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137'
+          startBlock: 64597158,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
         },
         sepolia: {
-          startBlock: 4654775,
+          startBlock: 7129765,
           address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
-        }
-      }
-    }
+        },
+      },
+    },
+    SablierV2LockupLinear: {
+      abi: SablierV2LockupLinearAbi,
+      chain: {
+        sepolia: {
+          startBlock: 6239030,
+          address: '0x3E435560fd0a03ddF70694b35b673C25c65aBB6C',
+        },
+      },
+    },
   },
 });

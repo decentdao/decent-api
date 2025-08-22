@@ -7,9 +7,9 @@ import {
   DaoInsert,
   signer,
   signerToDao,
-  hatIdToStreamId,
-  HatIdToStreamIdInsert,
+  stream,
   splitWallet,
+  StreamInsert,
 } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
@@ -58,8 +58,9 @@ const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bi
 // Contract: https://github.com/decentdao/decent-contracts/blob/develop/contracts/singletons/KeyValuePairs.sol
 ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   const { theAddress: safeAddress, key, value } = event.args;
+  const chainId = context.chain.id;
   const entry: DaoInsert = {
-    chainId: context.chain.id,
+    chainId,
     address: safeAddress,
     creatorAddress: event.transaction.from,
   };
@@ -81,14 +82,19 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     entry.topHatId = value; // can we get rid of this? we may only need treeId
     entry.treeId = hatIdToTreeId(value);
   } else if (key === 'hatIdToStreamId') {
-    const [hatId, streamId] = value.split(':');
-    const hatIdToStreamIdData: HatIdToStreamIdInsert = {
-      daoChainId: context.chain.id,
-      daoAddress: safeAddress,
-      hatId: hatId,
-      streamId: streamId,
-    };
-    await context.db.insert(hatIdToStreamId).values(hatIdToStreamIdData).onConflictDoNothing();
+    const [hatId, streamIdString] = value.split(':');
+    if (!streamIdString) return;
+    const streamId = BigInt(streamIdString);
+    await context.db
+      .insert(stream)
+      .values({
+        hatId,
+        streamId,
+        chainId,
+      })
+      .onConflictDoUpdate({
+        hatId,
+      });
     return;
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
@@ -108,7 +114,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
         }
         return {
           address,
-          daoChainId: context.chain.id,
+          daoChainId: chainId,
           daoAddress: safeAddress,
           name,
         };
@@ -132,7 +138,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
-    console.log('Network:', context.chain.id);
+    console.log('Network:', chainId);
     console.log(`DAO: ${entry.chainId}:${entry.address}`);
     console.log('Value:', value);
     console.log('--------------------------------');

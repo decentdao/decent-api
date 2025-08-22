@@ -99,15 +99,23 @@ export const signerToDao = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }),
 );
 
-export const hatIdToStreamId = onchainTable(
-  'hat_id_to_stream_id',
+export const stream = onchainTable(
+  'stream',
   {
+    streamId: bigint(),
     hatId: text(),
-    streamId: text(),
-    daoChainId: integer().notNull(),
-    daoAddress: hex().notNull(),
+    chainId: integer(),
+    sender: hex(),
+    smartAccount: hex(),
+    asset: hex(),
+    amount: bigint(),
+    start: integer(),
+    cliff: integer(),
+    end: bigint(),
+    cancelable: boolean(),
+    transferable: boolean(),
   },
-  t => ({ pk: primaryKey({ columns: [t.hatId, t.streamId] }) }),
+  t => ({ pk: primaryKey({ columns: [t.streamId, t.chainId] }) }),
 );
 
 export const role = onchainTable(
@@ -180,7 +188,6 @@ export const splitWallet = onchainTable(
 export const daoRelations = relations(dao, ({ many }) => ({
   signers: many(signerToDao),
   governanceModules: many(governanceModule),
-  hatIdToStreamIds: many(hatIdToStreamId),
   proposals: many(proposal),
   splitWallets: many(splitWallet),
   roles: many(role),
@@ -224,13 +231,6 @@ export const votingTokenRelations = relations(votingToken, ({ one }) => ({
   }),
 }));
 
-export const hatIdToStreamIdRelations = relations(hatIdToStreamId, ({ one }) => ({
-  dao: one(dao, {
-    fields: [hatIdToStreamId.daoChainId, hatIdToStreamId.daoAddress],
-    references: [dao.chainId, dao.address],
-  }),
-}));
-
 export const proposalRelations = relations(proposal, ({ one }) => ({
   dao: one(dao, {
     fields: [proposal.daoChainId, proposal.daoAddress],
@@ -245,11 +245,19 @@ export const splitWalletRelations = relations(splitWallet, ({ one }) => ({
   }),
 }));
 
-export const roleRelations = relations(role, ({ one }) => ({
+export const streamRelations = relations(stream, ({ one }) => ({
+  role: one(role, {
+    fields: [stream.hatId, stream.chainId],
+    references: [role.hatId, role.daoChainId],
+  }),
+}));
+
+export const roleRelations = relations(role, ({ one, many }) => ({
   dao: one(dao, {
     fields: [role.daoChainId, role.daoAddress],
     references: [dao.chainId, dao.address],
   }),
+  streams: many(stream),
 }));
 
 // ================================
@@ -267,8 +275,8 @@ export type Signer = typeof signer.$inferSelect;
 export type SignerInsert = typeof signer.$inferInsert;
 export type SignerToDao = typeof signerToDao.$inferSelect;
 export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
-export type HatIdToStreamId = typeof hatIdToStreamId.$inferSelect;
-export type HatIdToStreamIdInsert = typeof hatIdToStreamId.$inferInsert;
+export type Stream = typeof stream.$inferSelect;
+export type StreamInsert = typeof stream.$inferInsert;
 export type Role = typeof role.$inferSelect;
 export type RoleInsert = typeof role.$inferInsert;
 export type SplitWallet = typeof splitWallet.$inferSelect;

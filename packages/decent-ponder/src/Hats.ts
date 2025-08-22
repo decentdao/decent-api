@@ -14,15 +14,10 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
     const daoByTreeId = await context.db.sql
       .select({
         address: dao.address,
-        chainId: dao.chainId
+        chainId: dao.chainId,
       })
       .from(dao)
-      .where(
-        and(
-          eq(dao.chainId, chainId),
-          eq(dao.treeId, treeId)
-        )
-      )
+      .where(and(eq(dao.chainId, chainId), eq(dao.treeId, treeId)))
       .limit(1);
 
     if (daoByTreeId) {
@@ -35,7 +30,7 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
         daoChainId: dao.chainId,
         daoAddress: dao.address,
         detailsCID,
-      })
+      });
     }
   } catch (e) {
     console.error('Hats:HatCreated');
@@ -48,13 +43,15 @@ ponder.on('Hats:TransferSingle', async ({ context, event }) => {
     const hatId = String(id);
     const wearerAddress = to;
     const daoChainId = context.chain.id;
-    await context.db.update(role, {
-      daoChainId,
-      hatId
-    }).set({
-      wearerAddress
-    });
+    await context.db
+      .update(role, {
+        daoChainId,
+        hatId,
+      })
+      .set({
+        wearerAddress,
+      });
   } catch (e) {
     console.error('Hats:TransferSingle');
   }
-})
+});

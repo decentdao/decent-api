@@ -95,15 +95,22 @@ export const signerToDaoTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
 );
 
-export const hatIdToStreamIdTable = onchainSchema.table(
-  'hat_id_to_stream_id',
+export const streamTable = onchainSchema.table(
+  'stream',
   {
-    hatId: text().notNull(),
-    streamId: text().notNull(),
-    daoChainId: integer().notNull(),
-    daoAddress: hex().notNull(),
+    streamId: bigint({ mode: 'number' }).notNull(),
+    hatId: text(),
+    chainId: integer().notNull(),
+    smartAccount: hex(),
+    asset: hex(),
+    amount: bigint({ mode: 'number' }),
+    start: integer(),
+    cliff: integer(),
+    end: bigint({ mode: 'number' }),
+    cancelable: boolean(),
+    transferable: boolean(),
   },
-  t => [primaryKey({ columns: [t.hatId, t.streamId] })],
+  t => [primaryKey({ columns: [t.streamId, t.chainId] })],
 );
 
 export const onchainProposalTable = onchainSchema.table(
@@ -169,7 +176,6 @@ export const roleTable = onchainSchema.table(
 export const daoTableRelations = relations(daoTable, ({ many }) => ({
   signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
-  hatIdToStreamIds: many(hatIdToStreamIdTable),
   splitWallets: many(splitWalletTable),
   roles: many(roleTable),
 }));
@@ -214,10 +220,10 @@ export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) =
   }),
 }));
 
-export const hatIdToStreamIdTableRelations = relations(hatIdToStreamIdTable, ({ one }) => ({
-  dao: one(daoTable, {
-    fields: [hatIdToStreamIdTable.daoChainId, hatIdToStreamIdTable.daoAddress],
-    references: [daoTable.chainId, daoTable.address],
+export const streamTableRelations = relations(streamTable, ({ one }) => ({
+  role: one(roleTable, {
+    fields: [streamTable.hatId, streamTable.chainId],
+    references: [roleTable.hatId, roleTable.daoChainId],
   }),
 }));
 
@@ -251,11 +257,12 @@ export const splitWalletTableRelations = relations(splitWalletTable, ({ one }) =
   }),
 }));
 
-export const roleTableRelations = relations(roleTable, ({ one }) => ({
+export const roleTableRelations = relations(roleTable, ({ one, many }) => ({
   dao: one(daoTable, {
     fields: [roleTable.daoChainId, roleTable.daoAddress],
     references: [daoTable.chainId, daoTable.address],
   }),
+  streams: many(streamTable),
 }));
 
 // ================================
@@ -264,7 +271,6 @@ export const roleTableRelations = relations(roleTable, ({ one }) => ({
 export type DbDao = typeof daoTable.$inferSelect & {
   signers: DbSignerToDao[];
   governanceModules: DbGovernanceModule[];
-  hatIdToStreamIds: DbHatIdToStreamId[];
   roles: DbRole[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
@@ -276,10 +282,12 @@ export type DbVotingStrategy = typeof votingStrategyTable.$inferSelect & {
 export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbSigner = typeof signerTable.$inferSelect;
 export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
-export type DbHatIdToStreamId = typeof hatIdToStreamIdTable.$inferSelect;
+export type DbStream = typeof streamTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
   votes?: DbVote[];
 };
 export type DbVote = typeof voteTable.$inferSelect;
 export type SplitWallet = typeof splitWalletTable.$inferSelect;
-export type DbRole = typeof roleTable.$inferSelect;
+export type DbRole = typeof roleTable.$inferSelect & {
+  streams?: DbStream[];
+};

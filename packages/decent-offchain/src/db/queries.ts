@@ -38,17 +38,28 @@ export const DEFAULT_DAO_WITH = {
       address: true,
     },
   },
-  hatIdToStreamIds: {
-    columns: {
-      hatId: true,
-      streamId: true,
-    },
-  },
   roles: {
     columns: {
       hatId: true,
       detailsCID: true,
       wearerAddress: true,
+    },
+    with: {
+      streams: {
+        columns: {
+          streamId: true,
+          hatId: true,
+          chainId: true,
+          smartAccount: true,
+          asset: true,
+          amount: true,
+          start: true,
+          cliff: true,
+          end: true,
+          cancelable: true,
+          transferable: true,
+        },
+      },
     },
   },
 };
