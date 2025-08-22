@@ -36,6 +36,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
         })),
       })),
     })),
+    roles: dbDao.roles,
     hatIdToStreamIds: dbDao.hatIdToStreamIds.map(hatIdToStreamId => ({
       hatId: hatIdToStreamId.hatId,
       streamId: hatIdToStreamId.streamId,
@@ -43,7 +44,7 @@ export const formatDao = (dbDao: DbDao): Dao => {
     creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
-    updatedAt: dbDao.updatedAt || 0,
+    updatedAt: dbDao.updatedAt,
     parentAddress: dbDao.subDaoOf,
   };
   return dao;

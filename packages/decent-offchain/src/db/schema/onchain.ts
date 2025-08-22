@@ -29,6 +29,7 @@ export const daoTable = onchainSchema.table(
     proposalTemplatesCID: text(),
     snapshotENS: text(),
     subDaoOf: hex(),
+    treeId: integer(),
     topHatId: text(),
     gasTankEnabled: boolean(),
     gasTankAddress: hex(),
@@ -150,6 +151,18 @@ export const splitWalletTable = onchainSchema.table(
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
 );
 
+export const roleTable = onchainSchema.table(
+  'role',
+  {
+    hatId: text().notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    detailsCID: text(),
+    wearerAddress: hex(),
+  },
+  t => [primaryKey({ columns: [t.hatId, t.daoChainId] })],
+);
+
 // ================================
 // ========= Relations ============
 // ================================
@@ -158,6 +171,7 @@ export const daoTableRelations = relations(daoTable, ({ many }) => ({
   governanceModules: many(governanceModuleTable),
   hatIdToStreamIds: many(hatIdToStreamIdTable),
   splitWallets: many(splitWalletTable),
+  roles: many(roleTable),
 }));
 
 export const governanceModuleTableRelations = relations(governanceModuleTable, ({ one, many }) => ({
@@ -237,6 +251,13 @@ export const splitWalletTableRelations = relations(splitWalletTable, ({ one }) =
   }),
 }));
 
+export const roleTableRelations = relations(roleTable, ({ one }) => ({
+  dao: one(daoTable, {
+    fields: [roleTable.daoChainId, roleTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+}));
+
 // ================================
 // ========== Types ===============
 // ================================
@@ -244,6 +265,7 @@ export type DbDao = typeof daoTable.$inferSelect & {
   signers: DbSignerToDao[];
   governanceModules: DbGovernanceModule[];
   hatIdToStreamIds: DbHatIdToStreamId[];
+  roles: DbRole[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
   votingStrategies: DbVotingStrategy[];
@@ -260,3 +282,4 @@ export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
 };
 export type DbVote = typeof voteTable.$inferSelect;
 export type SplitWallet = typeof splitWalletTable.$inferSelect;
+export type DbRole = typeof roleTable.$inferSelect;

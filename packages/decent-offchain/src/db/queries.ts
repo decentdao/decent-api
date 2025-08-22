@@ -44,6 +44,13 @@ export const DEFAULT_DAO_WITH = {
       streamId: true,
     },
   },
+  roles: {
+    columns: {
+      hatId: true,
+      detailsCID: true,
+      wearerAddress: true,
+    },
+  },
 };
 
 export const DAO_SELECT_FIELDS = {
