@@ -10,6 +10,10 @@ const app = new Hono();
 
 const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
+// splitsV2 leaves some a small amount of wei in the contract
+// frontend depends on this to determine whether user should distribute or not
+const MINIMUM_BALANCE_WEI = 100n;
+
 /**
  * @title Get split wallets for a DAO
  * @route GET /d/{chainId}/{address}/splits
@@ -51,7 +55,7 @@ app.get('/', daoCheck, async c => {
       });
 
       const tokens = balances
-        .filter(b => b.amount !== '1') // SplitsV2 leaves 1 wei on distribute so filter out
+        .filter(b => BigInt(b.amount) > MINIMUM_BALANCE_WEI)
         .map(b => {
           if (b.address === 'native') return NATIVE_TOKEN_ADDRESS; // Dune returns as 'native' but we like to use NATIVE_TOKEN_ADDRESS
           return b.address;
