@@ -48,8 +48,6 @@ export const DEFAULT_DAO_WITH = {
       streams: {
         columns: {
           streamId: true,
-          hatId: true,
-          chainId: true,
           smartAccount: true,
           asset: true,
           amount: true,

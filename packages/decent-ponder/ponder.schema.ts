@@ -111,7 +111,7 @@ export const stream = onchainTable(
     amount: bigint(),
     start: integer(),
     cliff: integer(),
-    end: bigint(),
+    end: integer(),
     cancelable: boolean(),
     transferable: boolean(),
   },

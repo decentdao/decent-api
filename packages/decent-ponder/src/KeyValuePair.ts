@@ -1,16 +1,9 @@
-import { isAddress } from 'viem';
+import { isAddress, parseEventLogs } from 'viem';
 import { Context, ponder } from 'ponder:registry';
 import { fetchSafeInfo } from './utils/safeInfo';
 import { hatIdToTreeId } from './utils/hats';
-import {
-  dao,
-  DaoInsert,
-  signer,
-  signerToDao,
-  stream,
-  splitWallet,
-  StreamInsert,
-} from 'ponder:schema';
+import { SablierV2LockupLinearAbi } from '../abis/SablierV2LockupLinearAbi';
+import { dao, DaoInsert, signer, signerToDao, stream, splitWallet } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
@@ -84,17 +77,46 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else if (key === 'hatIdToStreamId') {
     const [hatId, streamIdString] = value.split(':');
     if (!streamIdString) return;
-    const streamId = BigInt(streamIdString);
-    await context.db
-      .insert(stream)
-      .values({
-        hatId,
-        streamId,
-        chainId,
-      })
-      .onConflictDoUpdate({
-        hatId,
-      });
+    const kvStreamId = BigInt(streamIdString);
+
+    // SablierV2LockupLinear:CreateLockupLinearStream has over 100k events
+    // it does not make sense to use ponder.on(...) so we will fetch the CreateLockupLinearStream
+    // from the logs
+    const { logs } = await context.client.getTransactionReceipt({
+      hash: event.transaction.hash,
+    });
+
+    const parsedLogs = parseEventLogs({
+      abi: SablierV2LockupLinearAbi,
+      eventName: 'CreateLockupLinearStream',
+      logs,
+    });
+
+    // Multiple SablierV2LockupLinear:CreateLockupLinearStream can exists in a single transaction
+    const createStream = parsedLogs.find(c => c.args.streamId === kvStreamId);
+
+    if (!createStream) return;
+
+    const { streamId, recipient, amounts, asset, cancelable, transferable, timestamps, sender } =
+      createStream.args;
+
+    const { deposit } = amounts;
+    const { start, cliff, end } = timestamps;
+
+    await context.db.insert(stream).values({
+      hatId,
+      streamId,
+      chainId,
+      sender,
+      smartAccount: recipient,
+      asset,
+      amount: deposit,
+      start,
+      cliff,
+      end,
+      cancelable,
+      transferable,
+    });
     return;
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';

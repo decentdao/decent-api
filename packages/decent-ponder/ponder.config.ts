@@ -674,14 +674,5 @@ export default createConfig({
         },
       },
     },
-    SablierV2LockupLinear: {
-      abi: SablierV2LockupLinearAbi,
-      chain: {
-        sepolia: {
-          startBlock: 6239030,
-          address: '0x3E435560fd0a03ddF70694b35b673C25c65aBB6C',
-        },
-      },
-    },
   },
 });
