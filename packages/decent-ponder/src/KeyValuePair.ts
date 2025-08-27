@@ -1,15 +1,9 @@
-import { isAddress } from 'viem';
+import { isAddress, parseEventLogs } from 'viem';
 import { Context, ponder } from 'ponder:registry';
 import { fetchSafeInfo } from './utils/safeInfo';
-import {
-  dao,
-  DaoInsert,
-  signer,
-  signerToDao,
-  hatIdToStreamId,
-  HatIdToStreamIdInsert,
-  splitWallet,
-} from 'ponder:schema';
+import { hatIdToTreeId } from './utils/hats';
+import { SablierV2LockupLinearAbi } from '../abis/SablierV2LockupLinearAbi';
+import { dao, DaoInsert, signer, signerToDao, stream, splitWallet } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
@@ -57,8 +51,9 @@ const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bi
 // Contract: https://github.com/decentdao/decent-contracts/blob/develop/contracts/singletons/KeyValuePairs.sol
 ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   const { theAddress: safeAddress, key, value } = event.args;
+  const chainId = context.chain.id;
   const entry: DaoInsert = {
-    chainId: context.chain.id,
+    chainId,
     address: safeAddress,
     creatorAddress: event.transaction.from,
   };
@@ -77,16 +72,51 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     entry.address = value;
     entry.subDaoOf = safeAddress;
   } else if (key === 'topHatId') {
-    entry.topHatId = value;
+    entry.topHatId = value; // can we get rid of this? we may only need treeId
+    entry.treeId = hatIdToTreeId(value);
   } else if (key === 'hatIdToStreamId') {
-    const [hatId, streamId] = value.split(':');
-    const hatIdToStreamIdData: HatIdToStreamIdInsert = {
-      daoChainId: context.chain.id,
-      daoAddress: safeAddress,
-      hatId: hatId,
-      streamId: streamId,
-    };
-    await context.db.insert(hatIdToStreamId).values(hatIdToStreamIdData).onConflictDoNothing();
+    const [hatId, streamIdString] = value.split(':');
+    if (!streamIdString) return;
+    const kvStreamId = BigInt(streamIdString);
+
+    // SablierV2LockupLinear:CreateLockupLinearStream has over 100k events
+    // it does not make sense to use ponder.on(...) so we will fetch the CreateLockupLinearStream
+    // from the logs
+    const { logs } = await context.client.getTransactionReceipt({
+      hash: event.transaction.hash,
+    });
+
+    const parsedLogs = parseEventLogs({
+      abi: SablierV2LockupLinearAbi,
+      eventName: 'CreateLockupLinearStream',
+      logs,
+    });
+
+    // Multiple SablierV2LockupLinear:CreateLockupLinearStream can exists in a single transaction
+    const createStream = parsedLogs.find(c => c.args.streamId === kvStreamId);
+
+    if (!createStream) return;
+
+    const { streamId, recipient, amounts, asset, cancelable, transferable, timestamps, sender } =
+      createStream.args;
+
+    const { deposit } = amounts;
+    const { start, cliff, end } = timestamps;
+
+    await context.db.insert(stream).values({
+      hatId,
+      streamId,
+      chainId,
+      sender,
+      smartAccount: recipient,
+      asset,
+      amount: deposit,
+      start,
+      cliff,
+      end,
+      cancelable,
+      transferable,
+    });
     return;
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
@@ -106,7 +136,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
         }
         return {
           address,
-          daoChainId: context.chain.id,
+          daoChainId: chainId,
           daoAddress: safeAddress,
           name,
         };
@@ -130,7 +160,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
-    console.log('Network:', context.chain.id);
+    console.log('Network:', chainId);
     console.log(`DAO: ${entry.chainId}:${entry.address}`);
     console.log('Value:', value);
     console.log('--------------------------------');

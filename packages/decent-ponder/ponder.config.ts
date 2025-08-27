@@ -15,6 +15,7 @@ import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVotingAbi';
 import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
 import { SplitV2Abi } from './abis/SplitV2Abi';
 import { HatsAbi } from './abis/HatsAbi';
+import { SablierV2LockupLinearAbi } from './abis/SablierV2LockupLinearAbi';
 
 export default createConfig({
   chains: {
@@ -645,6 +646,31 @@ export default createConfig({
             event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
             parameter: 'split',
           }),
+        },
+      },
+    },
+    Hats: {
+      abi: HatsAbi,
+      chain: {
+        mainnet: {
+          startBlock: 21130150,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+        base: {
+          startBlock: 22747340,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+        optimism: {
+          startBlock: 128342611,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+        polygon: {
+          startBlock: 64597158,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+        sepolia: {
+          startBlock: 7129765,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
         },
       },
     },
