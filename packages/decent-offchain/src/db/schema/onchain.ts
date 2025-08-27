@@ -106,11 +106,23 @@ export const streamTable = onchainSchema.table(
     amount: bigint({ mode: 'number' }),
     start: integer(),
     cliff: integer(),
-    end: bigint({ mode: 'number' }),
+    end: integer(),
     cancelable: boolean(),
     transferable: boolean(),
   },
   t => [primaryKey({ columns: [t.streamId, t.chainId] })],
+);
+
+export const roleTable = onchainSchema.table(
+  'role',
+  {
+    hatId: text().notNull(),
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    detailsCID: text(),
+    wearerAddress: hex(),
+  },
+  t => [primaryKey({ columns: [t.hatId, t.daoChainId] })],
 );
 
 export const onchainProposalTable = onchainSchema.table(
@@ -156,18 +168,6 @@ export const splitWalletTable = onchainSchema.table(
     updatedAt: bigint({ mode: 'number' }),
   },
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
-);
-
-export const roleTable = onchainSchema.table(
-  'role',
-  {
-    hatId: text().notNull(),
-    daoChainId: integer().notNull(),
-    daoAddress: hex().notNull(),
-    detailsCID: text(),
-    wearerAddress: hex(),
-  },
-  t => [primaryKey({ columns: [t.hatId, t.daoChainId] })],
 );
 
 // ================================
