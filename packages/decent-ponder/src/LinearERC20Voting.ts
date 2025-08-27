@@ -115,7 +115,7 @@ ponder.on('LinearERC20Voting:Voted', async ({ event, context }) => {
       voteType,
       weight,
       votedAt,
-    });
+    }).onConflictDoNothing();
   } catch (e) {
     console.error('LinearERC20Voting:Voted', e);
   }

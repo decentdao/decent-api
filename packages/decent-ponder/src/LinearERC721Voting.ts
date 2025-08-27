@@ -78,7 +78,7 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
       voteType,
       weight: BigInt(calculatedWeight),
       votedAt,
-    });
+    }).onConflictDoNothing();
   } catch (e) {
     console.error('LinearERC721Voting:Voted');
   }
