@@ -121,8 +121,19 @@ export const roleTable = onchainSchema.table(
     daoAddress: hex().notNull(),
     detailsCID: text(),
     wearerAddress: hex(),
+    eligibility: hex(),
   },
   t => [primaryKey({ columns: [t.hatId, t.daoChainId] })],
+);
+
+export const roleTermTable = onchainSchema.table(
+  'role_term',
+  {
+    eligibility: hex().notNull(),
+    termEnd: bigint({ mode: 'number' }).notNull(),
+    wearerAddress: hex(),
+  },
+  t => [primaryKey({ columns: [t.eligibility, t.termEnd] })],
 );
 
 export const onchainProposalTable = onchainSchema.table(
@@ -263,6 +274,14 @@ export const roleTableRelations = relations(roleTable, ({ one, many }) => ({
     references: [daoTable.chainId, daoTable.address],
   }),
   streams: many(streamTable),
+  terms: many(roleTermTable),
+}));
+
+export const roleTermTableRelations = relations(roleTermTable, ({ one }) => ({
+  role: one(roleTable, {
+    fields: [roleTermTable.eligibility],
+    references: [roleTable.eligibility],
+  }),
 }));
 
 // ================================
@@ -288,6 +307,8 @@ export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
 };
 export type DbVote = typeof voteTable.$inferSelect;
 export type SplitWallet = typeof splitWalletTable.$inferSelect;
+export type DbRoleTerm = typeof roleTermTable.$inferSelect;
 export type DbRole = typeof roleTable.$inferSelect & {
   streams?: DbStream[];
+  terms?: DbRoleTerm[];
 };

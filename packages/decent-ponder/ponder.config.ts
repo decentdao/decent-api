@@ -15,7 +15,8 @@ import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVotingAbi';
 import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
 import { SplitV2Abi } from './abis/SplitV2Abi';
 import { HatsAbi } from './abis/HatsAbi';
-import { SablierV2LockupLinearAbi } from './abis/SablierV2LockupLinearAbi';
+import { HatsElectionEligibilityAbi } from './abis/HatsElectionEligibilityAbi';
+import { HatsModuleFactoryAbi } from './abis/HatsModuleFactoryAbi';
 
 export default createConfig({
   chains: {
@@ -674,5 +675,50 @@ export default createConfig({
         },
       },
     },
+    HatsElectionEligibility: {
+      abi: HatsElectionEligibilityAbi,
+      chain: {
+        mainnet: {
+          startBlock: 19467227,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            parameter: 'instance',
+          }),
+        },
+        base: {
+          startBlock: 12021817,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            parameter: 'instance',
+          }),
+        },
+        optimism: {
+          startBlock: 117616123,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            parameter: 'instance',
+          }),
+        },
+        polygon: {
+          startBlock: 54831711,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            parameter: 'instance',
+          }),
+        },
+        sepolia: {
+          startBlock: 5516083,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            parameter: 'instance',
+          }),
+        },
+      },
+    }
   },
 });

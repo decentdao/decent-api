@@ -5,7 +5,7 @@ import { hatIdToTreeId, checkAdminHat } from './utils/hats';
 
 ponder.on('Hats:HatCreated', async ({ event, context }) => {
   try {
-    const { id, details, eligibility, toggle } = event.args;
+    const { id, details, eligibility } = event.args;
     const isAdminHat = checkAdminHat(id);
     if (isAdminHat) return;
 
@@ -30,6 +30,7 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
         daoChainId: dao.chainId,
         daoAddress: dao.address,
         detailsCID,
+        eligibility,
       });
     }
   } catch (e) {
@@ -40,6 +41,7 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
 ponder.on('Hats:TransferSingle', async ({ context, event }) => {
   try {
     const { id, to } = event.args;
+    // if (to === zeroAddress) return;
     const hatId = String(id);
     const wearerAddress = to;
     const daoChainId = context.chain.id;

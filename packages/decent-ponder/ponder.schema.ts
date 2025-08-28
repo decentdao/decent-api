@@ -126,9 +126,20 @@ export const role = onchainTable(
     daoAddress: hex().notNull(),
     detailsCID: text(),
     wearerAddress: hex(),
+    eligibility: hex(),
   },
   t => ({ pk: primaryKey({ columns: [t.hatId, t.daoChainId] }) }),
 );
+
+export const roleTerm = onchainTable(
+  'role_term',
+  {
+    eligibility: hex().notNull(),
+    termEnd: bigint().notNull(),
+    wearerAddress: hex(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.eligibility, t.termEnd] }) }),
+)
 
 export const proposal = onchainTable(
   'proposal',
@@ -258,6 +269,14 @@ export const roleRelations = relations(role, ({ one, many }) => ({
     references: [dao.chainId, dao.address],
   }),
   streams: many(stream),
+  terms: many(roleTerm),
+}));
+
+export const roleTermRelations = relations(roleTerm, ({ one }) => ({
+  role: one(role, {
+    fields: [roleTerm.eligibility],
+    references: [role.eligibility],
+  }),
 }));
 
 // ================================
@@ -279,5 +298,7 @@ export type Stream = typeof stream.$inferSelect;
 export type StreamInsert = typeof stream.$inferInsert;
 export type Role = typeof role.$inferSelect;
 export type RoleInsert = typeof role.$inferInsert;
+export type RoleTerm = typeof roleTerm.$inferSelect;
+export type RoleTermInsert = typeof roleTerm.$inferInsert;
 export type SplitWallet = typeof splitWallet.$inferSelect;
 export type SplitWalletInsert = typeof splitWallet.$inferInsert;
