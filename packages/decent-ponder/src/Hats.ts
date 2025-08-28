@@ -41,7 +41,6 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
 ponder.on('Hats:TransferSingle', async ({ context, event }) => {
   try {
     const { id, to } = event.args;
-    // if (to === zeroAddress) return;
     const hatId = String(id);
     const wearerAddress = to;
     const daoChainId = context.chain.id;
