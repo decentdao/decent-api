@@ -71,14 +71,17 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
     // TODO: ENG-1385 proper vote calculation
     const tokenWeight = 1;
     const calculatedWeight = tokenWeight * tokenAddresses.length;
-    await context.db.insert(vote).values({
-      voter,
-      proposalId: BigInt(proposalId),
-      votingStrategyAddress,
-      voteType,
-      weight: BigInt(calculatedWeight),
-      votedAt,
-    }).onConflictDoNothing();
+    await context.db
+      .insert(vote)
+      .values({
+        voter,
+        proposalId: BigInt(proposalId),
+        votingStrategyAddress,
+        voteType,
+        weight: BigInt(calculatedWeight),
+        votedAt,
+      })
+      .onConflictDoNothing();
   } catch (e) {
     console.error('LinearERC721Voting:Voted');
   }

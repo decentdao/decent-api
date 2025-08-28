@@ -57,8 +57,8 @@ export const DEFAULT_DAO_WITH = {
           transferable: true,
         },
         extras: {
-          amount: bigIntText(schema.streamTable.amount)
-        }
+          amount: bigIntText(schema.streamTable.amount),
+        },
       },
       terms: {
         columns: {

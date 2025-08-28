@@ -42,9 +42,9 @@ export const formatDao = (dbDao: DbDao): Dao => {
       ...role,
       terms: role.terms?.map(term => ({
         ...term,
-        active: term.termEnd >= now
-      }))}
-    )),
+        active: term.termEnd >= now,
+      })),
+    })),
     creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,

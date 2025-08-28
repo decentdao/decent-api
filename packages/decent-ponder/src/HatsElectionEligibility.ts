@@ -19,8 +19,8 @@ ponder.on('HatsElectionEligibility:ElectionCompleted', async ({ event, context }
     await context.db.insert(roleTerm).values({
       eligibility,
       termEnd,
-      wearerAddress
-    })
+      wearerAddress,
+    });
   } catch (e) {
     // no log
   }

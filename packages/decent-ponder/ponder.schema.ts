@@ -139,7 +139,7 @@ export const roleTerm = onchainTable(
     wearerAddress: hex(),
   },
   t => ({ pk: primaryKey({ columns: [t.eligibility, t.termEnd] }) }),
-)
+);
 
 export const proposal = onchainTable(
   'proposal',

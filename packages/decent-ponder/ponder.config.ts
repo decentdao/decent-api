@@ -682,7 +682,10 @@ export default createConfig({
           startBlock: 19467227,
           address: factory({
             address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
-            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
             parameter: 'instance',
           }),
         },
@@ -690,7 +693,10 @@ export default createConfig({
           startBlock: 12021817,
           address: factory({
             address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
-            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
             parameter: 'instance',
           }),
         },
@@ -698,7 +704,10 @@ export default createConfig({
           startBlock: 117616123,
           address: factory({
             address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
-            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
             parameter: 'instance',
           }),
         },
@@ -706,7 +715,10 @@ export default createConfig({
           startBlock: 54831711,
           address: factory({
             address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
-            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
             parameter: 'instance',
           }),
         },
@@ -714,11 +726,14 @@ export default createConfig({
           startBlock: 5516083,
           address: factory({
             address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
-            event: getAbiItem({ abi: HatsModuleFactoryAbi, name: 'HatsModuleFactory_ModuleDeployed' }),
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
             parameter: 'instance',
           }),
         },
       },
-    }
+    },
   },
 });
