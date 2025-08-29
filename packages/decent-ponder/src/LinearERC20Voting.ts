@@ -108,14 +108,17 @@ ponder.on('LinearERC20Voting:Voted', async ({ event, context }) => {
     const { voter, proposalId, voteType, weight } = event.args;
     const votingStrategyAddress = event.log.address;
     const votedAt = event.block.timestamp;
-    await context.db.insert(vote).values({
-      voter,
-      proposalId: BigInt(proposalId),
-      votingStrategyAddress,
-      voteType,
-      weight,
-      votedAt,
-    }).onConflictDoNothing();
+    await context.db
+      .insert(vote)
+      .values({
+        voter,
+        proposalId: BigInt(proposalId),
+        votingStrategyAddress,
+        voteType,
+        weight,
+        votedAt,
+      })
+      .onConflictDoNothing();
   } catch (e) {
     console.error('LinearERC20Voting:Voted', e);
   }

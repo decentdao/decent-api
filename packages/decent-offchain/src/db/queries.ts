@@ -50,12 +50,20 @@ export const DEFAULT_DAO_WITH = {
           streamId: true,
           smartAccount: true,
           asset: true,
-          amount: true,
           start: true,
           cliff: true,
           end: true,
           cancelable: true,
           transferable: true,
+        },
+        extras: {
+          amount: bigIntText(schema.streamTable.amount),
+        },
+      },
+      terms: {
+        columns: {
+          termEnd: true,
+          wearerAddress: true,
         },
       },
     },

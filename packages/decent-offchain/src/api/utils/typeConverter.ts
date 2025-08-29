@@ -2,12 +2,14 @@ import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
 import { Dao } from 'decent-sdk';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
+import { unixTimestamp } from './time';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
 };
 
 export const formatDao = (dbDao: DbDao): Dao => {
+  const now = unixTimestamp();
   const dao = {
     chainId: dbDao.chainId,
     address: dbDao.address,
@@ -36,7 +38,13 @@ export const formatDao = (dbDao: DbDao): Dao => {
         })),
       })),
     })),
-    roles: dbDao.roles,
+    roles: dbDao.roles.map(role => ({
+      ...role,
+      terms: role.terms?.map(term => ({
+        ...term,
+        active: term.termEnd >= now,
+      })),
+    })),
     creatorAddress: dbDao.creatorAddress,
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
