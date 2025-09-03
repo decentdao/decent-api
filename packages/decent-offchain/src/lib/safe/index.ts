@@ -1,6 +1,8 @@
 import { SupportedChainId } from 'decent-sdk';
-import { getAddress, decodeAbiParameters, parseAbiParameters } from 'viem';
-import { ListResponse, SafeMultisigTransactionResponse } from './types';
+import { getAddress, decodeAbiParameters, parseAbiParameters, Address } from 'viem';
+import { BasicSafeInfo, ListResponse, SafeMultisigTransactionResponse } from './types';
+import { getPublicClient } from '@/api/utils/publicClient';
+import { GnosisSafeL2Abi } from './GnosisSafeL2Abi';
 
 const ADDRESS_MULTISIG_METADATA = '0xdA00000000000000000000000000000000000Da0';
 
@@ -24,7 +26,7 @@ const API_URL = (chainId: SupportedChainId) => {
 
 export const getSafeTransactions = async (
   chainId: SupportedChainId,
-  _address: string,
+  _address: Address,
   since?: Date,
 ) => {
   const url = API_URL(chainId);
@@ -55,4 +57,38 @@ export const getCIDFromSafeTransaction = (tx: SafeMultisigTransactionResponse): 
     });
   }
   return cid;
+};
+
+export const getSafeInfo = async (
+  chainId: SupportedChainId,
+  _address: Address,
+): Promise<BasicSafeInfo> => {
+  const publicClient = getPublicClient(chainId);
+  const address = getAddress(_address);
+  const [threshold, owners, nonce] = await publicClient.multicall({
+    contracts: [
+      {
+        abi: GnosisSafeL2Abi,
+        address,
+        functionName: 'getThreshold',
+      },
+      {
+        abi: GnosisSafeL2Abi,
+        address,
+        functionName: 'getOwners',
+      },
+      {
+        abi: GnosisSafeL2Abi,
+        address,
+        functionName: 'nonce',
+      },
+    ],
+    allowFailure: false,
+  });
+
+  return {
+    nonce: Number(nonce),
+    threshold: Number(threshold),
+    owners: Array(...owners), // to convert from readonly
+  };
 };

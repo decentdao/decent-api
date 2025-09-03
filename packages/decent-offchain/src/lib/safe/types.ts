@@ -1,3 +1,5 @@
+import { Address } from 'viem';
+
 export { type Hex } from 'viem';
 
 export type SafeVersion = '1.4.1' | '1.3.0' | '1.2.0' | '1.1.1' | '1.0.0';
@@ -5,6 +7,12 @@ export type SafeVersion = '1.4.1' | '1.3.0' | '1.2.0' | '1.1.1' | '1.0.0';
 export enum OperationType {
   Call, // 0
   DelegateCall, // 1
+}
+
+export interface BasicSafeInfo {
+  nonce: number;
+  threshold: number;
+  owners: Address[];
 }
 
 export interface SafeSetupConfig {

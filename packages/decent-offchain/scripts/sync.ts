@@ -1,8 +1,8 @@
 import { sleep } from 'bun';
 import { Dao, ApiResponse, Proposal } from 'decent-sdk';
 
-// const API = 'http://localhost:3005';
-const API = 'https://api.decent.build';
+const API = 'http://localhost:3005';
+// const API = 'https://api.decent.build';
 
 export async function sync() {
   const startTime = Date.now();

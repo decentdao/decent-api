@@ -28,7 +28,6 @@ export const dao = onchainTable(
     gasTankEnabled: boolean(),
     gasTankAddress: hex(),
     creatorAddress: hex(),
-    requiredSignatures: integer(),
     erc20Address: hex(),
     createdAt: bigint(),
     updatedAt: bigint(),
@@ -83,20 +82,6 @@ export const votingToken = onchainTable(
     weight: bigint(), // ERC721 has weight
   },
   t => ({ pk: primaryKey({ columns: [t.address, t.votingStrategyId] }) }),
-);
-
-export const signer = onchainTable('signer', {
-  address: hex('signer_address').primaryKey(),
-});
-
-export const signerToDao = onchainTable(
-  'signer_to_dao',
-  {
-    address: hex('std_signer_address').notNull(),
-    daoChainId: integer('std_dao_chain_id').notNull(),
-    daoAddress: hex('std_dao_address').notNull(),
-  },
-  t => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }),
 );
 
 export const stream = onchainTable(
@@ -197,7 +182,6 @@ export const splitWallet = onchainTable(
 // ========= Relations ============
 // ================================
 export const daoRelations = relations(dao, ({ many }) => ({
-  signers: many(signerToDao),
   governanceModules: many(governanceModule),
   proposals: many(proposal),
   splitWallets: many(splitWallet),
@@ -210,21 +194,6 @@ export const governanceModuleRelations = relations(governanceModule, ({ one, man
     references: [dao.chainId, dao.address],
   }),
   votingStrategies: many(votingStrategy),
-}));
-
-export const signerRelations = relations(signer, ({ many }) => ({
-  daos: many(signerToDao),
-}));
-
-export const signerDaoRelations = relations(signerToDao, ({ one }) => ({
-  signer: one(signer, {
-    fields: [signerToDao.address],
-    references: [signer.address],
-  }),
-  dao: one(dao, {
-    fields: [signerToDao.daoChainId, signerToDao.daoAddress],
-    references: [dao.chainId, dao.address],
-  }),
 }));
 
 export const votingStrategyRelations = relations(votingStrategy, ({ one, many }) => ({
@@ -290,10 +259,6 @@ export type VotingStrategy = typeof votingStrategy.$inferSelect;
 export type VotingStrategyInsert = typeof votingStrategy.$inferInsert;
 export type VotingToken = typeof votingToken.$inferSelect;
 export type VotingTokenInsert = typeof votingToken.$inferInsert;
-export type Signer = typeof signer.$inferSelect;
-export type SignerInsert = typeof signer.$inferInsert;
-export type SignerToDao = typeof signerToDao.$inferSelect;
-export type SignerToDaoInsert = typeof signerToDao.$inferInsert;
 export type Stream = typeof stream.$inferSelect;
 export type StreamInsert = typeof stream.$inferInsert;
 export type Role = typeof role.$inferSelect;

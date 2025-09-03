@@ -34,7 +34,6 @@ export const daoTable = onchainSchema.table(
     gasTankEnabled: boolean(),
     gasTankAddress: hex(),
     creatorAddress: hex(),
-    requiredSignatures: integer(),
     erc20Address: hex(),
     createdAt: bigint({ mode: 'number' }),
     updatedAt: bigint({ mode: 'number' }),
@@ -79,20 +78,6 @@ export const votingTokenTable = onchainSchema.table(
     weight: bigint({ mode: 'number' }), // ERC721 has weight
   },
   t => [primaryKey({ columns: [t.address, t.votingStrategyId] })],
-);
-
-export const signerTable = onchainSchema.table('signer', {
-  address: hex('signer_address').primaryKey(),
-});
-
-export const signerToDaoTable = onchainSchema.table(
-  'signer_to_dao',
-  {
-    address: hex('std_signer_address').notNull(),
-    daoChainId: integer('std_dao_chain_id').notNull(),
-    daoAddress: hex('std_dao_address').notNull(),
-  },
-  t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
 );
 
 export const streamTable = onchainSchema.table(
@@ -185,7 +170,6 @@ export const splitWalletTable = onchainSchema.table(
 // ========= Relations ============
 // ================================
 export const daoTableRelations = relations(daoTable, ({ many }) => ({
-  signers: many(signerToDaoTable),
   governanceModules: many(governanceModuleTable),
   splitWallets: many(splitWalletTable),
   roles: many(roleTable),
@@ -197,21 +181,6 @@ export const governanceModuleTableRelations = relations(governanceModuleTable, (
     references: [daoTable.chainId, daoTable.address],
   }),
   votingStrategies: many(votingStrategyTable),
-}));
-
-export const signerTableRelations = relations(signerTable, ({ many }) => ({
-  daos: many(signerToDaoTable),
-}));
-
-export const signerToDaoTableRelations = relations(signerToDaoTable, ({ one }) => ({
-  signer: one(signerTable, {
-    fields: [signerToDaoTable.address],
-    references: [signerTable.address],
-  }),
-  dao: one(daoTable, {
-    fields: [signerToDaoTable.daoChainId, signerToDaoTable.daoAddress],
-    references: [daoTable.chainId, daoTable.address],
-  }),
 }));
 
 export const votingStrategyTableRelations = relations(votingStrategyTable, ({ one, many }) => ({
@@ -288,7 +257,6 @@ export const roleTermTableRelations = relations(roleTermTable, ({ one }) => ({
 // ========== Types ===============
 // ================================
 export type DbDao = typeof daoTable.$inferSelect & {
-  signers: DbSignerToDao[];
   governanceModules: DbGovernanceModule[];
   roles: DbRole[];
 };
@@ -299,8 +267,6 @@ export type DbVotingStrategy = typeof votingStrategyTable.$inferSelect & {
   votingTokens: DbVotingToken[];
 };
 export type DbVotingToken = typeof votingTokenTable.$inferSelect;
-export type DbSigner = typeof signerTable.$inferSelect;
-export type DbSignerToDao = typeof signerToDaoTable.$inferSelect;
 export type DbStream = typeof streamTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
   votes?: DbVote[];

@@ -1,4 +1,4 @@
-import { mainnet, base, optimism, polygon } from 'viem/chains';
+import { mainnet, base, optimism, polygon, sepolia } from 'viem/chains';
 import { SupportedChainId } from 'decent-sdk';
 import { createPublicClient, http, PublicClient } from 'viem';
 
@@ -18,6 +18,10 @@ export const publicClients: Record<SupportedChainId, PublicClient> = {
   137: createPublicClient({
     chain: polygon,
     transport: http(process.env.PONDER_RPC_URL_137),
+  }),
+  11155111: createPublicClient({
+    chain: sepolia,
+    transport: http(process.env.PONDER_RPC_URL_11155111),
   }),
 };
 

@@ -1,9 +1,9 @@
 import { isAddress, parseEventLogs } from 'viem';
 import { Context, ponder } from 'ponder:registry';
-import { fetchSafeInfo } from './utils/safeInfo';
+import { isSafeCheck } from './utils/safeInfo';
 import { hatIdToTreeId } from './utils/hats';
 import { SablierV2LockupLinearAbi } from '../abis/SablierV2LockupLinearAbi';
-import { dao, DaoInsert, signer, signerToDao, stream, splitWallet } from 'ponder:schema';
+import { dao, DaoInsert, stream, splitWallet } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
@@ -24,24 +24,13 @@ const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bi
 
   if (newDao) {
     const { address, chainId } = entry;
-    const safeInfo = await fetchSafeInfo(context, address);
 
-    // if theres no safeInfo, its not a safe, delete
-    if (!safeInfo) {
+    const isSafe = await isSafeCheck(context, address);
+
+    if (!isSafe) {
+      // a non-safe address made it into the systme, remove it
       await context.db.delete(dao, { address, chainId });
       return;
-    }
-
-    await context.db.update(dao, { address, chainId }).set({
-      requiredSignatures: safeInfo.threshold,
-    });
-
-    if (safeInfo.signers.length > 0) {
-      await context.db.insert(signer).values(safeInfo.signers).onConflictDoNothing();
-    }
-
-    if (safeInfo.signerToDaos.length > 0) {
-      await context.db.insert(signerToDao).values(safeInfo.signerToDaos).onConflictDoNothing();
     }
   }
 };

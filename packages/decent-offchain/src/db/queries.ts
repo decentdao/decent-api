@@ -33,11 +33,6 @@ export const DEFAULT_DAO_WITH = {
       },
     },
   },
-  signers: {
-    columns: {
-      address: true,
-    },
-  },
   roles: {
     columns: {
       hatId: true,
@@ -81,7 +76,6 @@ export const DAO_SELECT_FIELDS = {
   gasTankEnabled: schema.daoTable.gasTankEnabled,
   gasTankAddress: schema.daoTable.gasTankAddress,
   creatorAddress: schema.daoTable.creatorAddress,
-  requiredSignatures: schema.daoTable.requiredSignatures,
   erc20Address: schema.daoTable.erc20Address,
   createdAt: schema.daoTable.createdAt,
   updatedAt: schema.daoTable.updatedAt,

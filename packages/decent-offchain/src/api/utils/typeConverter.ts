@@ -3,19 +3,21 @@ import { PgColumn } from 'drizzle-orm/pg-core';
 import { Dao } from 'decent-sdk';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
+import { BasicSafeInfo } from '@/lib/safe/types';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
 };
 
-export const formatDao = (dbDao: DbDao): Dao => {
+export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo): Dao => {
   const now = unixTimestamp();
   const dao = {
     chainId: dbDao.chainId,
     address: dbDao.address,
     safe: {
-      owners: dbDao.signers.map(signer => signer.address),
-      threshold: dbDao.requiredSignatures || 0,
+      owners: safeInfo.owners,
+      threshold: safeInfo.threshold,
+      nonce: safeInfo.nonce,
     },
     name: dbDao.name,
     proposalTemplatesCID: dbDao.proposalTemplatesCID,
