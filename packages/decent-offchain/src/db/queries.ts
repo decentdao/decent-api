@@ -79,13 +79,28 @@ export const DAO_SELECT_FIELDS = {
   erc20Address: schema.daoTable.erc20Address,
   createdAt: schema.daoTable.createdAt,
   updatedAt: schema.daoTable.updatedAt,
-  governanceModuleExists: sql<boolean>`
+  isAzorius: sql<boolean>`
     EXISTS (
       SELECT 1 FROM ${schema.governanceModuleTable}
       WHERE ${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId}
         AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}
+        AND ${schema.governanceModuleTable.moduleType} = 'AZORIUS'
     )
-  `.as('governanceModuleExists'),
+  `.as('isAzorius'),
 };
 
 export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
+
+export const CHILD_SELECT_FIELDS = {
+  address: schema.daoTable.address,
+  name: schema.daoTable.name,
+  subDaoAddresses: schema.daoTable.subDaoAddresses,
+  isAzorius: sql<boolean>`
+    EXISTS (
+      SELECT 1 FROM ${schema.governanceModuleTable}
+      WHERE ${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId}
+        AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}
+        AND ${schema.governanceModuleTable.moduleType} = 'AZORIUS'
+    )
+  `.as('isAzorius'),
+};

@@ -2,6 +2,7 @@ import { isAddress, parseEventLogs } from 'viem';
 import { Context, ponder } from 'ponder:registry';
 import { isSafeCheck } from './utils/safeInfo';
 import { hatIdToTreeId } from './utils/hats';
+import { updateSubDaoAddresses } from './utils/subDao';
 import { SablierV2LockupLinearAbi } from '../abis/SablierV2LockupLinearAbi';
 import { dao, DaoInsert, stream, splitWallet } from 'ponder:schema';
 
@@ -60,6 +61,8 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     }
     entry.address = value;
     entry.subDaoOf = safeAddress;
+
+    await updateSubDaoAddresses(context, chainId, safeAddress, value, event.block.timestamp);
   } else if (key === 'topHatId') {
     entry.topHatId = value; // can we get rid of this? we may only need treeId
     entry.treeId = hatIdToTreeId(value);
@@ -182,11 +185,20 @@ ponder.on('FractalRegistry:FractalNameUpdated', async ({ event, context }) => {
 
 ponder.on('FractalRegistry:FractalSubDAODeclared', async ({ event, context }) => {
   const { parentDAOAddress, subDAOAddress } = event.args;
+  const chainId = context.chain.id;
   const entry: DaoInsert = {
-    chainId: context.chain.id,
+    chainId,
     address: subDAOAddress,
     subDaoOf: parentDAOAddress,
   };
 
   await handleDataEntry(entry, context, event.block.timestamp);
+
+  await updateSubDaoAddresses(
+    context,
+    chainId,
+    parentDAOAddress,
+    subDAOAddress,
+    event.block.timestamp,
+  );
 });

@@ -23,6 +23,7 @@ export const dao = onchainTable(
     proposalTemplatesCID: text(),
     snapshotENS: text(),
     subDaoOf: hex(),
+    subDaoAddresses: hex().array(),
     treeId: integer(),
     topHatId: text(),
     gasTankEnabled: boolean(),

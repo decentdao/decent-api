@@ -29,6 +29,7 @@ export const daoTable = onchainSchema.table(
     proposalTemplatesCID: text(),
     snapshotENS: text(),
     subDaoOf: hex(),
+    subDaoAddresses: hex().array(),
     treeId: integer(),
     topHatId: text(),
     gasTankEnabled: boolean(),
@@ -60,12 +61,26 @@ export const votingStrategyTable = onchainSchema.table('voting_strategy', {
   quorumNumerator: bigint({ mode: 'number' }),
 });
 
-export const freezeVotingStrategy = onchainSchema.table('voting_strategy_freeze', {
+export const governanceGuardTable = onchainSchema.table('governance_guard', {
+  address: hex('governance_guard_address').primaryKey(),
+  daoChainId: integer(),
+  daoAddress: hex(),
+  executionPeriod: integer(),
+  timelockPeriod: integer(),
+});
+
+export const freezeVoteType = onchainSchema.enum('freeze_vote_type', [
+  'MULTISIG',
+  'ERC20',
+  'ERC721',
+]);
+export const freezeVotingStrategyTable = onchainSchema.table('voting_strategy_freeze', {
   address: hex('voting_strategy_address').primaryKey(),
-  governanceModuleId: hex(), // references governanceModule.address
+  governanceGuardId: hex(), // references governanceGuard.address
   freezePeriod: integer(),
   freezeProposalPeriod: integer(),
   freezeVotesThreshold: bigint({ mode: 'number' }),
+  freezeVoteType: freezeVoteType(),
 });
 
 export const tokenTypeEnum = onchainSchema.enum('token_type', ['ERC20', 'ERC721']);
@@ -86,6 +101,7 @@ export const streamTable = onchainSchema.table(
     streamId: bigint({ mode: 'number' }).notNull(),
     hatId: text(),
     chainId: integer().notNull(),
+    sender: hex(),
     smartAccount: hex(),
     asset: hex(),
     amount: bigint({ mode: 'number' }),
@@ -171,6 +187,7 @@ export const splitWalletTable = onchainSchema.table(
 // ================================
 export const daoTableRelations = relations(daoTable, ({ many }) => ({
   governanceModules: many(governanceModuleTable),
+  proposals: many(onchainProposalTable),
   splitWallets: many(splitWalletTable),
   roles: many(roleTable),
 }));
