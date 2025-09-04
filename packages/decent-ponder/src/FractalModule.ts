@@ -40,7 +40,7 @@ ponder.on('FractalModule:ControllersAdded', async ({ event, context }) => {
         address: guard,
         daoAddress,
         daoChainId,
-      });
+      }).onConflictDoNothing();
     }
   } catch (e) {
     console.error('FractalModule:AvatarSet', e);
