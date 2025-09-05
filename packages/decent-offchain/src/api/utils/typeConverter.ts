@@ -3,13 +3,13 @@ import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
-import { BasicDaoInfo } from '../middleware/dao';
+import { SubDaoInfo } from '../middleware/dao';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
 };
 
-export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: BasicDaoInfo[]) => {
+export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDaoInfo[]) => {
   const now = unixTimestamp();
   const dao = {
     chainId: dbDao.chainId,

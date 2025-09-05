@@ -22,7 +22,7 @@ async function fetchNestedSubDaos(
   addresses: Address[],
   chainId: number,
   depth = 0,
-): Promise<BasicDaoInfo[]> {
+): Promise<SubDaoInfo[]> {
   if (depth > MAX_SUB_DAO_DEPTH || addresses.length === 0) return [];
 
   const subDaos = await db
@@ -50,18 +50,18 @@ async function fetchNestedSubDaos(
   return result;
 }
 
-export type BasicDaoInfo = {
+export type SubDaoInfo = {
   address: Address;
   name: string | null;
   isAzorius: boolean;
-  subDaos?: BasicDaoInfo[];
+  subDaos?: SubDaoInfo[];
 };
 
 declare module 'hono' {
   interface ContextVariableMap {
     dao: Dao & {
       safe: BasicSafeInfo;
-      subDaos: BasicDaoInfo[];
+      subDaos: SubDaoInfo[];
     }; // @TODO: update SDK types
   }
 }
