@@ -33,6 +33,26 @@ export const DEFAULT_DAO_WITH = {
       },
     },
   },
+  governanceGuards: {
+    columns: {
+      address: true,
+      executionPeriod: true,
+      timelockPeriod: true,
+    },
+    with: {
+      freezeVotingStrategies: {
+        columns: {
+          address: true,
+          freezePeriod: true,
+          freezeProposalPeriod: true,
+          freezeVoteType: true,
+        },
+        extras: {
+          freezeVotesThreshold: bigIntText(schema.freezeVotingStrategyTable.freezeVotesThreshold),
+        },
+      },
+    },
+  },
   roles: {
     columns: {
       hatId: true,

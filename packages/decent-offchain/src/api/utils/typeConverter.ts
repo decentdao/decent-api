@@ -40,6 +40,19 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
         })),
       })),
     })),
+    // asume single governanceGuard and freezeVotingStrategy for now
+    governanceGuard: dbDao.governanceGuards?.[0] ? {
+      address: dbDao.governanceGuards[0].address,
+      executionPeriod: dbDao.governanceGuards[0].executionPeriod,
+      timelockPeriod: dbDao.governanceGuards[0].timelockPeriod,
+      freezeVotingStrategy: dbDao.governanceGuards[0].freezeVotingStrategies?.[0] ? {
+        address: dbDao.governanceGuards[0].freezeVotingStrategies[0].address,
+        freezePeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezePeriod,
+        freezeProposalPeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeProposalPeriod,
+        freezeVotesThreshold: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeVotesThreshold,
+        freezeVoteType: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeVoteType,
+      } : null,
+    } : null,
     roles: dbDao.roles.map(role => ({
       ...role,
       terms: role.terms?.map(term => ({

@@ -187,6 +187,7 @@ export const splitWalletTable = onchainSchema.table(
 // ================================
 export const daoTableRelations = relations(daoTable, ({ many }) => ({
   governanceModules: many(governanceModuleTable),
+  governanceGuards: many(governanceGuardTable),
   proposals: many(onchainProposalTable),
   splitWallets: many(splitWalletTable),
   roles: many(roleTable),
@@ -214,6 +215,21 @@ export const votingTokenTableRelations = relations(votingTokenTable, ({ one }) =
   votingStrategy: one(votingStrategyTable, {
     fields: [votingTokenTable.votingStrategyId],
     references: [votingStrategyTable.address],
+  }),
+}));
+
+export const governanceGuardTableRelations = relations(governanceGuardTable, ({ one, many }) => ({
+  dao: one(daoTable, {
+    fields: [governanceGuardTable.daoChainId, governanceGuardTable.daoAddress],
+    references: [daoTable.chainId, daoTable.address],
+  }),
+  freezeVotingStrategies: many(freezeVotingStrategyTable),
+}));
+
+export const freezeVotingStrategyTableRelations = relations(freezeVotingStrategyTable, ({ one }) => ({
+  governanceGuard: one(governanceGuardTable, {
+    fields: [freezeVotingStrategyTable.governanceGuardId],
+    references: [governanceGuardTable.address],
   }),
 }));
 
@@ -275,11 +291,16 @@ export const roleTermTableRelations = relations(roleTermTable, ({ one }) => ({
 // ================================
 export type DbDao = typeof daoTable.$inferSelect & {
   governanceModules: DbGovernanceModule[];
+  governanceGuards?: DbGovernanceGuard[];
   roles: DbRole[];
 };
 export type DbGovernanceModule = typeof governanceModuleTable.$inferSelect & {
   votingStrategies: DbVotingStrategy[];
 };
+export type DbGovernanceGuard = typeof governanceGuardTable.$inferSelect & {
+  freezeVotingStrategies?: DbFreezeVotingStrategy[];
+};
+export type DbFreezeVotingStrategy = typeof freezeVotingStrategyTable.$inferSelect;
 export type DbVotingStrategy = typeof votingStrategyTable.$inferSelect & {
   votingTokens: DbVotingToken[];
 };
