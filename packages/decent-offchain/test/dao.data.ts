@@ -19,6 +19,7 @@ async function insertDaoData() {
         address: daoAddress,
         name: 'decent-api',
         createdAt: 1744234225,
+        creatorAddress: '0x25910143c255828f623786f46fe9a8941b7983bb'
       })
       .onConflictDoNothing();
 
