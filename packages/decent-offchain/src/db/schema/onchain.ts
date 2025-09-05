@@ -34,7 +34,7 @@ export const daoTable = onchainSchema.table(
     topHatId: text(),
     gasTankEnabled: boolean(),
     gasTankAddress: hex(),
-    creatorAddress: hex(),
+    creatorAddress: hex().notNull(),
     erc20Address: hex(),
     createdAt: bigint({ mode: 'number' }),
     updatedAt: bigint({ mode: 'number' }),

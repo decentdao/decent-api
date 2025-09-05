@@ -4,6 +4,7 @@ import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo } from '../middleware/dao';
+import { getAddress } from 'viem';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -22,19 +23,19 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
     name: dbDao.name,
     proposalTemplatesCID: dbDao.proposalTemplatesCID,
     governanceModules: dbDao.governanceModules.map(module => ({
-      address: module.address,
+      address: getAddress(module.address),
       type: module.moduleType,
       executionPeriod: module.executionPeriod,
       timelockPeriod: module.timelockPeriod,
       strategies: module.votingStrategies.map(strategy => ({
-        address: strategy.address,
+        address: getAddress(strategy.address),
         version: 1, // TODO: [ENG-551] add version to db
         requiredProposerWeight: strategy.requiredProposerWeight,
         votingPeriod: strategy.votingPeriod,
         basisNumerator: strategy.basisNumerator,
         quorumNumerator: strategy.quorumNumerator,
         votingTokens: strategy.votingTokens.map(token => ({
-          address: token.address,
+          address: getAddress(token.address),
           type: token.type,
           weight: token?.weight || undefined,
         })),
@@ -42,11 +43,11 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
     })),
     // asume single governanceGuard and freezeVotingStrategy for now
     governanceGuard: dbDao.governanceGuards?.[0] ? {
-      address: dbDao.governanceGuards[0].address,
+      address: getAddress(dbDao.governanceGuards[0].address),
       executionPeriod: dbDao.governanceGuards[0].executionPeriod,
       timelockPeriod: dbDao.governanceGuards[0].timelockPeriod,
       freezeVotingStrategy: dbDao.governanceGuards[0].freezeVotingStrategies?.[0] ? {
-        address: dbDao.governanceGuards[0].freezeVotingStrategies[0].address,
+        address: getAddress(dbDao.governanceGuards[0].freezeVotingStrategies[0].address),
         freezePeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezePeriod,
         freezeProposalPeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeProposalPeriod,
         freezeVotesThreshold: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeVotesThreshold,
@@ -60,7 +61,7 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
         active: term.termEnd >= now,
       })),
     })),
-    creatorAddress: dbDao.creatorAddress,
+    creatorAddress: getAddress(dbDao.creatorAddress),
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
     updatedAt: dbDao.updatedAt,
