@@ -111,7 +111,7 @@ export const useCacheBlockTimestamp = async (
   return timestamp;
 };
 
-export const addProposalTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
+export const addVoteEndTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
   if (!proposal.blockTimestamp?.timestamp && proposal.votingEndBlock) {
     proposal.blockTimestamp = {
       timestamp: await useCacheBlockTimestamp(chainId, proposal.votingEndBlock)

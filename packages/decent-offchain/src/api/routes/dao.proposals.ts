@@ -5,7 +5,7 @@ import { DbProposal, schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
-import { addProposalTimestamp } from '../utils/blockTimestamp';
+import { addVoteEndTimestamp } from '../utils/blockTimestamp';
 
 const app = new Hono();
 
@@ -53,7 +53,7 @@ app.get('/', daoCheck, async c => {
     }) as DbProposal[];
 
     const proposalsWithTimestamps = await Promise.all(
-      proposals.map(proposal => addProposalTimestamp(proposal, dao.chainId))
+      proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId))
     );
 
     const ret = proposalsWithTimestamps.map(formatProposal);
@@ -96,7 +96,7 @@ app.get('/:id', daoCheck, async c => {
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  const proposalWithTimestamp = await addProposalTimestamp(proposal, dao.chainId);
+  const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
 
   return resf(c, formatProposal(proposalWithTimestamp));
 });
