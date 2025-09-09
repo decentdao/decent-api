@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
-import { DbDao, DbGovernanceGuard } from '@/db/schema/onchain';
+import { DbDao } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo } from '../middleware/dao';
