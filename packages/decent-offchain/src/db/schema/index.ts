@@ -18,12 +18,9 @@ export const onchainProposalBlockTimestampRelations = relations(
   }),
 );
 
-export const blockTimestampTableRelations = relations(
-  blockTimestampTable,
-  ({ many }) => ({
-    proposals: many(onchainSchema.onchainProposalTable),
-  }),
-);
+export const blockTimestampTableRelations = relations(blockTimestampTable, ({ many }) => ({
+  proposals: many(onchainSchema.onchainProposalTable),
+}));
 // ==============================================================================
 
 export const schema = {
@@ -32,8 +29,10 @@ export const schema = {
   sessionTable,
   blockTimestampTable,
   onchainProposalBlockTimestampRelations,
-  blockTimestampTableRelations
+  blockTimestampTableRelations,
 };
 
 export type DbNewSafeProposal = typeof safeProposalTable.$inferInsert;
-export type DbProposal = onchainSchema.DbOnchainProposal & { blockTimestamp: { timestamp: number } };
+export type DbProposal = onchainSchema.DbOnchainProposal & {
+  blockTimestamp: { timestamp: number };
+};

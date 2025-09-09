@@ -55,8 +55,9 @@ export const getBlockTimestamp = async (
     } else {
       // Block is in the future, estimate timestamp
       const averageBlockTime = await getAverageBlockTime(chainId);
-      const estimatedTimestamp = Number(latestBlock.timestamp) +
-        (averageBlockTime * (blockNumber - Number(latestBlock.number)));
+      const estimatedTimestamp =
+        Number(latestBlock.timestamp) +
+        averageBlockTime * (blockNumber - Number(latestBlock.number));
       return Math.floor(estimatedTimestamp);
     }
   } catch (error) {
@@ -76,8 +77,8 @@ export const useCacheBlockTimestamp = async (
   const cached = await db.query.blockTimestampTable.findFirst({
     where: and(
       eq(schema.blockTimestampTable.chainId, chainId),
-      eq(schema.blockTimestampTable.blockNumber, blockNumber)
-    )
+      eq(schema.blockTimestampTable.blockNumber, blockNumber),
+    ),
   });
 
   const now = unixTimestamp();
@@ -97,7 +98,7 @@ export const useCacheBlockTimestamp = async (
       blockNumber,
       timestamp,
       future,
-      updatedAt: now
+      updatedAt: now,
     })
     .onConflictDoUpdate({
       target: [schema.blockTimestampTable.chainId, schema.blockTimestampTable.blockNumber],
@@ -114,7 +115,7 @@ export const useCacheBlockTimestamp = async (
 export const addVoteEndTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
   if (!proposal.blockTimestamp?.timestamp && proposal.votingEndBlock) {
     proposal.blockTimestamp = {
-      timestamp: await useCacheBlockTimestamp(chainId, proposal.votingEndBlock)
+      timestamp: await useCacheBlockTimestamp(chainId, proposal.votingEndBlock),
     };
   }
   return proposal;

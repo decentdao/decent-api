@@ -74,7 +74,6 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
 
 const voteChoice = ['NO', 'YES', 'ABSTAIN'];
 
-
 export const formatProposal = (dbProposal: DbProposal) => {
   const proposal = {
     id: dbProposal.id,
@@ -97,4 +96,3 @@ export const formatProposal = (dbProposal: DbProposal) => {
   };
   return proposal;
 };
-

@@ -32,7 +32,7 @@ app.get('/', daoCheck, async c => {
 
     return resf(c, proposals);
   } else {
-    const proposals = await db.query.onchainProposalTable.findMany({
+    const proposals = (await db.query.onchainProposalTable.findMany({
       where: and(
         eq(schema.onchainProposalTable.daoChainId, dao.chainId),
         eq(schema.onchainProposalTable.daoAddress, dao.address),
@@ -46,14 +46,14 @@ app.get('/', daoCheck, async c => {
         },
         blockTimestamp: {
           columns: {
-            timestamp: true
-          }
+            timestamp: true,
+          },
         },
       },
-    }) as DbProposal[];
+    })) as DbProposal[];
 
     const proposalsWithTimestamps = await Promise.all(
-      proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId))
+      proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId)),
     );
 
     const ret = proposalsWithTimestamps.map(formatProposal);
@@ -74,7 +74,7 @@ app.get('/:id', daoCheck, async c => {
   const { id } = c.req.param();
   if (!id) throw new ApiError('Proposal id is required', 400);
 
-  const proposal = await db.query.onchainProposalTable.findFirst({
+  const proposal = (await db.query.onchainProposalTable.findFirst({
     where: and(
       eq(schema.onchainProposalTable.id, Number(id)),
       eq(schema.onchainProposalTable.daoChainId, dao.chainId),
@@ -88,11 +88,11 @@ app.get('/:id', daoCheck, async c => {
       },
       blockTimestamp: {
         columns: {
-          timestamp: true
-        }
+          timestamp: true,
+        },
       },
     },
-  }) as DbProposal;
+  })) as DbProposal;
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
