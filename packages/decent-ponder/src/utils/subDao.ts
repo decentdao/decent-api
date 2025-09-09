@@ -1,4 +1,4 @@
-import { Context } from 'ponder:registry'
+import { Context } from 'ponder:registry';
 import { dao } from 'ponder:schema';
 
 export async function updateSubDaoAddresses(
@@ -14,7 +14,7 @@ export async function updateSubDaoAddresses(
     const subDaoAddresses = [...currentSubDaoAddresses, subDaoAddress];
     await context.db.update(dao, { chainId, address: daoAddress }).set({
       subDaoAddresses,
-      updatedAt: timestamp
+      updatedAt: timestamp,
     });
-  } catch { }
+  } catch {}
 }

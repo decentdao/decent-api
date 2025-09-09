@@ -1,5 +1,10 @@
 import { ponder } from 'ponder:registry';
 import { votingStrategy, votingToken, vote } from 'ponder:schema';
+import { setProposalEndBlock } from './utils/endBlock';
+
+ponder.on('LinearERC721Voting:ProposalInitialized', async ({ event }) => {
+  setProposalEndBlock(event); // cache votingEndBlock
+});
 
 ponder.on('LinearERC721Voting:GovernanceTokenAdded', async ({ event, context }) => {
   try {

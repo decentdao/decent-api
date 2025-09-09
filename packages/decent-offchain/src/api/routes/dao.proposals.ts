@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db';
-import { schema } from '@/db/schema';
+import { DbProposal, schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
+import { bigIntText, formatProposal, ensureProposalTimestamp } from '@/api/utils/typeConverter';
 
 const app = new Hono();
 
@@ -37,9 +37,26 @@ app.get('/', daoCheck, async c => {
         eq(schema.onchainProposalTable.daoAddress, dao.address),
       ),
       orderBy: desc(schema.onchainProposalTable.id),
-    });
+      with: {
+        votes: {
+          extras: {
+            weight: bigIntText(schema.voteTable.weight),
+          },
+        },
+        blockTimestamp: {
+          columns: {
+            timestamp: true
+          }
+        },
+      },
+    }) as DbProposal[];
 
-    const ret = proposals.map(formatProposal);
+    // Ensure timestamps for proposals missing them
+    const proposalsWithTimestamps = await Promise.all(
+      proposals.map(proposal => ensureProposalTimestamp(proposal, dao.chainId))
+    );
+
+    const ret = proposalsWithTimestamps.map(formatProposal);
     return resf(c, ret);
   }
 });
@@ -69,12 +86,20 @@ app.get('/:id', daoCheck, async c => {
           weight: bigIntText(schema.voteTable.weight),
         },
       },
+      blockTimestamp: {
+        columns: {
+          timestamp: true
+        }
+      },
     },
-  });
+  }) as DbProposal;
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  return resf(c, formatProposal(proposal));
+  // Ensure timestamp for proposal if missing
+  const proposalWithTimestamp = await ensureProposalTimestamp(proposal, dao.chainId);
+
+  return resf(c, formatProposal(proposalWithTimestamp));
 });
 
 export default app;

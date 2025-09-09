@@ -32,7 +32,7 @@ async function fetchNestedSubDaos(
     .where(inArray(schema.daoTable.address, addresses));
 
   const result = await Promise.all(
-    subDaos.map(async (dao) => {
+    subDaos.map(async dao => {
       const nestedSubDaos =
         dao.subDaoAddresses && dao.subDaoAddresses.length > 0
           ? await fetchNestedSubDaos(dao.subDaoAddresses, chainId, depth + 1)
@@ -44,7 +44,7 @@ async function fetchNestedSubDaos(
         isAzorius: dao.isAzorius,
         ...(nestedSubDaos.length > 0 && { subDaos: nestedSubDaos }),
       };
-    })
+    }),
   );
 
   return result;

@@ -1,10 +1,13 @@
 import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
-import { DbDao, DbOnchainProposal } from '@/db/schema/onchain';
+import { DbDao } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo } from '../middleware/dao';
 import { getAddress } from 'viem';
+import { DbProposal } from '@/db/schema';
+import { SupportedChainId } from 'decent-sdk';
+import { getOrCacheBlockTimestamp } from './blockTimestamp';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -73,9 +76,10 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
 
 const voteChoice = ['NO', 'YES', 'ABSTAIN'];
 
-export const formatProposal = (dbProposal: DbOnchainProposal) => {
+
+export const formatProposal = (dbProposal: DbProposal) => {
   const proposal = {
-    id: dbProposal.id, // Already a string
+    id: dbProposal.id,
     title: dbProposal.title,
     description: dbProposal.description,
     proposer: dbProposal.proposer,
@@ -83,12 +87,23 @@ export const formatProposal = (dbProposal: DbOnchainProposal) => {
     transactions: dbProposal.transactions,
     proposedTxHash: dbProposal.proposedTxHash,
     executedTxHash: dbProposal.executedTxHash,
-    createdAt: dbProposal.createdAt, // Already a string
+    createdAt: dbProposal.createdAt,
+    votingEndBlock: dbProposal.votingEndBlock,
+    votingEndTimestamp: dbProposal.blockTimestamp?.timestamp || null,
     votes: dbProposal.votes?.map(v => ({
       voter: v.voter,
       choice: voteChoice[v.voteType],
       weight: v.weight,
     })),
   };
+  return proposal;
+};
+
+export const ensureProposalTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
+  if (!proposal.blockTimestamp?.timestamp && proposal.votingEndBlock) {
+    proposal.blockTimestamp = {
+      timestamp: await getOrCacheBlockTimestamp(chainId, proposal.votingEndBlock)
+    };
+  }
   return proposal;
 };

@@ -45,7 +45,7 @@ export const daoTable = onchainSchema.table(
 export const moduleType = onchainSchema.enum('module_type', ['AZORIUS', 'FRACTAL']);
 export const governanceModuleTable = onchainSchema.table('governance_module', {
   address: hex('governance_module_address').primaryKey(),
-  daoChainId: integer().notNull(),
+  daoChainId: integer().notNull().$type<SupportedChainId>(),
   daoAddress: hex().notNull(),
   executionPeriod: bigint({ mode: 'number' }),
   timelockPeriod: bigint({ mode: 'number' }),
@@ -63,7 +63,7 @@ export const votingStrategyTable = onchainSchema.table('voting_strategy', {
 
 export const governanceGuardTable = onchainSchema.table('governance_guard', {
   address: hex('governance_guard_address').primaryKey(),
-  daoChainId: integer(),
+  daoChainId: integer().$type<SupportedChainId>(),
   daoAddress: hex(),
   executionPeriod: integer(),
   timelockPeriod: integer(),
@@ -100,7 +100,7 @@ export const streamTable = onchainSchema.table(
   {
     streamId: bigint({ mode: 'number' }).notNull(),
     hatId: text(),
-    chainId: integer().notNull(),
+    chainId: integer().notNull().$type<SupportedChainId>(),
     sender: hex(),
     smartAccount: hex(),
     asset: hex(),
@@ -118,7 +118,7 @@ export const roleTable = onchainSchema.table(
   'role',
   {
     hatId: text().notNull(),
-    daoChainId: integer().notNull(),
+    daoChainId: integer().notNull().$type<SupportedChainId>(),
     daoAddress: hex().notNull(),
     detailsCID: text(),
     wearerAddress: hex(),
@@ -141,7 +141,7 @@ export const onchainProposalTable = onchainSchema.table(
   'proposal',
   {
     id: bigint('proposal_id', { mode: 'number' }).notNull(),
-    daoChainId: integer().notNull(),
+    daoChainId: integer().notNull().$type<SupportedChainId>(),
     daoAddress: hex().notNull(),
     proposer: hex().notNull(),
     votingStrategyAddress: hex().notNull(),
@@ -149,6 +149,7 @@ export const onchainProposalTable = onchainSchema.table(
     title: text().notNull(),
     description: text().notNull(),
     createdAt: bigint({ mode: 'number' }).notNull(),
+    votingEndBlock: integer(),
     proposedTxHash: hex().notNull(),
     executedTxHash: hex(),
   },
@@ -172,7 +173,7 @@ export const splitWalletTable = onchainSchema.table(
   'split_wallet',
   {
     address: hex('split_address').notNull(),
-    daoChainId: integer('dao_chain_id').notNull(),
+    daoChainId: integer('dao_chain_id').notNull().$type<SupportedChainId>(),
     daoAddress: hex('dao_address').notNull(),
     name: text(), // comes from a KeyValuePair event
     splits: json().$type<Split[]>().notNull(),
@@ -226,12 +227,15 @@ export const governanceGuardTableRelations = relations(governanceGuardTable, ({ 
   freezeVotingStrategies: many(freezeVotingStrategyTable),
 }));
 
-export const freezeVotingStrategyTableRelations = relations(freezeVotingStrategyTable, ({ one }) => ({
-  governanceGuard: one(governanceGuardTable, {
-    fields: [freezeVotingStrategyTable.governanceGuardId],
-    references: [governanceGuardTable.address],
+export const freezeVotingStrategyTableRelations = relations(
+  freezeVotingStrategyTable,
+  ({ one }) => ({
+    governanceGuard: one(governanceGuardTable, {
+      fields: [freezeVotingStrategyTable.governanceGuardId],
+      references: [governanceGuardTable.address],
+    }),
   }),
-}));
+);
 
 export const streamTableRelations = relations(streamTable, ({ one }) => ({
   role: one(roleTable, {

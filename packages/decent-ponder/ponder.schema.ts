@@ -139,6 +139,8 @@ export const proposal = onchainTable(
     title: text().notNull(),
     description: text().notNull(),
     createdAt: bigint().notNull(),
+    votingEndBlock: integer(),
+    votingEndTimestamp: integer(),
     proposedTxHash: hex().notNull(),
     executedTxHash: hex(),
   },
