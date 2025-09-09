@@ -88,22 +88,18 @@ export const useCacheBlockTimestamp = async (
 
   // Fetch, cache, and return
   const timestamp = await getBlockTimestamp(blockNumber, chainId);
-  const client = getPublicClient(chainId);
-  const latestBlock = await client.getBlock();
-  const future = blockNumber > Number(latestBlock.number);
+
   await db
     .insert(schema.blockTimestampTable)
     .values({
       chainId,
       blockNumber,
       timestamp,
-      future,
       updatedAt: now,
     })
     .onConflictDoUpdate({
       target: [schema.blockTimestampTable.chainId, schema.blockTimestampTable.blockNumber],
       set: {
-        future,
         timestamp,
         updatedAt: now,
       },

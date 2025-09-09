@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
-import { DbDao } from '@/db/schema/onchain';
+import { DbDao, DbGovernanceGuard } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo } from '../middleware/dao';
@@ -13,6 +13,22 @@ export const bigIntText = (column: PgColumn, alias?: string) => {
 
 export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDaoInfo[]) => {
   const now = unixTimestamp();
+
+  const guard = dbDao?.governanceGuards?.[0];
+  // prettier-ignore
+  const governanceGuard = guard ? {
+    address: getAddress(guard.address),
+    executionPeriod: guard.executionPeriod,
+    timelockPeriod: guard.timelockPeriod,
+    freezeVotingStrategy: guard.freezeVotingStrategies?.[0] ? {
+      address: getAddress(guard.freezeVotingStrategies[0].address),
+      freezePeriod: guard.freezeVotingStrategies[0].freezePeriod,
+      freezeProposalPeriod: guard.freezeVotingStrategies[0].freezeProposalPeriod,
+      freezeVotesThreshold: guard.freezeVotingStrategies[0].freezeVotesThreshold,
+      freezeVoteType: guard.freezeVotingStrategies[0].freezeVoteType,
+    } : null,
+  } : null;
+
   const dao = {
     chainId: dbDao.chainId,
     address: dbDao.address,
@@ -42,19 +58,7 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
         })),
       })),
     })),
-    // asume single governanceGuard and freezeVotingStrategy for now
-    governanceGuard: dbDao.governanceGuards?.[0] ? {
-      address: getAddress(dbDao.governanceGuards[0].address),
-      executionPeriod: dbDao.governanceGuards[0].executionPeriod,
-      timelockPeriod: dbDao.governanceGuards[0].timelockPeriod,
-      freezeVotingStrategy: dbDao.governanceGuards[0].freezeVotingStrategies?.[0] ? {
-        address: getAddress(dbDao.governanceGuards[0].freezeVotingStrategies[0].address),
-        freezePeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezePeriod,
-        freezeProposalPeriod: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeProposalPeriod,
-        freezeVotesThreshold: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeVotesThreshold,
-        freezeVoteType: dbDao.governanceGuards[0].freezeVotingStrategies[0].freezeVoteType,
-      } : null,
-    } : null,
+    governanceGuard,
     roles: dbDao.roles.map(role => ({
       ...role,
       terms: role.terms?.map(term => ({

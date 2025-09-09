@@ -1,4 +1,4 @@
-import { boolean, integer, primaryKey } from 'drizzle-orm/pg-core';
+import { integer, primaryKey } from 'drizzle-orm/pg-core';
 import { SupportedChainId } from 'decent-sdk';
 import { offchainSchema } from './offchain';
 
@@ -8,7 +8,6 @@ export const blockTimestampTable = offchainSchema.table(
     chainId: integer().notNull().$type<SupportedChainId>(),
     blockNumber: integer().notNull(),
     timestamp: integer(),
-    future: boolean(),
     updatedAt: integer().notNull(),
   },
   t => [primaryKey({ columns: [t.chainId, t.blockNumber] })],
