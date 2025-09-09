@@ -148,6 +148,7 @@ export const onchainProposalTable = onchainSchema.table(
     transactions: json().$type<Transaction[]>(),
     title: text().notNull(),
     description: text().notNull(),
+    snapshotBlock: integer().notNull(),
     createdAt: bigint({ mode: 'number' }).notNull(),
     votingEndBlock: integer(),
     proposedTxHash: hex().notNull(),

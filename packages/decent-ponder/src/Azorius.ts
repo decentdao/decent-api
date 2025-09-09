@@ -71,6 +71,7 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
         transactions: replaceBigInts(transactions, x => x.toString()),
         title,
         description,
+        snapshotBlock: Number(event.block.number),
         createdAt: event.block.timestamp,
         votingEndBlock,
         proposedTxHash: event.transaction.hash,

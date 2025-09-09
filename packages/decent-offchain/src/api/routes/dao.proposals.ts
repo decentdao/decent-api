@@ -4,7 +4,8 @@ import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { bigIntText, formatProposal, ensureProposalTimestamp } from '@/api/utils/typeConverter';
+import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
+import { addProposalTimestamp } from '../utils/blockTimestamp';
 
 const app = new Hono();
 
@@ -51,9 +52,8 @@ app.get('/', daoCheck, async c => {
       },
     }) as DbProposal[];
 
-    // Ensure timestamps for proposals missing them
     const proposalsWithTimestamps = await Promise.all(
-      proposals.map(proposal => ensureProposalTimestamp(proposal, dao.chainId))
+      proposals.map(proposal => addProposalTimestamp(proposal, dao.chainId))
     );
 
     const ret = proposalsWithTimestamps.map(formatProposal);
@@ -96,8 +96,7 @@ app.get('/:id', daoCheck, async c => {
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  // Ensure timestamp for proposal if missing
-  const proposalWithTimestamp = await ensureProposalTimestamp(proposal, dao.chainId);
+  const proposalWithTimestamp = await addProposalTimestamp(proposal, dao.chainId);
 
   return resf(c, formatProposal(proposalWithTimestamp));
 });

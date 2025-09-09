@@ -4,6 +4,7 @@ import { safeProposalTable } from './offchain/safeProposals';
 import { blockTimestampTable } from './offchain/blockTimestamp';
 import { relations } from 'drizzle-orm';
 
+// These relationships link onchain.proposal with offchain.blockTimestamp entries
 export const onchainProposalBlockTimestampRelations = relations(
   onchainSchema.onchainProposalTable,
   ({ one }) => ({
@@ -23,6 +24,7 @@ export const blockTimestampTableRelations = relations(
     proposals: many(onchainSchema.onchainProposalTable),
   }),
 );
+// ==============================================================================
 
 export const schema = {
   ...onchainSchema,

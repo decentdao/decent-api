@@ -9,6 +9,7 @@ export const blockTimestampTable = offchainSchema.table(
     blockNumber: integer().notNull(),
     timestamp: integer(),
     future: boolean(),
+    updatedAt: integer().notNull(),
   },
   t => [primaryKey({ columns: [t.chainId, t.blockNumber] })],
 );

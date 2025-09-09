@@ -1,18 +1,18 @@
+import { eq, and } from 'drizzle-orm';
 import { SupportedChainId } from 'decent-sdk';
 import { getPublicClient } from './publicClient';
 import { unixTimestamp } from './time';
 import { db } from '@/db';
-import { schema } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { DbProposal, schema } from '@/db/schema';
 
-const blockTimeCache = new Map<number, { blockTime: number; timestamp: number }>();
+const avgBlockTimeCache = new Map<number, { blockTime: number; updatedAt: number }>();
 const CACHE_DURATION = 24 * 60 * 60;
 
 export const getAverageBlockTime = async (chainId: SupportedChainId): Promise<number> => {
-  const cached = blockTimeCache.get(chainId);
+  const cached = avgBlockTimeCache.get(chainId);
   const now = unixTimestamp();
 
-  if (cached && now - cached.timestamp < CACHE_DURATION) {
+  if (cached && now < cached.updatedAt + CACHE_DURATION) {
     return cached.blockTime;
   }
 
@@ -22,7 +22,7 @@ export const getAverageBlockTime = async (chainId: SupportedChainId): Promise<nu
     const latestBlock = await client.getBlock();
     const pastBlock = await client.getBlock({ blockNumber: latestBlock.number - 1000n });
     const averageBlockTime = Number(latestBlock.timestamp - pastBlock.timestamp) / 1000;
-    blockTimeCache.set(chainId, { blockTime: averageBlockTime, timestamp: now });
+    avgBlockTimeCache.set(chainId, { blockTime: averageBlockTime, updatedAt: now });
 
     return averageBlockTime;
   } catch (error) {
@@ -56,8 +56,8 @@ export const getBlockTimestamp = async (
       // Block is in the future, estimate timestamp
       const averageBlockTime = await getAverageBlockTime(chainId);
       const estimatedTimestamp = Number(latestBlock.timestamp) +
-          (averageBlockTime * blockNumber - Number(latestBlock.number));
-      return estimatedTimestamp;
+        (averageBlockTime * (blockNumber - Number(latestBlock.number)));
+      return Math.floor(estimatedTimestamp);
     }
   } catch (error) {
     console.error(
@@ -68,7 +68,7 @@ export const getBlockTimestamp = async (
   }
 };
 
-export const getOrCacheBlockTimestamp = async (
+export const useCacheBlockTimestamp = async (
   chainId: SupportedChainId,
   blockNumber: number,
 ): Promise<number> => {
@@ -80,7 +80,8 @@ export const getOrCacheBlockTimestamp = async (
     )
   });
 
-  if (cached?.timestamp) {
+  const now = unixTimestamp();
+  if (cached?.timestamp && now < cached.updatedAt + CACHE_DURATION) {
     return cached.timestamp;
   }
 
@@ -88,16 +89,33 @@ export const getOrCacheBlockTimestamp = async (
   const timestamp = await getBlockTimestamp(blockNumber, chainId);
   const client = getPublicClient(chainId);
   const latestBlock = await client.getBlock();
-
+  const future = blockNumber > Number(latestBlock.number);
   await db
     .insert(schema.blockTimestampTable)
     .values({
       chainId,
       blockNumber,
       timestamp,
-      future: blockNumber > Number(latestBlock.number),
+      future,
+      updatedAt: now
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [schema.blockTimestampTable.chainId, schema.blockTimestampTable.blockNumber],
+      set: {
+        future,
+        timestamp,
+        updatedAt: now,
+      },
+    });
 
   return timestamp;
+};
+
+export const addProposalTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
+  if (!proposal.blockTimestamp?.timestamp && proposal.votingEndBlock) {
+    proposal.blockTimestamp = {
+      timestamp: await useCacheBlockTimestamp(chainId, proposal.votingEndBlock)
+    };
+  }
+  return proposal;
 };

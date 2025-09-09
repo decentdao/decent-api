@@ -6,8 +6,6 @@ import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo } from '../middleware/dao';
 import { getAddress } from 'viem';
 import { DbProposal } from '@/db/schema';
-import { SupportedChainId } from 'decent-sdk';
-import { getOrCacheBlockTimestamp } from './blockTimestamp';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -88,6 +86,7 @@ export const formatProposal = (dbProposal: DbProposal) => {
     proposedTxHash: dbProposal.proposedTxHash,
     executedTxHash: dbProposal.executedTxHash,
     createdAt: dbProposal.createdAt,
+    snapshotBlock: dbProposal.snapshotBlock,
     votingEndBlock: dbProposal.votingEndBlock,
     votingEndTimestamp: dbProposal.blockTimestamp?.timestamp || null,
     votes: dbProposal.votes?.map(v => ({
@@ -99,11 +98,3 @@ export const formatProposal = (dbProposal: DbProposal) => {
   return proposal;
 };
 
-export const ensureProposalTimestamp = async (proposal: DbProposal, chainId: SupportedChainId) => {
-  if (!proposal.blockTimestamp?.timestamp && proposal.votingEndBlock) {
-    proposal.blockTimestamp = {
-      timestamp: await getOrCacheBlockTimestamp(chainId, proposal.votingEndBlock)
-    };
-  }
-  return proposal;
-};
