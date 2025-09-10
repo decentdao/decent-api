@@ -34,5 +34,5 @@ export const schema = {
 
 export type DbNewSafeProposal = typeof safeProposalTable.$inferInsert;
 export type DbProposal = onchainSchema.DbOnchainProposal & {
-  blockTimestamp: { timestamp: number };
+  blockTimestamp?: { timestamp: number } | null;
 };
