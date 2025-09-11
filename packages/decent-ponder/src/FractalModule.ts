@@ -36,11 +36,14 @@ ponder.on('FractalModule:ControllersAdded', async ({ event, context }) => {
     });
     const guard = getAddress(`0x${guardStorageValue?.slice(-40)}`);
     if (guard !== zeroAddress) {
-      await context.db.insert(governanceGuard).values({
-        address: guard,
-        daoAddress,
-        daoChainId,
-      }).onConflictDoNothing();
+      await context.db
+        .insert(governanceGuard)
+        .values({
+          address: guard,
+          daoAddress,
+          daoChainId,
+        })
+        .onConflictDoNothing();
     }
   } catch (e) {
     console.error('FractalModule:AvatarSet', e);

@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db';
-import { schema } from '@/db/schema';
+import { DbProposal, schema } from '@/db/schema';
 import { daoCheck } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
+import { addVoteEndTimestamp } from '../utils/blockTimestamp';
 
 const app = new Hono();
 
@@ -31,15 +32,31 @@ app.get('/', daoCheck, async c => {
 
     return resf(c, proposals);
   } else {
-    const proposals = await db.query.onchainProposalTable.findMany({
+    const proposals = (await db.query.onchainProposalTable.findMany({
       where: and(
         eq(schema.onchainProposalTable.daoChainId, dao.chainId),
         eq(schema.onchainProposalTable.daoAddress, dao.address),
       ),
       orderBy: desc(schema.onchainProposalTable.id),
-    });
+      with: {
+        votes: {
+          extras: {
+            weight: bigIntText(schema.voteTable.weight),
+          },
+        },
+        blockTimestamp: {
+          columns: {
+            timestamp: true,
+          },
+        },
+      },
+    })) as DbProposal[];
 
-    const ret = proposals.map(formatProposal);
+    const proposalsWithTimestamps = await Promise.all(
+      proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId)),
+    );
+
+    const ret = proposalsWithTimestamps.map(formatProposal);
     return resf(c, ret);
   }
 });
@@ -57,7 +74,7 @@ app.get('/:id', daoCheck, async c => {
   const { id } = c.req.param();
   if (!id) throw new ApiError('Proposal id is required', 400);
 
-  const proposal = await db.query.onchainProposalTable.findFirst({
+  const proposal = (await db.query.onchainProposalTable.findFirst({
     where: and(
       eq(schema.onchainProposalTable.id, Number(id)),
       eq(schema.onchainProposalTable.daoChainId, dao.chainId),
@@ -69,12 +86,19 @@ app.get('/:id', daoCheck, async c => {
           weight: bigIntText(schema.voteTable.weight),
         },
       },
+      blockTimestamp: {
+        columns: {
+          timestamp: true,
+        },
+      },
     },
-  });
+  })) as DbProposal;
 
   if (!proposal) throw new ApiError('Proposal not found', 404);
 
-  return resf(c, formatProposal(proposal));
+  const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
+
+  return resf(c, formatProposal(proposalWithTimestamp));
 });
 
 export default app;

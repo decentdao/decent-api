@@ -2,6 +2,7 @@ import { replaceBigInts } from 'ponder';
 import { ponder } from 'ponder:registry';
 import { governanceModule, proposal } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/AzoriusAbi';
+import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
 
 ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {
@@ -48,12 +49,16 @@ ponder.on('Azorius:TimelockPeriodUpdated', async ({ event, context }) => {
 ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
   try {
     const { proposalId, proposer, transactions, metadata, strategy } = event.args;
-    if (!event.transaction.to) return;
-    const daoAddress = await context.client.readContract({
-      address: event.transaction.to,
-      abi: AzoriusAbi,
-      functionName: 'target',
-    });
+    const azorius = event.transaction.to;
+    if (!azorius) return;
+
+    const moduleQuery = await context.db.find(governanceModule, { address: azorius });
+    if (!moduleQuery) return;
+    const daoAddress = moduleQuery.daoAddress;
+    if (!daoAddress) return;
+
+    const votingEndBlock = getProposalEndBlock(event);
+
     const { title, description } = JSON.parse(metadata);
     await context.db
       .insert(proposal)
@@ -66,10 +71,14 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
         transactions: replaceBigInts(transactions, x => x.toString()),
         title,
         description,
+        snapshotBlock: Number(event.block.number),
         createdAt: event.block.timestamp,
+        votingEndBlock,
         proposedTxHash: event.transaction.hash,
       })
       .onConflictDoNothing();
+
+    deleteProposalEndBlock(event);
   } catch (e) {
     console.log('Azorius:ProposalCreated', e);
   }
@@ -78,12 +87,14 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
 ponder.on('Azorius:ProposalExecuted', async ({ event, context }) => {
   try {
     const { proposalId } = event.args;
-    if (!event.transaction.to) return;
-    const daoAddress = await context.client.readContract({
-      address: event.transaction.to,
-      abi: AzoriusAbi,
-      functionName: 'target',
-    });
+    const azorius = event.transaction.to;
+    if (!azorius) return;
+
+    const moduleQuery = await context.db.find(governanceModule, { address: azorius });
+    if (!moduleQuery) return;
+    const daoAddress = moduleQuery.daoAddress;
+    if (!daoAddress) return;
+
     await context.db
       .update(proposal, {
         id: BigInt(proposalId),
