@@ -1,6 +1,6 @@
 import { replaceBigInts } from 'ponder';
 import { ponder } from 'ponder:registry';
-import { governanceModule, proposal } from 'ponder:schema';
+import { dao, governanceModule, proposal } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/AzoriusAbi';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
 
@@ -21,6 +21,16 @@ ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
         daoChainId,
       })
       .onConflictDoUpdate({ daoAddress, daoChainId });
+
+    await context.db
+      .insert(dao)
+      .values({
+        address: daoAddress,
+        chainId: daoChainId,
+        isAzorius: true,
+      })
+      .onConflictDoUpdate({ isAzorius: true });
+
   } catch (e) {
     console.error('Azorius:EnabledStrategy', e);
   }

@@ -1,12 +1,13 @@
 import { Context, Next } from 'hono';
 import { Address, isAddress } from 'viem';
-import { inArray } from 'drizzle-orm';
-import { Dao } from 'decent-sdk';
+import { and, eq, inArray } from 'drizzle-orm';
+import { Dao, SupportedChainId } from 'decent-sdk';
 import { db } from '@/db';
 import {
   CHILD_SELECT_FIELDS,
   DAO_GOVERNANCE_MODULE_JOIN_CONDITION,
   DEFAULT_DAO_WITH,
+  SIMPLE_DAO_SELECT_FIELDS,
 } from '@/db/queries';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { formatDao } from '@/api/utils/typeConverter';
@@ -21,6 +22,7 @@ const MAX_SUB_DAO_DEPTH = 3;
 
 declare module 'hono' {
   interface ContextVariableMap {
+    basicDaoInfo: BasicDaoInfo,
     dao: Dao & {
       safe: BasicSafeInfo;
       subDaos: SubDaoInfo[];
@@ -28,6 +30,13 @@ declare module 'hono' {
     }; // @TODO: update SDK types
   }
 }
+
+export type BasicDaoInfo = {
+  address: Address;
+  chainId: SupportedChainId;
+  name: string | null;
+  isAzorius: boolean;
+};
 
 export type SubDaoInfo = {
   address: Address;
@@ -92,7 +101,27 @@ async function fetchNestedSubDaos(
   return result;
 }
 
-export const daoCheck = async (c: Context, next: Next) => {
+// set basicDaoInfo for more efficient routes when we don't need all the Safe info etc
+export const daoExists = async (c: Context, next: Next) => {
+  const { chainId, address } = c.req.param();
+  const chainIdNumber = getChainId(chainId);
+
+  const addressLower = address?.toLowerCase();
+  if (!addressLower || !isAddress(addressLower)) throw new ApiError('Invalid dao address', 400);
+
+  const [basicDaoInfo] = await db
+    .select(SIMPLE_DAO_SELECT_FIELDS)
+    .from(schema.daoTable)
+    .where(and(eq(schema.daoTable.chainId, chainIdNumber), eq(schema.daoTable.address, addressLower)))
+    .limit(1);
+
+  if (!basicDaoInfo) throw new ApiError('DAO not found', 404);
+
+  c.set('basicDaoInfo', basicDaoInfo);
+  await next();
+}
+
+export const daoFetch = async (c: Context, next: Next) => {
   const { chainId, address } = c.req.param();
   const chainIdNumber = getChainId(chainId);
 
