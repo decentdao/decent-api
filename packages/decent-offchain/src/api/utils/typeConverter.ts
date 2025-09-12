@@ -3,7 +3,7 @@ import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao } from '@/db/schema/onchain';
 import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
-import { SubDaoInfo } from '../middleware/dao';
+import { SubDaoInfo, ProposalTemplate } from '../middleware/dao';
 import { getAddress } from 'viem';
 import { DbProposal } from '@/db/schema';
 
@@ -11,7 +11,12 @@ export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
 };
 
-export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDaoInfo[]) => {
+export const formatDao = (
+  dbDao: DbDao,
+  safeInfo: BasicSafeInfo,
+  subDaos: SubDaoInfo[],
+  proposalTemplates: ProposalTemplate[] | null,
+) => {
   const now = unixTimestamp();
 
   const guard = dbDao?.governanceGuards?.[0];
@@ -38,7 +43,7 @@ export const formatDao = (dbDao: DbDao, safeInfo: BasicSafeInfo, subDaos: SubDao
       nonce: safeInfo.nonce,
     },
     name: dbDao.name,
-    proposalTemplatesCID: dbDao.proposalTemplatesCID,
+    proposalTemplates,
     governanceModules: dbDao.governanceModules.map(module => ({
       address: getAddress(module.address),
       type: module.moduleType,

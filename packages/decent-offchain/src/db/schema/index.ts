@@ -2,6 +2,7 @@ import * as onchainSchema from './onchain';
 import { sessionTable } from './offchain/sessions';
 import { safeProposalTable } from './offchain/safeProposals';
 import { blockTimestampTable } from './offchain/blockTimestamp';
+import { ipfsTable } from './offchain/ipfs';
 import { relations } from 'drizzle-orm';
 
 // These relationships link onchain.proposal with offchain.blockTimestamp entries
@@ -25,9 +26,12 @@ export const blockTimestampTableRelations = relations(blockTimestampTable, ({ ma
 
 export const schema = {
   ...onchainSchema,
+  // offchain tables
   safeProposalTable,
   sessionTable,
   blockTimestampTable,
+  ipfsTable,
+  // offchain relationships
   onchainProposalBlockTimestampRelations,
   blockTimestampTableRelations,
 };

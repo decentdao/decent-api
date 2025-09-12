@@ -15,8 +15,50 @@ import { getChainId } from '@/api/utils/chains';
 import { getSafeInfo } from '@/lib/safe';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { schema } from '@/db/schema';
+import { ipfsCacheFetch } from '../utils/ipfs';
 
 const MAX_SUB_DAO_DEPTH = 3;
+
+declare module 'hono' {
+  interface ContextVariableMap {
+    dao: Dao & {
+      safe: BasicSafeInfo;
+      subDaos: SubDaoInfo[];
+      proposalTemplates: ProposalTemplate[] | null;
+    }; // @TODO: update SDK types
+  }
+}
+
+export type SubDaoInfo = {
+  address: Address;
+  name: string | null;
+  isAzorius: boolean;
+  subDaos?: SubDaoInfo[];
+};
+
+export type EthValue = {
+  value: string;
+  bigintValue: string;
+};
+
+export type TransactionParameter = {
+  signature: string;
+  label: string;
+  value: string;
+};
+
+export type CustomTransaction = {
+  targetAddress: string;
+  ethValue: EthValue;
+  functionName: string;
+  parameters: TransactionParameter[];
+};
+
+export type ProposalTemplate = {
+  title: string;
+  description: string;
+  transactions: CustomTransaction[];
+};
 
 async function fetchNestedSubDaos(
   addresses: Address[],
@@ -50,22 +92,6 @@ async function fetchNestedSubDaos(
   return result;
 }
 
-export type SubDaoInfo = {
-  address: Address;
-  name: string | null;
-  isAzorius: boolean;
-  subDaos?: SubDaoInfo[];
-};
-
-declare module 'hono' {
-  interface ContextVariableMap {
-    dao: Dao & {
-      safe: BasicSafeInfo;
-      subDaos: SubDaoInfo[];
-    }; // @TODO: update SDK types
-  }
-}
-
 export const daoCheck = async (c: Context, next: Next) => {
   const { chainId, address } = c.req.param();
   const chainIdNumber = getChainId(chainId);
@@ -84,9 +110,14 @@ export const daoCheck = async (c: Context, next: Next) => {
 
   if (!dao) throw new ApiError('DAO not found', 404);
 
-  // get most safe info with contract read
+  // get most uptodate safe info with contract read
   const safeInfo = await getSafeInfo(chainIdNumber, addressLower);
 
-  c.set('dao', formatDao(dao, safeInfo, subDaos));
+  // fetch custom templates from IPFS if available
+  const proposalTemplates = dao.proposalTemplatesCID
+    ? ((await ipfsCacheFetch(dao.proposalTemplatesCID)) as ProposalTemplate[])
+    : null;
+
+  c.set('dao', formatDao(dao, safeInfo, subDaos, proposalTemplates));
   await next();
 };

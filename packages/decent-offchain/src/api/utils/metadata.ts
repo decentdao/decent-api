@@ -1,4 +1,4 @@
-const IPFS_GATEWAY = 'https://nance.infura-ipfs.io';
+import { IPFS_GATEWAY } from './ipfs';
 
 export async function fetchMetadata(cid: string) {
   const response = await fetch(`${IPFS_GATEWAY}/ipfs/${cid}`);
