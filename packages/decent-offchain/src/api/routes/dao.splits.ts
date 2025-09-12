@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { splitWalletTable } from '@/db/schema/onchain';
-import { daoCheck } from '@/api/middleware/dao';
+import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { duneFetchBalances } from '@/lib/dune';
 
@@ -27,8 +27,8 @@ const MINIMUM_BALANCE_WEI = 100n;
  *    tokens: Address[]
  *  }[]
  */
-app.get('/', daoCheck, async c => {
-  const dao = c.get('dao');
+app.get('/', daoExists, async c => {
+  const dao = c.get('basicDaoInfo');
 
   const splitWallets = await db
     .select({

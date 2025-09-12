@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
-import { daoCheck } from '@/api/middleware/dao';
+import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
@@ -17,11 +17,10 @@ const app = new Hono();
  * @returns {Proposal[]} Array of proposal objects
  * TODO: Unify types for multisig and module DAO
  */
-app.get('/', daoCheck, async c => {
-  const dao = c.get('dao');
-  const isMultisig = dao?.governanceModules?.length === 0;
+app.get('/', daoExists, async c => {
+  const dao = c.get('basicDaoInfo');
 
-  if (isMultisig) {
+  if (!dao.isAzorius) {
     const proposals = await db.query.safeProposalTable.findMany({
       where: and(
         eq(schema.safeProposalTable.daoChainId, dao.chainId),
@@ -69,8 +68,8 @@ app.get('/', daoCheck, async c => {
  * @param {string} id - id of the proposal
  * @returns {Proposal} Proposal object
  */
-app.get('/:id', daoCheck, async c => {
-  const dao = c.get('dao');
+app.get('/:id', daoExists, async c => {
+  const dao = c.get('basicDaoInfo');
   const { id } = c.req.param();
   if (!id) throw new ApiError('Proposal id is required', 400);
 

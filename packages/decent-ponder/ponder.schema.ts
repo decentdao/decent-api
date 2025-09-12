@@ -22,6 +22,7 @@ export const dao = onchainTable(
     name: text('dao_name'),
     proposalTemplatesCID: text(),
     snapshotENS: text(),
+    isAzorius: boolean().default(false).notNull(),
     subDaoOf: hex(),
     subDaoAddresses: hex().array(),
     treeId: integer(),

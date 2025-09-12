@@ -85,10 +85,15 @@ export const DEFAULT_DAO_WITH = {
   },
 };
 
-export const DAO_SELECT_FIELDS = {
+export const SIMPLE_DAO_SELECT_FIELDS = {
   chainId: schema.daoTable.chainId,
   address: schema.daoTable.address,
   name: schema.daoTable.name,
+  isAzorius: schema.daoTable.isAzorius,
+};
+
+export const DAO_SELECT_FIELDS = {
+  ...SIMPLE_DAO_SELECT_FIELDS,
   proposalTemplatesCID: schema.daoTable.proposalTemplatesCID,
   snapshotENS: schema.daoTable.snapshotENS,
   subDaoOf: schema.daoTable.subDaoOf,
@@ -99,28 +104,11 @@ export const DAO_SELECT_FIELDS = {
   erc20Address: schema.daoTable.erc20Address,
   createdAt: schema.daoTable.createdAt,
   updatedAt: schema.daoTable.updatedAt,
-  isAzorius: sql<boolean>`
-    EXISTS (
-      SELECT 1 FROM ${schema.governanceModuleTable}
-      WHERE ${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId}
-        AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}
-        AND ${schema.governanceModuleTable.moduleType} = 'AZORIUS'
-    )
-  `.as('isAzorius'),
 };
 
 export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
 
 export const CHILD_SELECT_FIELDS = {
-  address: schema.daoTable.address,
-  name: schema.daoTable.name,
+  ...SIMPLE_DAO_SELECT_FIELDS,
   subDaoAddresses: schema.daoTable.subDaoAddresses,
-  isAzorius: sql<boolean>`
-    EXISTS (
-      SELECT 1 FROM ${schema.governanceModuleTable}
-      WHERE ${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId}
-        AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}
-        AND ${schema.governanceModuleTable.moduleType} = 'AZORIUS'
-    )
-  `.as('isAzorius'),
 };
