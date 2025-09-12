@@ -14,7 +14,7 @@ export const safeProposalTable = offchainSchema.table(
     proposer: hex('proposer').notNull(),
     metadataCID: text('metadata_cid'),
     transactions: json('transactions').$type<DataDecoded>(),
-    safeTxHash: hex('safe_tx_hash'),
+    safeTxHash: hex('safe_tx_hash').notNull(),
     executedTxHash: hex('executed_tx_hash'),
     submissionDate: timestamp('submission_date').notNull(),
     executionDate: timestamp('execution_date'),
