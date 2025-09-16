@@ -7,9 +7,9 @@ const API = 'http://localhost:3005';
 export async function sync() {
   const startTime = Date.now();
   const f = (await fetch(`${API}/d`).then(r => r.json())) as {
-    data: (Dao & { governanceModuleExists: boolean })[];
+    data: (Dao & { isAzorius: boolean })[];
   };
-  const daos = f.data.filter(d => !d.governanceModuleExists); // multisig DAOs
+  const daos = f.data.filter(d => !d.isAzorius); // multisig DAOs
   let proposalsAdded = 0;
   for (let i = 0; i < daos.length; i++) {
     const dao = daos[i];

@@ -3,7 +3,7 @@ import { sql, asc } from 'drizzle-orm';
 import { db } from '@/db';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bearerAuth } from '@/api/middleware/auth';
-import { daoFetch } from '@/api/middleware/dao';
+import { daoFetch, daoExists } from '@/api/middleware/dao';
 import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
 import { getCIDFromSafeTransaction, getSafeTransactions } from '@/lib/safe';
@@ -67,9 +67,9 @@ app.get('/:chainId/:address', daoFetch, async c => {
  * @param {string} address - Address parameter
  * @returns {SafeProposal[]} Array of Safe proposal objects
  */
-app.post('/:chainId/:address/safe-proposals', daoFetch, async c => {
-  const dao = c.get('dao');
-  if (dao.governanceModules?.length !== 0) throw new ApiError('DAO is not a Safe DAO', 400);
+app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
+  const dao = c.get('basicDaoInfo');
+  if (dao.isAzorius) throw new ApiError('DAO is not a Safe DAO', 400);
   const latestProposal = await db.query.safeProposalTable.findFirst({
     where: (safeProposal, { eq }) =>
       eq(safeProposal.daoChainId, dao.chainId) && eq(safeProposal.daoAddress, dao.address),
@@ -138,7 +138,7 @@ app.post('/:chainId/:address/safe-proposals', daoFetch, async c => {
  * @param {string} address - Address parameter
  * @returns {User} User object
  */
-app.get('/:chainId/:address/me', daoFetch, bearerAuth, permissionsCheck, async c => {
+app.get('/:chainId/:address/me', daoExists, bearerAuth, permissionsCheck, async c => {
   const user = c.get('user');
   if (!user) throw new ApiError('User not found', 401);
   return resf(c, user);

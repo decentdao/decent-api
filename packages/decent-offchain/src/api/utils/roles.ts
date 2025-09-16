@@ -11,7 +11,7 @@ export async function formatRoles(roles: DbRole[]) {
 
       let details = detailsCache?.data;
       if (!details && detailsCID) {
-        details = await ipfsCacheFetch(detailsCID) as RoleDetails;
+        details = (await ipfsCacheFetch(detailsCID)) as RoleDetails;
       }
 
       return {

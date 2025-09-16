@@ -38,6 +38,7 @@ export const getSafeTransactions = async (
 
   const response = await fetch(
     `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
+    { headers: { Authorization: `Bearer ${process.env.SAFE_API_KEY}` } },
   );
   const data = (await response.json()) as ListResponse<SafeMultisigTransactionResponse>;
   return data;
