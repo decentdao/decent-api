@@ -89,7 +89,8 @@ export const useCacheBlockTimestamp = async (
   // Fetch, cache, and return
   const timestamp = await getBlockTimestamp(blockNumber, chainId);
 
-  await db.insert(schema.blockTimestampTable)
+  await db
+    .insert(schema.blockTimestampTable)
     .values({
       chainId,
       blockNumber,

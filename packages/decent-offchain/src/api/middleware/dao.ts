@@ -17,12 +17,13 @@ import { getSafeInfo } from '@/lib/safe';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { schema } from '@/db/schema';
 import { ipfsCacheFetch } from '../utils/ipfs';
+import { formatRoles } from '../utils/roles';
 
 const MAX_SUB_DAO_DEPTH = 3;
 
 declare module 'hono' {
   interface ContextVariableMap {
-    basicDaoInfo: BasicDaoInfo,
+    basicDaoInfo: BasicDaoInfo;
     dao: Dao & {
       safe: BasicSafeInfo;
       subDaos: SubDaoInfo[];
@@ -112,14 +113,16 @@ export const daoExists = async (c: Context, next: Next) => {
   const [basicDaoInfo] = await db
     .select(SIMPLE_DAO_SELECT_FIELDS)
     .from(schema.daoTable)
-    .where(and(eq(schema.daoTable.chainId, chainIdNumber), eq(schema.daoTable.address, addressLower)))
+    .where(
+      and(eq(schema.daoTable.chainId, chainIdNumber), eq(schema.daoTable.address, addressLower)),
+    )
     .limit(1);
 
   if (!basicDaoInfo) throw new ApiError('DAO not found', 404);
 
   c.set('basicDaoInfo', basicDaoInfo);
   await next();
-}
+};
 
 export const daoFetch = async (c: Context, next: Next) => {
   const { chainId, address } = c.req.param();
@@ -146,6 +149,8 @@ export const daoFetch = async (c: Context, next: Next) => {
   const proposalTemplates = dao.proposalTemplatesCID
     ? ((await ipfsCacheFetch(dao.proposalTemplatesCID)) as ProposalTemplate[])
     : null;
+
+  dao.roles = await formatRoles(dao.roles);
 
   c.set('dao', formatDao(dao, safeInfo, subDaos, proposalTemplates));
   await next();

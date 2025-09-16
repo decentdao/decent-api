@@ -12,7 +12,7 @@ export async function ipfsCacheFetch(cid: string) {
   if (!cache) {
     const response = await fetch(`${IPFS_GATEWAY}/ipfs/${cid}`);
     const data = await response.json();
-    await db.insert(schema.ipfsTable).values({ cid, data });
+    await db.insert(schema.ipfsTable).values({ cid, data }).onConflictDoNothing();
     return data;
   }
 

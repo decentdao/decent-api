@@ -17,8 +17,6 @@ export const formatDao = (
   subDaos: SubDaoInfo[],
   proposalTemplates: ProposalTemplate[] | null,
 ) => {
-  const now = unixTimestamp();
-
   const guard = dbDao?.governanceGuards?.[0];
   // prettier-ignore
   const governanceGuard = guard ? {
@@ -64,13 +62,7 @@ export const formatDao = (
       })),
     })),
     governanceGuard,
-    roles: dbDao.roles.map(role => ({
-      ...role,
-      terms: role.terms?.map(term => ({
-        ...term,
-        active: term.termEnd >= now,
-      })),
-    })),
+    roles: dbDao.roles,
     creatorAddress: getAddress(dbDao.creatorAddress),
     snapshotENS: dbDao.snapshotENS,
     createdAt: dbDao.createdAt || 0,
