@@ -60,6 +60,11 @@ export const DEFAULT_DAO_WITH = {
       wearerAddress: true,
     },
     with: {
+      detailsCache: {
+        columns: {
+          data: true,
+        },
+      },
       streams: {
         columns: {
           streamId: true,

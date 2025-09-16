@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao } from '@/db/schema/onchain';
-import { unixTimestamp } from './time';
 import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo, ProposalTemplate } from '../middleware/dao';
 import { getAddress } from 'viem';

@@ -1,25 +1,17 @@
-import { DbRole } from '@/db/schema/onchain';
+import { DbRole, RoleDetails } from '@/db/schema';
 import { unixTimestamp } from './time';
 import { ipfsCacheFetch } from './ipfs';
-
-type RoleDetails = {
-  type: string;
-  data: {
-    name: string;
-    description: string;
-  };
-};
 
 export async function formatRoles(roles: DbRole[]) {
   const now = unixTimestamp();
 
   return Promise.all(
     roles.map(async r => {
-      const { detailsCID, ...role } = r;
+      const { detailsCID, detailsCache, ...role } = r;
 
-      let details: RoleDetails | undefined;
-      if (detailsCID) {
-        details = (await ipfsCacheFetch(detailsCID)) as RoleDetails;
+      let details = detailsCache?.data;
+      if (!details && detailsCID) {
+        details = await ipfsCacheFetch(detailsCID) as RoleDetails;
       }
 
       return {
