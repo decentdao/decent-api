@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { SupportedChainId } from 'decent-sdk';
 
 type Operator = 'gte' | 'gt' | 'eq' | 'lt' | 'lte';
 
@@ -37,19 +36,12 @@ export type WhitelistVerification = {
   allowedAddresses: Address[];
 };
 
-export type NativeVerification = {
-  type: 'native';
-  amount: string;
-  operator: Operator;
-};
-
 export type VerificationMethod =
   | ERC20Verification
   | ERC721Verification
   | ERC1155Verification
   | KycVerification
   | WhitelistVerification
-  | NativeVerification;
 
 export type TokenSaleVerification = {
   operator: 'AND' | 'OR';
