@@ -1,6 +1,6 @@
 import { replaceBigInts } from 'ponder';
 import { ponder } from 'ponder:registry';
-import { dao, governanceModule, proposal } from 'ponder:schema';
+import { dao, governanceModule, proposal, votingStrategy, votingToken, vote, votingToken } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/AzoriusAbi';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
 
@@ -33,6 +33,15 @@ ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
 
   } catch (e) {
     console.error('Azorius:EnabledStrategy', e);
+  }
+});
+
+ponder.on('Azorius:DisabledStrategy', async ({ event, context }) => {
+  try {
+    const { strategy } = event.args;
+    await context.db.delete(votingStrategy, { address: strategy });
+  } catch (e) {
+    console.error('Azorius:DisabledStrategy', e);
   }
 });
 
