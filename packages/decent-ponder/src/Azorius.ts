@@ -1,6 +1,6 @@
 import { replaceBigInts } from 'ponder';
 import { ponder } from 'ponder:registry';
-import { dao, governanceModule, proposal, votingStrategy, votingToken, vote, votingToken } from 'ponder:schema';
+import { dao, governanceModule, proposal, votingStrategy } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/AzoriusAbi';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
 
