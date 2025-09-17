@@ -30,7 +30,6 @@ ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
         isAzorius: true,
       })
       .onConflictDoUpdate({ isAzorius: true });
-
   } catch (e) {
     console.error('Azorius:EnabledStrategy', e);
   }
