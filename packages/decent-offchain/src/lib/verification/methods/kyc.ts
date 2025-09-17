@@ -1,10 +1,7 @@
 import { Address } from 'viem';
 import { CheckResult, KycVerification } from '../types';
 
-export function kycCheck(
-  address: Address,
-  method: KycVerification,
-): CheckResult {
+export function kycCheck(address: Address, method: KycVerification): CheckResult {
   // TODO: Implement KYC status check
   // 1. Check database for existing KYC approval for this address
   // 2. If approved, return eligible: true

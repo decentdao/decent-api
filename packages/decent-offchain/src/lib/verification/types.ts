@@ -41,7 +41,7 @@ export type VerificationMethod =
   | ERC721Verification
   | ERC1155Verification
   | KycVerification
-  | WhitelistVerification
+  | WhitelistVerification;
 
 export type TokenSaleVerification = {
   operator: 'AND' | 'OR';
