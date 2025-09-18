@@ -70,65 +70,75 @@ app.get('/:chainId/:address', daoFetch, async c => {
 app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
   const dao = c.get('basicDaoInfo');
   if (dao.isAzorius) throw new ApiError('DAO is not a Safe DAO', 400);
-  const latestProposal = await db.query.safeProposalTable.findFirst({
-    where: (safeProposal, { eq }) =>
-      eq(safeProposal.daoChainId, dao.chainId) && eq(safeProposal.daoAddress, dao.address),
-    orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
-  });
-  const since = latestProposal ? new Date(latestProposal.submissionDate.getTime() + 1) : undefined;
 
-  const transactions = await getSafeTransactions(dao.chainId, dao.address, since);
-  if (transactions.results.length === 0) return resf(c, []);
+  // Return immediately; run update in background to avoid timeout.
+  (async () => {
+    const latestProposal = await db.query.safeProposalTable.findFirst({
+      where: (safeProposal, { eq, and, isNotNull }) =>
+        and(
+          eq(safeProposal.daoChainId, dao.chainId),
+          eq(safeProposal.daoAddress, dao.address),
+          isNotNull(safeProposal.executedTxHash), // Only consider executed (final state) proposals
+        ),
+      orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
+    });
+    const since = latestProposal
+      ? new Date(latestProposal.submissionDate.getTime() + 1)
+      : undefined;
 
-  const proposals = await Promise.all(
-    transactions.results.map(async t => {
-      const proposer = (t.proposer || t.confirmations?.[0]?.owner) as `0x${string}`;
-      const executedTxHash = t.transactionHash as `0x${string}`;
-      const safeTxHash = t.safeTxHash as `0x${string}`;
-      const cid = getCIDFromSafeTransaction(t);
-      const metadata = cid ? await fetchMetadata(cid) : { title: null, description: null };
-      const { title, description } = metadata;
-      const submissionDate = new Date(t.submissionDate);
-      const executionDate = t.executionDate ? new Date(t.executionDate) : null;
-      return {
-        daoChainId: dao.chainId,
-        daoAddress: dao.address,
-        proposer,
-        safeNonce: t.nonce,
-        safeTxHash,
-        transactions: t.dataDecoded,
-        executedTxHash,
-        metadataCID: cid,
-        title,
-        description,
-        submissionDate,
-        executionDate,
-      };
-    }),
-  );
+    const transactions = await getSafeTransactions(dao.chainId, dao.address, since);
+    if (transactions.results.length === 0) return resf(c, []);
 
-  const inserted = await db
-    .insert(schema.safeProposalTable)
-    .values(proposals)
-    .onConflictDoUpdate({
-      target: [
-        schema.safeProposalTable.daoChainId,
-        schema.safeProposalTable.daoAddress,
-        schema.safeProposalTable.safeTxHash,
-      ],
-      set: {
-        metadataCID: sql.raw(`excluded.${schema.safeProposalTable.metadataCID.name}`),
-        transactions: sql.raw(`excluded.${schema.safeProposalTable.transactions.name}`),
-        executedTxHash: sql.raw(`excluded.${schema.safeProposalTable.executedTxHash.name}`),
-        title: sql.raw(`excluded.${schema.safeProposalTable.title.name}`),
-        description: sql.raw(`excluded.${schema.safeProposalTable.description.name}`),
-        submissionDate: sql.raw(`excluded.${schema.safeProposalTable.submissionDate.name}`),
-        executionDate: sql.raw(`excluded.${schema.safeProposalTable.executionDate.name}`),
-      },
-    })
-    .returning();
+    const proposals = await Promise.all(
+      transactions.results.map(async t => {
+        const proposer = (t.proposer || t.confirmations?.[0]?.owner) as `0x${string}`;
+        const executedTxHash = t.transactionHash as `0x${string}`;
+        const safeTxHash = t.safeTxHash as `0x${string}`;
+        const cid = getCIDFromSafeTransaction(t);
+        const metadata = cid ? await fetchMetadata(cid) : { title: null, description: null };
+        const { title, description } = metadata;
+        const submissionDate = new Date(t.submissionDate);
+        const executionDate = t.executionDate ? new Date(t.executionDate) : null;
+        return {
+          daoChainId: dao.chainId,
+          daoAddress: dao.address,
+          proposer,
+          safeNonce: t.nonce,
+          safeTxHash,
+          transactions: t.dataDecoded,
+          executedTxHash,
+          metadataCID: cid,
+          title,
+          description,
+          submissionDate,
+          executionDate,
+        };
+      }),
+    );
 
-  return resf(c, inserted);
+    await db
+      .insert(schema.safeProposalTable)
+      .values(proposals)
+      .onConflictDoUpdate({
+        target: [
+          schema.safeProposalTable.daoChainId,
+          schema.safeProposalTable.daoAddress,
+          schema.safeProposalTable.safeTxHash,
+        ],
+        set: {
+          metadataCID: sql.raw(`excluded.${schema.safeProposalTable.metadataCID.name}`),
+          transactions: sql.raw(`excluded.${schema.safeProposalTable.transactions.name}`),
+          executedTxHash: sql.raw(`excluded.${schema.safeProposalTable.executedTxHash.name}`),
+          title: sql.raw(`excluded.${schema.safeProposalTable.title.name}`),
+          description: sql.raw(`excluded.${schema.safeProposalTable.description.name}`),
+          submissionDate: sql.raw(`excluded.${schema.safeProposalTable.submissionDate.name}`),
+          executionDate: sql.raw(`excluded.${schema.safeProposalTable.executionDate.name}`),
+        },
+      })
+      .returning();
+  })();
+
+  return resf(c, 'Task scheduled');
 });
 
 /**
