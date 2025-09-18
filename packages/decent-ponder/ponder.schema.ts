@@ -58,8 +58,8 @@ export const votingStrategy = onchainTable('voting_strategy', {
 
 export const governanceGuard = onchainTable('governance_guard', {
   address: hex('governance_guard_address').primaryKey(),
-  daoChainId: integer(),
-  daoAddress: hex(),
+  daoChainId: integer().notNull(),
+  daoAddress: hex().notNull(),
   executionPeriod: integer(),
   timelockPeriod: integer(),
 });
@@ -146,6 +146,18 @@ export const proposal = onchainTable(
     executedTxHash: hex(),
   },
   t => ({ pk: primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] }) }),
+);
+
+export const safeProposalExecution = onchainTable(
+  'safe_proposal_execution',
+  {
+    daoChainId: integer().notNull(),
+    daoAddress: hex().notNull(),
+    safeTxnHash: hex().notNull(),
+    executedTxHash: hex(),
+    timelockedBlock: integer(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxnHash] }) }),
 );
 
 export const vote = onchainTable(
