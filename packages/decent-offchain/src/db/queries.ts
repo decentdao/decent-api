@@ -112,6 +112,7 @@ export const DAO_SELECT_FIELDS = {
 };
 
 export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
+export const DAO_GOVERNANCE_GUARD_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceGuardTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceGuardTable.daoAddress}`;
 
 export const CHILD_SELECT_FIELDS = {
   ...SIMPLE_DAO_SELECT_FIELDS,
