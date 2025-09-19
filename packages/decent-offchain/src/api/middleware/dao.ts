@@ -1,11 +1,10 @@
 import { Context, Next } from 'hono';
 import { Address, isAddress } from 'viem';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Dao, SupportedChainId } from 'decent-sdk';
 import { db } from '@/db';
 import {
   CHILD_SELECT_FIELDS,
-  DAO_GOVERNANCE_GUARD_JOIN_CONDITION,
   DAO_GOVERNANCE_MODULE_JOIN_CONDITION,
   DEFAULT_DAO_WITH,
   SIMPLE_DAO_SELECT_FIELDS,
@@ -25,7 +24,6 @@ const MAX_SUB_DAO_DEPTH = 3;
 declare module 'hono' {
   interface ContextVariableMap {
     basicDaoInfo: BasicDaoInfo;
-    moduleGuardInfo: ModuleGuardInfo;
     dao: Dao & {
       safe: BasicSafeInfo;
       subDaos: SubDaoInfo[];
@@ -39,11 +37,6 @@ export type BasicDaoInfo = {
   chainId: SupportedChainId;
   name: string | null;
   isAzorius: boolean;
-};
-
-export type ModuleGuardInfo = {
-  modules: Address[];
-  guards: Address[];
 };
 
 export type SubDaoInfo = {
@@ -128,31 +121,6 @@ export const daoExists = async (c: Context, next: Next) => {
   if (!basicDaoInfo) throw new ApiError('DAO not found', 404);
 
   c.set('basicDaoInfo', basicDaoInfo);
-  await next();
-};
-
-export const moduleGuardFetch = async (c: Context, next: Next) => {
-  const { chainId, address } = c.req.param();
-  const chainIdNumber = getChainId(chainId);
-
-  const addressLower = address?.toLowerCase();
-  if (!addressLower || !isAddress(addressLower)) throw new ApiError('Invalid dao address', 400);
-
-  const result = await db
-    .select({
-      modules: sql<Address[]>`array_agg(DISTINCT ${schema.governanceModuleTable.address})`,
-      guards: sql<Address[]>`array_agg(DISTINCT ${schema.governanceGuardTable.address})`,
-    })
-    .from(schema.daoTable)
-    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
-    .leftJoin(schema.governanceGuardTable, DAO_GOVERNANCE_GUARD_JOIN_CONDITION)
-    .where(
-      and(eq(schema.daoTable.chainId, chainIdNumber), eq(schema.daoTable.address, addressLower)),
-    )
-    .groupBy(schema.daoTable.address);
-  const moduleAndGuards = result[0] ?? { modules: [], guards: [] };
-
-  c.set('moduleGuardInfo', moduleAndGuards);
   await next();
 };
 

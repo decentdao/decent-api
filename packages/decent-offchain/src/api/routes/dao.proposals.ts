@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
-import { daoExists, moduleGuardFetch } from '@/api/middleware/dao';
+import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
@@ -21,9 +21,8 @@ const app = new Hono();
  * @returns {Proposal[]} Array of proposal objects
  * TODO: Unify types for multisig and module DAO
  */
-app.get('/', daoExists, moduleGuardFetch, async c => {
+app.get('/', daoExists, async c => {
   const dao = c.get('basicDaoInfo');
-  const moduleGuard = c.get('moduleGuardInfo');
 
   if (!dao.isAzorius) {
     // Then it's Multisig DAO
@@ -34,12 +33,10 @@ app.get('/', daoExists, moduleGuardFetch, async c => {
       ),
       orderBy: desc(schema.safeProposalTable.safeNonce),
     });
-    const freezeGuard = moduleGuard.guards[0];
     const proposalsWithState = await mergeMultisigProposalsWithState(
       dao.address,
       dao.chainId,
       proposals,
-      freezeGuard,
     );
 
     return resf(c, proposalsWithState);
@@ -68,9 +65,8 @@ app.get('/', daoExists, moduleGuardFetch, async c => {
       proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId)),
     );
 
-    const azorius = moduleGuard.modules[0];
     const ret = await mergeAzoriusProposalsWithState(
-      azorius!,
+      dao.address,
       dao.chainId,
       proposalsWithTimestamps.map(formatProposal),
     );

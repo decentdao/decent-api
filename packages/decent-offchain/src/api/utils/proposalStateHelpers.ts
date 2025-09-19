@@ -1,4 +1,5 @@
 import { Address } from 'viem';
+import { and, eq, sql } from 'drizzle-orm';
 import { getBlockTimestamp } from './blockTimestamp';
 import { SupportedChainId } from 'decent-sdk';
 import { getPublicClient } from './publicClient';
@@ -6,8 +7,13 @@ import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { getSafeInfo, getSafeTransactions } from '@/lib/safe';
 import { FractalProposalState, strategyFractalProposalStates } from '../types';
 import { db } from '@/db';
+import { schema } from '@/db/schema';
 import { abis } from '@fractal-framework/fractal-contracts';
 import { DbProposal } from '@/db/schema';
+import {
+  DAO_GOVERNANCE_GUARD_JOIN_CONDITION,
+  DAO_GOVERNANCE_MODULE_JOIN_CONDITION,
+} from '@/db/queries';
 
 /**
  * Merge proposals from DB with their current state.
@@ -44,9 +50,16 @@ export async function mergeMultisigProposalsWithState(
   daoAddress: Address,
   chainId: SupportedChainId,
   proposals: DbSafeProposal[],
-  freezeGuard?: Address,
 ) {
   if (proposals.length === 0) return [];
+
+  // -----------------------
+  // Fetch freeze guard info internally
+  // -----------------------
+  const guardRow = await db.query.governanceGuardTable.findFirst({
+    where: (g, { eq, and }) =>
+      and(eq(g.daoChainId, chainId), eq(g.daoAddress, daoAddress)),
+  });
 
   // -----------------------
   // Fetch Safe info (threshold & current nonce)
@@ -111,17 +124,11 @@ export async function mergeMultisigProposalsWithState(
   let freezeGuardData:
     | { guardTimelockPeriodMs: bigint; guardExecutionPeriodMs: bigint }
     | undefined;
-  if (freezeGuard) {
-    const guardRow = await db.query.governanceGuardTable.findFirst({
-      where: (g, { eq }) =>
-        eq(g.address, freezeGuard) && eq(g.daoChainId, chainId) && eq(g.daoAddress, daoAddress),
-    });
-    if (guardRow) {
-      freezeGuardData = {
-        guardTimelockPeriodMs: BigInt(guardRow.timelockPeriod || 0) * 1000n,
-        guardExecutionPeriodMs: BigInt(guardRow.executionPeriod || 0) * 1000n,
-      };
-    }
+  if (guardRow) {
+    freezeGuardData = {
+      guardTimelockPeriodMs: BigInt(guardRow.timelockPeriod || 0) * 1000n,
+      guardExecutionPeriodMs: BigInt(guardRow.executionPeriod || 0) * 1000n,
+    };
   }
 
   // -----------------------
@@ -202,12 +209,26 @@ export async function mergeMultisigProposalsWithState(
  * Merge on-chain Azorius proposals with their current state from the contract.
  */
 export async function mergeAzoriusProposalsWithState(
-  azoriusAddress: Address,
+  daoAddress: Address,
   chainId: SupportedChainId,
   proposals: Pick<DbProposal, 'id'>[],
 ) {
   if (proposals.length === 0) return [];
 
+  // -----------------------
+  // Fetch Azorius module info internally
+  // -----------------------
+  const moduleRow = await db.query.governanceModuleTable.findFirst({
+    where: (m, { eq, and }) =>
+      and(eq(m.daoChainId, chainId), eq(m.daoAddress, daoAddress)),
+  });
+
+  if (!moduleRow?.address) {
+    // No Azorius module found, return proposals without state
+    return proposals.map(p => ({ ...p, state: FractalProposalState.ACTIVE }));
+  }
+
+  const azoriusAddress = moduleRow.address;
   const client = getPublicClient(chainId);
 
   // Extract proposal IDs as BigInt (uint32 in Solidity)
