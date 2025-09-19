@@ -27,14 +27,32 @@ const API_URL = (chainId: SupportedChainId) => {
 export const getSafeTransactions = async (
   chainId: SupportedChainId,
   _address: Address,
-  since?: Date,
+  options?: {
+    since?: Date; // backward compatibility
+    nonceGte?: number; // new preferred filter
+    executed?: boolean;
+    hasConfirmations?: boolean;
+  },
 ) => {
   const url = API_URL(chainId);
   const address = getAddress(_address);
   const params = new URLSearchParams({
     limit: '1000',
-    submission_date__gte: since?.toISOString() || '',
   });
+
+  if (options?.since) {
+    params.set('submission_date__gte', options.since.toISOString());
+  }
+
+  if (options?.nonceGte !== undefined) {
+    params.set('nonce__gte', options.nonceGte.toString());
+  }
+  if (options?.executed !== undefined) {
+    params.set('executed', options.executed ? 'true' : 'false');
+  }
+  if (options?.hasConfirmations !== undefined) {
+    params.set('has_confirmations', options.hasConfirmations ? 'true' : 'false');
+  }
 
   const response = await fetch(
     `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
