@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { and, eq, sql } from 'drizzle-orm';
 import { getBlockTimestamp } from './blockTimestamp';
 import { SupportedChainId } from 'decent-sdk';
 import { getPublicClient } from './publicClient';
@@ -7,13 +6,8 @@ import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { getSafeInfo, getSafeTransactions } from '@/lib/safe';
 import { FractalProposalState, strategyFractalProposalStates } from '../types';
 import { db } from '@/db';
-import { schema } from '@/db/schema';
 import { abis } from '@fractal-framework/fractal-contracts';
 import { DbProposal } from '@/db/schema';
-import {
-  DAO_GOVERNANCE_GUARD_JOIN_CONDITION,
-  DAO_GOVERNANCE_MODULE_JOIN_CONDITION,
-} from '@/db/queries';
 
 /**
  * Merge proposals from DB with their current state.
@@ -57,8 +51,7 @@ export async function mergeMultisigProposalsWithState(
   // Fetch freeze guard info internally
   // -----------------------
   const guardRow = await db.query.governanceGuardTable.findFirst({
-    where: (g, { eq, and }) =>
-      and(eq(g.daoChainId, chainId), eq(g.daoAddress, daoAddress)),
+    where: (g, { eq, and }) => and(eq(g.daoChainId, chainId), eq(g.daoAddress, daoAddress)),
   });
 
   // -----------------------
@@ -202,7 +195,9 @@ export async function mergeMultisigProposalsWithState(
   // -----------------------
   // Merge and return in nonce descending order
   // -----------------------
-  return [...oldProposalsWithState, ...activeProposalsWithState].sort((a, b) => b.safeNonce - a.safeNonce);
+  return [...oldProposalsWithState, ...activeProposalsWithState].sort(
+    (a, b) => b.safeNonce - a.safeNonce,
+  );
 }
 
 /**
@@ -219,8 +214,7 @@ export async function mergeAzoriusProposalsWithState(
   // Fetch Azorius module info internally
   // -----------------------
   const moduleRow = await db.query.governanceModuleTable.findFirst({
-    where: (m, { eq, and }) =>
-      and(eq(m.daoChainId, chainId), eq(m.daoAddress, daoAddress)),
+    where: (m, { eq, and }) => and(eq(m.daoChainId, chainId), eq(m.daoAddress, daoAddress)),
   });
 
   if (!moduleRow?.address) {
