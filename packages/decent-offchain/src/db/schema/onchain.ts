@@ -64,11 +64,23 @@ export const votingStrategyTable = onchainSchema.table('voting_strategy', {
 
 export const governanceGuardTable = onchainSchema.table('governance_guard', {
   address: hex('governance_guard_address').primaryKey(),
-  daoChainId: integer().$type<SupportedChainId>(),
-  daoAddress: hex(),
+  daoChainId: integer().notNull().$type<SupportedChainId>(),
+  daoAddress: hex().notNull(),
   executionPeriod: integer(),
   timelockPeriod: integer(),
 });
+
+export const safeProposalExecutionTable = onchainSchema.table(
+  'safe_proposal_execution',
+  {
+    daoChainId: integer().notNull().$type<SupportedChainId>(),
+    daoAddress: hex().notNull(),
+    safeTxnHash: hex().notNull(),
+    executedTxHash: hex(),
+    timelockedBlock: integer(),
+  },
+  t => ({ pk: primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxnHash] }) }),
+);
 
 export const freezeVoteType = onchainSchema.enum('freeze_vote_type', [
   'MULTISIG',
