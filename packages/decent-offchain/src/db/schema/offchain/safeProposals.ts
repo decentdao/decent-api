@@ -15,12 +15,7 @@ export const safeProposalTable = offchainSchema.table(
     metadataCID: text('metadata_cid'),
     transactions: json('transactions').$type<DataDecoded>(),
     safeTxHash: hex('safe_tx_hash').notNull(),
-    // FIXME this won't be on-time
-    //   we should probably remove this since we have safe_proposal_execution now
-    executedTxHash: hex('executed_tx_hash'),
     submissionDate: timestamp('submission_date').notNull(),
-    // TODO update safe_proposal_execution to have this
-    executionDate: timestamp('execution_date'),
   },
   t => [primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxHash] })],
 );

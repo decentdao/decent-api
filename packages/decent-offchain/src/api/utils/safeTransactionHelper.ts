@@ -49,24 +49,11 @@ export async function mergeMultisigProposalsWithState(
   const nowMs = BigInt(currentTimestamp) * 1000n;
 
   // -----------------------
-  // Determine latest executed nonce
-  // -----------------------
-  const latestExecutedProposal = await db.query.safeProposalTable.findFirst({
-    where: (safeProposal, { eq, and, isNotNull }) =>
-      and(
-        eq(safeProposal.daoChainId, chainId),
-        eq(safeProposal.daoAddress, daoAddress),
-        isNotNull(safeProposal.executedTxHash),
-      ),
-    orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
-  });
-  const latestExecutedNonce = latestExecutedProposal?.safeNonce;
-
-  // -----------------------
-  // Fetch relevant Safe API transactions using nonce__gte
+  // Fetch relevant Safe API transactions for active proposals
+  // Only need nonce >= currentSafeNonce
   // -----------------------
   const safeTransactions = await getSafeTransactions(chainId, daoAddress, {
-    nonceGte: latestExecutedNonce,
+    nonceGte: currentSafeNonce,
   });
   const safeTxByHash = new Map(safeTransactions.results.map(tx => [tx.safeTxHash, tx]));
 
@@ -84,10 +71,11 @@ export async function mergeMultisigProposalsWithState(
       ),
   });
 
-  // Map: nonce → executed safeTxnHash (use proposal.safeNonce)
+  // Map: nonce → executed safeTxnHash (from proposals)
+  const executedHashSet = new Set(executedProposals.map(e => e.safeTxnHash));
   const executedNonceMap = new Map<number, string>();
   for (const p of proposals) {
-    if (executedProposals.find(e => e.safeTxnHash === p.safeTxHash)) {
+    if (executedHashSet.has(p.safeTxHash)) {
       executedNonceMap.set(p.safeNonce, p.safeTxHash);
     }
   }

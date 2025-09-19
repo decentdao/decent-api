@@ -74,12 +74,8 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
   // Return immediately; run update in background to avoid timeout.
   (async () => {
     const latestProposal = await db.query.safeProposalTable.findFirst({
-      where: (safeProposal, { eq, and, isNotNull }) =>
-        and(
-          eq(safeProposal.daoChainId, dao.chainId),
-          eq(safeProposal.daoAddress, dao.address),
-          isNotNull(safeProposal.executedTxHash), // Only consider executed (final state) proposals
-        ),
+      where: (safeProposal, { eq, and }) =>
+        and(eq(safeProposal.daoChainId, dao.chainId), eq(safeProposal.daoAddress, dao.address)),
       orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
     });
     const since = latestProposal
@@ -92,13 +88,11 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
     const proposals = await Promise.all(
       transactions.results.map(async t => {
         const proposer = (t.proposer || t.confirmations?.[0]?.owner) as `0x${string}`;
-        const executedTxHash = t.transactionHash as `0x${string}`;
         const safeTxHash = t.safeTxHash as `0x${string}`;
         const cid = getCIDFromSafeTransaction(t);
         const metadata = cid ? await fetchMetadata(cid) : { title: null, description: null };
         const { title, description } = metadata;
         const submissionDate = new Date(t.submissionDate);
-        const executionDate = t.executionDate ? new Date(t.executionDate) : null;
         return {
           daoChainId: dao.chainId,
           daoAddress: dao.address,
@@ -106,12 +100,10 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
           safeNonce: t.nonce,
           safeTxHash,
           transactions: t.dataDecoded,
-          executedTxHash,
           metadataCID: cid,
           title,
           description,
           submissionDate,
-          executionDate,
         };
       }),
     );
@@ -128,11 +120,9 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
         set: {
           metadataCID: sql.raw(`excluded.${schema.safeProposalTable.metadataCID.name}`),
           transactions: sql.raw(`excluded.${schema.safeProposalTable.transactions.name}`),
-          executedTxHash: sql.raw(`excluded.${schema.safeProposalTable.executedTxHash.name}`),
           title: sql.raw(`excluded.${schema.safeProposalTable.title.name}`),
           description: sql.raw(`excluded.${schema.safeProposalTable.description.name}`),
           submissionDate: sql.raw(`excluded.${schema.safeProposalTable.submissionDate.name}`),
-          executionDate: sql.raw(`excluded.${schema.safeProposalTable.executionDate.name}`),
         },
       })
       .returning();

@@ -53,15 +53,34 @@ const getProposalsByAuthor = async ({
         ? sql`LOWER(${schema.onchainProposalTable.proposer}) = ${address} AND ${schema.onchainProposalTable.executedTxHash} IS NOT NULL`
         : sql`LOWER(${schema.onchainProposalTable.proposer}) = ${address}`,
     }),
-    db.query.safeProposalTable.findMany({
-      where: passed
-        ? sql`LOWER(${schema.safeProposalTable.proposer}) = ${address} AND ${schema.safeProposalTable.executedTxHash} IS NOT NULL`
-        : sql`LOWER(${schema.safeProposalTable.proposer}) = ${address}`,
-    }),
+    db
+      .select({
+        proposal: schema.safeProposalTable,
+        executedTxHash: schema.safeProposalExecutionTable.executedTxHash,
+      })
+      .from(schema.safeProposalTable)
+      .leftJoin(
+        schema.safeProposalExecutionTable,
+        sql`${schema.safeProposalTable.daoChainId} = ${schema.safeProposalExecutionTable.daoChainId}
+              AND ${schema.safeProposalTable.daoAddress} = ${schema.safeProposalExecutionTable.daoAddress}
+              AND ${schema.safeProposalTable.safeTxHash} = ${schema.safeProposalExecutionTable.safeTxnHash}`,
+      )
+      .where(
+        passed
+          ? sql`LOWER(${schema.safeProposalTable.proposer}) = ${address} AND ${schema.safeProposalExecutionTable.executedTxHash} IS NOT NULL`
+          : sql`LOWER(${schema.safeProposalTable.proposer}) = ${address}`,
+      ),
   ]);
+
+  // merge executedTxHash into safeProposal objects
+  const mergedSafeProposals = safeProposals.map(({ proposal, executedTxHash }) => ({
+    ...proposal,
+    executedTxHash,
+  }));
+
   return {
     onchainProposals,
-    safeProposals,
+    safeProposals: mergedSafeProposals,
   };
 };
 

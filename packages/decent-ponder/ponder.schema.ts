@@ -155,6 +155,7 @@ export const safeProposalExecution = onchainTable(
     daoAddress: hex().notNull(),
     safeTxnHash: hex().notNull(),
     executedTxHash: hex(),
+    executedBlock: integer(),
     timelockedBlock: integer(),
   },
   t => ({ pk: primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxnHash] }) }),
