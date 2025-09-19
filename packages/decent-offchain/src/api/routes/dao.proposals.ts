@@ -6,15 +6,7 @@ import { daoExists, moduleGuardFetch } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
-import { FractalProposalState } from '../types';
-import {
-  getFreezeGuardData,
-  getTxTimelockedTimestamp,
-  isApproved,
-  isRejected,
-} from '../utils/safeTransactionHelper';
-import { getSafeTransactions } from '@/lib/safe';
-import { Hex } from 'viem';
+import { mergeMultisigProposalsWithState } from '../utils/safeTransactionHelper';
 
 const app = new Hono();
 
@@ -29,6 +21,7 @@ const app = new Hono();
 app.get('/', daoExists, moduleGuardFetch, async c => {
   const dao = c.get('basicDaoInfo');
   const moduleGuard = c.get('moduleGuardInfo');
+  const freezeGuard = moduleGuard.guards[0];
 
   if (!dao.isAzorius) {
     // Then it's Multisig DAO
@@ -39,94 +32,14 @@ app.get('/', daoExists, moduleGuardFetch, async c => {
       ),
       orderBy: desc(schema.safeProposalTable.safeNonce),
     });
-
-    const safeTransactionListResponse = await getSafeTransactions(dao.chainId, dao.address);
-
-    // Let's calculate proposal status
-    const proposalsWithState = await Promise.all(
-      proposals.map(async proposal => {
-        let state: FractalProposalState | null = null;
-        if (proposal.executedTxHash !== null) {
-          // the transaction has already been executed
-          state = FractalProposalState.EXECUTED;
-        } else if (isRejected(proposals, proposal)) {
-          // a different transaction with the same nonce has already
-          // been executed, so this is no longer valid
-          state = FractalProposalState.REJECTED;
-        } else {
-          // it's not executed or rejected, so we need to check the timelock status
-          const freezeGuard = moduleGuard.guards[0];
-          const freezeGuardData = await getFreezeGuardData(freezeGuard, dao.chainId);
-
-          if (freezeGuard === undefined || freezeGuardData === undefined) {
-            // FIXME fetch active nonce from SafeInfo?
-            if (isApproved(proposal) && proposal.safeNonce === safeTransactionListResponse.count) {
-              state = FractalProposalState.EXECUTABLE;
-            } else {
-              state = FractalProposalState.ACTIVE;
-            }
-          } else {
-            const safeTransaction = safeTransactionListResponse.results.find(
-              r => r.safeTxHash === proposal.safeTxHash,
-            );
-            if (safeTransaction && safeTransaction.signatures !== null) {
-              const timelockedTimestampMs =
-                (await getTxTimelockedTimestamp(
-                  safeTransaction.signatures as Hex,
-                  freezeGuard,
-                  dao.chainId,
-                )) * 1000;
-              if (timelockedTimestampMs === 0) {
-                // not yet timelocked
-                if (isApproved(proposal)) {
-                  // the proposal has enough signatures, so it can now be timelocked
-                  state = FractalProposalState.TIMELOCKABLE;
-                } else {
-                  // not enough signatures on the proposal, it's still active
-                  state = FractalProposalState.ACTIVE;
-                }
-              } else {
-                // the proposal has been timelocked
-                const timeLockPeriodEndMs =
-                  timelockedTimestampMs + Number(freezeGuardData.guardTimelockPeriodMs);
-                const nowMs = freezeGuardData.lastBlockTimestamp * 1000;
-                if (nowMs > timeLockPeriodEndMs) {
-                  // Timelock has ended, check execution period
-                  const executionPeriodEndMs =
-                    timeLockPeriodEndMs + Number(freezeGuardData.guardExecutionPeriodMs);
-                  if (nowMs < executionPeriodEndMs) {
-                    // Within execution period
-                    state = FractalProposalState.EXECUTABLE;
-                  } else {
-                    // Execution period has ended
-                    state = FractalProposalState.EXPIRED;
-                  }
-                } else {
-                  // Still within timelock period
-                  state = FractalProposalState.TIMELOCKED;
-                }
-              }
-            } else {
-              state = FractalProposalState.UNKNOWN;
-            }
-          }
-        }
-
-        return { ...proposal, state };
-      }),
-    );
-    console.debug(
-      'withState',
-      proposalsWithState.map(ps => {
-        return {
-          title: ps.title,
-          description: ps.description,
-          state: ps.state,
-        };
-      }),
+    const proposalsWithState = await mergeMultisigProposalsWithState(
+      dao.address,
+      dao.chainId,
+      proposals,
+      freezeGuard,
     );
 
-    return resf(c, proposals);
+    return resf(c, proposalsWithState);
   } else {
     const proposals = (await db.query.onchainProposalTable.findMany({
       where: and(

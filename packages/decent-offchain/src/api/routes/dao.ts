@@ -86,7 +86,7 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
       ? new Date(latestProposal.submissionDate.getTime() + 1)
       : undefined;
 
-    const transactions = await getSafeTransactions(dao.chainId, dao.address, since);
+    const transactions = await getSafeTransactions(dao.chainId, dao.address, { since });
     if (transactions.results.length === 0) return resf(c, []);
 
     const proposals = await Promise.all(
