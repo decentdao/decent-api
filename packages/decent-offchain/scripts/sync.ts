@@ -9,8 +9,7 @@ export async function sync() {
   const f = (await fetch(`${API}/d`).then(r => r.json())) as {
     data: (Dao & { isAzorius: boolean })[];
   };
-  // const daos = f.data.filter(d => !d.isAzorius); // multisig DAOs
-  const daos = f.data.filter(d => d.address === '0x6b83a4a6210eefd6526a34617370267dbab35ae7')
+  const daos = f.data.filter(d => !d.isAzorius); // multisig DAOs
   let proposalsAdded = 0;
   for (let i = 0; i < daos.length; i++) {
     const dao = daos[i];
