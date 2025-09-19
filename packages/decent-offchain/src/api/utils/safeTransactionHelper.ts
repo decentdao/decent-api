@@ -58,41 +58,28 @@ export async function mergeMultisigProposalsWithState(
   const safeTxByHash = new Map(safeTransactions.results.map(tx => [tx.safeTxHash, tx]));
 
   // -----------------------
-  // Fetch executed proposals for only the current proposals
+  // Fetch executed + timelocked proposals for only the current proposals
   // -----------------------
   const safeTxnHashes = proposals.map(p => p.safeTxHash);
-  const executedProposals = await db.query.safeProposalExecutionTable.findMany({
-    where: (t, { eq, and, inArray, isNotNull }) =>
+  const executionRows = await db.query.safeProposalExecutionTable.findMany({
+    where: (t, { eq, and, inArray }) =>
       and(
         eq(t.daoChainId, chainId),
         eq(t.daoAddress, daoAddress),
         inArray(t.safeTxnHash, safeTxnHashes),
-        isNotNull(t.executedTxHash),
       ),
   });
 
   // Map: nonce → executed safeTxnHash (from proposals)
-  const executedHashSet = new Set(executedProposals.map(e => e.safeTxnHash));
   const executedNonceMap = new Map<number, string>();
-  for (const p of proposals) {
-    if (executedHashSet.has(p.safeTxHash)) {
-      executedNonceMap.set(p.safeNonce, p.safeTxHash);
-    }
-  }
-
-  // -----------------------
-  // Fetch timelocked proposals for current proposals
-  // -----------------------
-  const timelockEvents = await db.query.safeProposalExecutionTable.findMany({
-    where: (t, { eq, and, inArray, isNotNull }) =>
-      and(
-        eq(t.daoChainId, chainId),
-        eq(t.daoAddress, daoAddress),
-        inArray(t.safeTxnHash, safeTxnHashes),
-        isNotNull(t.timelockedBlock),
-      ),
+  const timelockByTxHash = new Map<string, (typeof executionRows)[number]>();
+  executionRows.forEach(row => {
+    const proposal = proposals.find(p => p.safeTxHash === row.safeTxnHash);
+    if (!proposal) return;
+    if (row.executedTxHash) executedNonceMap.set(proposal.safeNonce, proposal.safeTxHash);
+    if (row.timelockedBlock !== null && row.timelockedBlock !== undefined)
+      timelockByTxHash.set(proposal.safeTxHash, row);
   });
-  const timelockByTxHash = new Map(timelockEvents.map(e => [e.safeTxnHash, e]));
 
   // -----------------------
   // Fetch FreezeGuard data from DB
@@ -141,13 +128,13 @@ export async function mergeMultisigProposalsWithState(
 
     // FreezeGuard exists
     const timelockEvent = timelockByTxHash.get(proposal.safeTxHash);
-    if (!timelockEvent || timelockEvent.timelockedBlock === null) {
+    if (!timelockEvent) {
       return hasEnoughApprovals ? FractalProposalState.TIMELOCKABLE : FractalProposalState.ACTIVE;
     }
 
     // Timelocked state
     const timelockEndMs =
-      BigInt(timelockEvent.timelockedBlock) * 1000n + freezeGuardData.guardTimelockPeriodMs;
+      BigInt(timelockEvent.timelockedBlock!) * 1000n + freezeGuardData.guardTimelockPeriodMs;
 
     if (nowMs <= timelockEndMs) return FractalProposalState.TIMELOCKED;
 
