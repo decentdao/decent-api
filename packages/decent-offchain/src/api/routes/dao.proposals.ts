@@ -6,7 +6,10 @@ import { daoExists, moduleGuardFetch } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
-import { mergeMultisigProposalsWithState } from '../utils/safeTransactionHelper';
+import {
+  mergeAzoriusProposalsWithState,
+  mergeMultisigProposalsWithState,
+} from '../utils/proposalStateHelpers';
 
 const app = new Hono();
 
@@ -21,7 +24,6 @@ const app = new Hono();
 app.get('/', daoExists, moduleGuardFetch, async c => {
   const dao = c.get('basicDaoInfo');
   const moduleGuard = c.get('moduleGuardInfo');
-  const freezeGuard = moduleGuard.guards[0];
 
   if (!dao.isAzorius) {
     // Then it's Multisig DAO
@@ -32,6 +34,7 @@ app.get('/', daoExists, moduleGuardFetch, async c => {
       ),
       orderBy: desc(schema.safeProposalTable.safeNonce),
     });
+    const freezeGuard = moduleGuard.guards[0];
     const proposalsWithState = await mergeMultisigProposalsWithState(
       dao.address,
       dao.chainId,
@@ -65,7 +68,12 @@ app.get('/', daoExists, moduleGuardFetch, async c => {
       proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId)),
     );
 
-    const ret = proposalsWithTimestamps.map(formatProposal);
+    const azorius = moduleGuard.modules[0];
+    const ret = await mergeAzoriusProposalsWithState(
+      azorius!,
+      dao.chainId,
+      proposalsWithTimestamps.map(formatProposal),
+    );
     return resf(c, ret);
   }
 });

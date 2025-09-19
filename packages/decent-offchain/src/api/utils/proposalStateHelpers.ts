@@ -4,8 +4,10 @@ import { SupportedChainId } from 'decent-sdk';
 import { getPublicClient } from './publicClient';
 import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { getSafeInfo, getSafeTransactions } from '@/lib/safe';
-import { FractalProposalState } from '../types';
+import { FractalProposalState, strategyFractalProposalStates } from '../types';
 import { db } from '@/db';
+import { abis } from '@fractal-framework/fractal-contracts';
+import { DbProposal } from '@/db/schema';
 
 /**
  * Merge proposals from DB with their current state.
@@ -194,4 +196,40 @@ export async function mergeMultisigProposalsWithState(
   // Merge and return
   // -----------------------
   return [...oldProposalsWithState, ...activeProposalsWithState];
+}
+
+/**
+ * Merge on-chain Azorius proposals with their current state from the contract.
+ */
+export async function mergeAzoriusProposalsWithState(
+  azoriusAddress: Address,
+  chainId: SupportedChainId,
+  proposals: Pick<DbProposal, 'id'>[],
+) {
+  if (proposals.length === 0) return [];
+
+  const client = getPublicClient(chainId);
+
+  // Extract proposal IDs as BigInt (uint32 in Solidity)
+  const proposalIds = proposals.map(p => BigInt(p.id));
+
+  // Prepare multicall inputs
+  const calls = proposalIds.map(id => ({
+    address: azoriusAddress,
+    abi: abis.Azorius,
+    functionName: 'proposalState',
+    args: [id],
+  }));
+
+  // Execute multicall
+  const statesResponses = await client.multicall({ contracts: calls, allowFailure: true });
+  const states = statesResponses.map(response => (response.result as number) || 0);
+
+  // Map numeric ProposalState to FractalProposalState enum
+  const proposalsWithState = proposals.map((p, i) => ({
+    ...p,
+    state: strategyFractalProposalStates[states[i]!],
+  }));
+
+  return proposalsWithState;
 }

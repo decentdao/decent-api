@@ -99,6 +99,6 @@ export enum FractalProposalState {
    * and is used for Snapshot proposals only, which appear if the DAO's snapshotENS is set.
    */
   CLOSED = 'stateClosed',
-
-  UNKNOWN = 'stateUnknown',
 }
+
+export const strategyFractalProposalStates = Object.values(FractalProposalState);
