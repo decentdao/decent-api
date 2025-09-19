@@ -17,6 +17,7 @@ import { SplitV2Abi } from './abis/SplitV2Abi';
 import { HatsAbi } from './abis/HatsAbi';
 import { HatsElectionEligibilityAbi } from './abis/HatsElectionEligibilityAbi';
 import { HatsModuleFactoryAbi } from './abis/HatsModuleFactoryAbi';
+import { GnosisSafeL2Abi } from './abis/GnosisSafeL2Abi';
 
 export default createConfig({
   chains: {
@@ -731,6 +732,126 @@ export default createConfig({
               name: 'HatsModuleFactory_ModuleDeployed',
             }),
             parameter: 'instance',
+          }),
+        },
+      },
+    },
+    SafeKeyValuePair: {
+      abi: GnosisSafeL2Abi,
+      chain: {
+        mainnet: {
+          startBlock: 17389311,
+          address: factory({
+            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            event: getAbiItem({
+              abi: KeyValuePairsAbi,
+              name: 'ValueUpdated',
+            }),
+            parameter: 'theAddress',
+          }),
+        },
+        base: {
+          startBlock: 12996645,
+          address: factory({
+            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            event: getAbiItem({
+              abi: KeyValuePairsAbi,
+              name: 'ValueUpdated',
+            }),
+            parameter: 'theAddress',
+          }),
+        },
+        optimism: {
+          startBlock: 118640420,
+          address: factory({
+            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            event: getAbiItem({
+              abi: KeyValuePairsAbi,
+              name: 'ValueUpdated',
+            }),
+            parameter: 'theAddress',
+          }),
+        },
+        polygon: {
+          startBlock: 43952879,
+          address: factory({
+            address: '0x68e3b985B93eA0a10178c7ae919299699559Aaab',
+            event: getAbiItem({
+              abi: KeyValuePairsAbi,
+              name: 'ValueUpdated',
+            }),
+            parameter: 'theAddress',
+          }),
+        },
+        sepolia: {
+          startBlock: 4916643,
+          address: factory({
+            address: '0xC0E08581b70cF745770154f3E9a9A8890198b024',
+            event: getAbiItem({
+              abi: KeyValuePairsAbi,
+              name: 'ValueUpdated',
+            }),
+            parameter: 'theAddress',
+          }),
+        },
+      },
+    },
+    SafeFractalRegistry: {
+      abi: GnosisSafeL2Abi,
+      chain: {
+        mainnet: {
+          startBlock: 17389302,
+          address: factory({
+            address: '0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3',
+            event: getAbiItem({
+              abi: FractalRegistryAbi,
+              name: 'FractalNameUpdated',
+            }),
+            parameter: 'daoAddress',
+          }),
+        },
+        base: {
+          startBlock: 12996617,
+          address: factory({
+            address: '0x023bdaefeddddd5b43af125caa8007a99a886fd3',
+            event: getAbiItem({
+              abi: FractalRegistryAbi,
+              name: 'FractalNameUpdated',
+            }),
+            parameter: 'daoAddress',
+          }),
+        },
+        optimism: {
+          startBlock: 118640391,
+          address: factory({
+            address: '0x023BDAEFeDDDdd5B43aF125CAA8007a99A886Fd3',
+            event: getAbiItem({
+              abi: FractalRegistryAbi,
+              name: 'FractalNameUpdated',
+            }),
+            parameter: 'daoAddress',
+          }),
+        },
+        polygon: {
+          startBlock: 43952847,
+          address: factory({
+            address: '0xfE5950B4975a19679be7c31a0A03D626d237f37C',
+            event: getAbiItem({
+              abi: FractalRegistryAbi,
+              name: 'FractalNameUpdated',
+            }),
+            parameter: 'daoAddress',
+          }),
+        },
+        sepolia: {
+          startBlock: 4916634,
+          address: factory({
+            address: '0x4791FF2a6E84F012402c0679C12Cb1d9260450A6',
+            event: getAbiItem({
+              abi: FractalRegistryAbi,
+              name: 'FractalNameUpdated',
+            }),
+            parameter: 'daoAddress',
           }),
         },
       },

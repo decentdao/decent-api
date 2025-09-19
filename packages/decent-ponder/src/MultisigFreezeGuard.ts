@@ -1,5 +1,5 @@
 import { ponder } from 'ponder:registry';
-import { freezeVotingStrategy, governanceGuard } from 'ponder:schema';
+import { freezeVotingStrategy, governanceGuard, safeProposalExecution } from 'ponder:schema';
 
 ponder.on('MultisigFreezeGuard:MultisigFreezeGuardSetup', async ({ event, context }) => {
   try {
@@ -51,4 +51,25 @@ ponder.on('MultisigFreezeGuard:ExecutionPeriodUpdated', async ({ event, context 
     // No error since most of the time this is the intended path to not overwrite non-MultisigFreezeGuard
     // console.error('MultisigFreezeGuard:ExecutionPeriodUpdated');
   }
+});
+
+// Need to track when a subDAO Safe proposal is timelocked
+ponder.on('MultisigFreezeGuard:TransactionTimelocked', async ({ event, context }) => {
+  const { transactionHash: safeTxnHash } = event.args;
+  const guardAddress = event.log.address;
+  const freezeGuard = await context.db.find(governanceGuard, { address: guardAddress });
+  if (!freezeGuard) return; // not in our database
+  const { daoAddress, daoChainId } = freezeGuard;
+
+  // update Safe proposal with timelockedBlock
+  const timelockedBlock = Number(event.block.number);
+  await context.db
+    .insert(safeProposalExecution)
+    .values({
+      daoChainId,
+      daoAddress,
+      safeTxnHash,
+      timelockedBlock,
+    })
+    .onConflictDoUpdate({ timelockedBlock });
 });

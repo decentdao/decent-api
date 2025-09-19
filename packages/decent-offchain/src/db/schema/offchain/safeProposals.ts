@@ -15,9 +15,9 @@ export const safeProposalTable = offchainSchema.table(
     metadataCID: text('metadata_cid'),
     transactions: json('transactions').$type<DataDecoded>(),
     safeTxHash: hex('safe_tx_hash').notNull(),
-    executedTxHash: hex('executed_tx_hash'),
     submissionDate: timestamp('submission_date').notNull(),
-    executionDate: timestamp('execution_date'),
   },
   t => [primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxHash] })],
 );
+
+export type DbSafeProposal = typeof safeProposalTable.$inferInsert;

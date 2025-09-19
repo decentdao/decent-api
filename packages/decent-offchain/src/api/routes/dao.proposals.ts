@@ -6,6 +6,10 @@ import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
+import {
+  mergeAzoriusProposalsWithState,
+  mergeMultisigProposalsWithState,
+} from '../utils/proposalStateHelpers';
 
 const app = new Hono();
 
@@ -21,15 +25,20 @@ app.get('/', daoExists, async c => {
   const dao = c.get('basicDaoInfo');
 
   if (!dao.isAzorius) {
+    // Then it's Multisig DAO
     const proposals = await db.query.safeProposalTable.findMany({
       where: and(
         eq(schema.safeProposalTable.daoChainId, dao.chainId),
         eq(schema.safeProposalTable.daoAddress, dao.address),
       ),
-      orderBy: desc(schema.safeProposalTable.safeNonce),
     });
+    const proposalsWithState = await mergeMultisigProposalsWithState(
+      dao.address,
+      dao.chainId,
+      proposals,
+    );
 
-    return resf(c, proposals);
+    return resf(c, proposalsWithState);
   } else {
     const proposals = (await db.query.onchainProposalTable.findMany({
       where: and(
@@ -55,7 +64,11 @@ app.get('/', daoExists, async c => {
       proposals.map(proposal => addVoteEndTimestamp(proposal, dao.chainId)),
     );
 
-    const ret = proposalsWithTimestamps.map(formatProposal);
+    const ret = await mergeAzoriusProposalsWithState(
+      dao.address,
+      dao.chainId,
+      proposalsWithTimestamps.map(formatProposal),
+    );
     return resf(c, ret);
   }
 });
