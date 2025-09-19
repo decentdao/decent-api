@@ -12,27 +12,19 @@ import { db } from '@/db';
  *
  * Proposal State Flow:
  *
- * [Proposal(DB)]
- *   ├─ executedTxHash? → EXECUTED
- *   ├─ another same-nonce executed? → REJECTED
- *   ├─ FreezeGuard enabled?
- *   │     ├─ timelockedBlock null? → hasEnoughApprovals? → TIMELOCKABLE : ACTIVE
- *   │     └─ timelockEndMs ≥ nowMs → TIMELOCKED
- *   │       └─ executionEndMs > nowMs → EXECUTABLE
- *   │         └─ else → EXPIRED
- *   └─ else (no FreezeGuard) → hasEnoughApprovals & nonce=current? → EXECUTABLE : ACTIVE
- */
-/**
- * Merge proposals from DB with their current state.
- *
- * Proposal State Flow:
- * [Proposal(DB)] → EXECUTED → REJECTED → TIMELOCKABLE → TIMELOCKED → EXECUTABLE → EXPIRED → ACTIVE
- */
-/**
- * Merge proposals from DB with their current state.
- *
- * Proposal State Flow:
- * [Proposal(DB)] → EXECUTED → REJECTED → TIMELOCKABLE → TIMELOCKED → EXECUTABLE → EXPIRED → ACTIVE
+ * [Proposal]
+ *   ├─ Executed? → EXECUTED
+ *   ├─ Another proposal with same nonce executed? → REJECTED
+ *   ├─ FreezeGuard exists?
+ *   │     ├─ Not timelocked yet
+ *   │     │     ├─ Enough approvals? → TIMELOCKABLE
+ *   │     │     └─ Else → ACTIVE
+ *   │     └─ Timelock active → TIMELOCKED
+ *   │           └─ Execution period active → EXECUTABLE
+ *   │             └─ Else → EXPIRED
+ *   └─ No FreezeGuard
+ *         ├─ Enough approvals & current nonce? → EXECUTABLE
+ *         └─ Else → ACTIVE
  */
 export async function mergeMultisigProposalsWithState(
   daoAddress: Address,
