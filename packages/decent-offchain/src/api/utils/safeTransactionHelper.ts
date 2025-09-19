@@ -10,21 +10,33 @@ import { db } from '@/db';
 /**
  * Merge proposals from DB with their current state.
  *
- * Proposal State Flow:
+ * State machine (simplified):
  *
  * [Proposal]
- *   ├─ Executed? → EXECUTED
- *   ├─ Another proposal with same nonce executed? → REJECTED
- *   ├─ FreezeGuard exists?
- *   │     ├─ Not timelocked yet
- *   │     │     ├─ Enough approvals? → TIMELOCKABLE
- *   │     │     └─ Else → ACTIVE
- *   │     └─ Timelock active → TIMELOCKED
- *   │           └─ Execution period active → EXECUTABLE
- *   │             └─ Else → EXPIRED
- *   └─ No FreezeGuard
- *         ├─ Enough approvals & current nonce? → EXECUTABLE
- *         └─ Else → ACTIVE
+ *   ├─ Nonce < currentSafeNonce (old proposals)
+ *   │     ├─ Executed → EXECUTED
+ *   │     └─ Another same-nonce executed → REJECTED
+ *   │
+ *   └─ Nonce >= currentSafeNonce (active proposals)
+ *         ├─ FreezeGuard enabled?
+ *         │     ├─ Not timelocked yet
+ *         │     │     ├─ Enough approvals → TIMELOCKABLE
+ *         │     │     └─ Else → ACTIVE
+ *         │     └─ Timelock active
+ *         │           ├─ Execution period active → EXECUTABLE
+ *         │           └─ Else → EXPIRED
+ *         └─ No FreezeGuard
+ *               ├─ Enough approvals & current nonce → EXECUTABLE
+ *               └─ Else → ACTIVE
+ *
+ * Optimization notes:
+ * 1. Old proposals (nonce < currentSafeNonce) are final states → no RPC or FreezeGuard reads needed.
+ * 2. Only active proposals (nonce >= currentSafeNonce) require:
+ *    - Safe API transactions for approval counts
+ *    - FreezeGuard contract reads and timelock DB queries (if freezeGuard is defined)
+ * 3. DB queries are scoped to relevant proposals:
+ *    - Executed proposals: only oldProposals
+ *    - Timelocked proposals: only activeProposals if freezeGuard exists
  */
 export async function mergeMultisigProposalsWithState(
   daoAddress: Address,
@@ -41,48 +53,58 @@ export async function mergeMultisigProposalsWithState(
   const currentSafeNonce = safeInfo.nonce;
 
   // -----------------------
-  // Determine nowMs for timelock/execution
+  // Split proposals by nonce
   // -----------------------
-  const publicClient = getPublicClient(chainId);
-  const blockNumber = await publicClient.getBlockNumber();
-  const currentTimestamp = await getBlockTimestamp(Number(blockNumber), chainId);
-  const nowMs = BigInt(currentTimestamp) * 1000n;
+  const oldProposals = proposals.filter(p => p.safeNonce < currentSafeNonce);
+  const activeProposals = proposals.filter(p => p.safeNonce >= currentSafeNonce);
+
+  // Early return if nothing to process
+  if (oldProposals.length === 0 && activeProposals.length === 0) return [];
 
   // -----------------------
-  // Fetch relevant Safe API transactions for active proposals
-  // Only need nonce >= currentSafeNonce
+  // Fetch executed proposals for oldProposals
   // -----------------------
-  const safeTransactions = await getSafeTransactions(chainId, daoAddress, {
-    nonceGte: currentSafeNonce,
-  });
-  const safeTxByHash = new Map(safeTransactions.results.map(tx => [tx.safeTxHash, tx]));
+  const oldProposalHashes = oldProposals.map(p => p.safeTxHash);
+  const executedRows = oldProposalHashes.length
+    ? await db.query.safeProposalExecutionTable.findMany({
+        where: (t, { eq, and, inArray, isNotNull }) =>
+          and(
+            eq(t.daoChainId, chainId),
+            eq(t.daoAddress, daoAddress),
+            inArray(t.safeTxnHash, oldProposalHashes),
+            isNotNull(t.executedTxHash),
+          ),
+      })
+    : [];
 
-  // -----------------------
-  // Fetch executed + timelocked proposals for only the current proposals
-  // -----------------------
-  const safeTxnHashes = proposals.map(p => p.safeTxHash);
-  const executionRows = await db.query.safeProposalExecutionTable.findMany({
-    where: (t, { eq, and, inArray }) =>
-      and(
-        eq(t.daoChainId, chainId),
-        eq(t.daoAddress, daoAddress),
-        inArray(t.safeTxnHash, safeTxnHashes),
-      ),
-  });
+  const executedHashSet = new Set(executedRows.map(e => e.safeTxnHash));
 
-  // Map: nonce → executed safeTxnHash (from proposals)
+  // Map nonce → executed hash for oldProposals
   const executedNonceMap = new Map<number, string>();
-  const timelockByTxHash = new Map<string, (typeof executionRows)[number]>();
-  executionRows.forEach(row => {
-    const proposal = proposals.find(p => p.safeTxHash === row.safeTxnHash);
-    if (!proposal) return;
-    if (row.executedTxHash) executedNonceMap.set(proposal.safeNonce, proposal.safeTxHash);
-    if (row.timelockedBlock !== null && row.timelockedBlock !== undefined)
-      timelockByTxHash.set(proposal.safeTxHash, row);
-  });
+  for (const p of oldProposals) {
+    if (executedHashSet.has(p.safeTxHash)) {
+      executedNonceMap.set(p.safeNonce, p.safeTxHash);
+    }
+  }
 
   // -----------------------
-  // Fetch FreezeGuard data from DB
+  // Assign state to oldProposals (final)
+  // -----------------------
+  const oldProposalsWithState = oldProposals.map(p => {
+    if (executedNonceMap.get(p.safeNonce) === p.safeTxHash) {
+      return { ...p, state: FractalProposalState.EXECUTED };
+    }
+    if (executedNonceMap.has(p.safeNonce)) {
+      return { ...p, state: FractalProposalState.REJECTED };
+    }
+    return { ...p, state: FractalProposalState.ACTIVE }; // fallback (unlikely)
+  });
+
+  // If no active proposals or no FreezeGuard, we can return early
+  if (activeProposals.length === 0) return oldProposalsWithState;
+
+  // -----------------------
+  // Only compute for activeProposals
   // -----------------------
   let freezeGuardData:
     | { guardTimelockPeriodMs: bigint; guardExecutionPeriodMs: bigint }
@@ -101,46 +123,75 @@ export async function mergeMultisigProposalsWithState(
   }
 
   // -----------------------
-  // Helper: determine proposal state
+  // Determine nowMs only if needed
+  // -----------------------
+  const nowMs =
+    freezeGuardData || activeProposals.length > 0
+      ? BigInt(
+          await getBlockTimestamp(Number(await getPublicClient(chainId).getBlockNumber()), chainId),
+        ) * 1000n
+      : 0n;
+
+  // -----------------------
+  // Fetch Safe API transactions for active proposals
+  // Only need nonce >= currentSafeNonce
+  // -----------------------
+  const safeTransactions = await getSafeTransactions(chainId, daoAddress, {
+    nonceGte: currentSafeNonce,
+  });
+  const safeTxByHash = new Map(safeTransactions.results.map(tx => [tx.safeTxHash, tx]));
+
+  // -----------------------
+  // Fetch timelocked events only if FreezeGuard exists
+  // -----------------------
+  const activeProposalHashes = activeProposals.map(p => p.safeTxHash);
+  const timelockEvents = freezeGuardData
+    ? await db.query.safeProposalExecutionTable.findMany({
+        where: (t, { eq, and, inArray, isNotNull }) =>
+          and(
+            eq(t.daoChainId, chainId),
+            eq(t.daoAddress, daoAddress),
+            inArray(t.safeTxnHash, activeProposalHashes),
+            isNotNull(t.timelockedBlock),
+          ),
+      })
+    : [];
+  const timelockByTxHash = new Map(timelockEvents.map(e => [e.safeTxnHash, e]));
+
+  // -----------------------
+  // Helper: determine proposal state for activeProposals
   // -----------------------
   const determineProposalState = (proposal: DbSafeProposal): FractalProposalState => {
-    // Executed
-    if (executedNonceMap.get(proposal.safeNonce) === proposal.safeTxHash) {
-      return FractalProposalState.EXECUTED;
-    }
-
-    // Rejected (another proposal with same nonce executed)
-    if (executedNonceMap.has(proposal.safeNonce)) {
-      return FractalProposalState.REJECTED;
-    }
-
-    // Get Safe transaction and approvals
     const safeTx = safeTxByHash.get(proposal.safeTxHash);
     const approvalsCount = safeTx?.confirmations?.length ?? 0;
     const hasEnoughApprovals = safeTx ? approvalsCount >= safeTx.confirmationsRequired : false;
 
-    // No FreezeGuard
     if (!freezeGuardData) {
       return hasEnoughApprovals && proposal.safeNonce === currentSafeNonce
         ? FractalProposalState.EXECUTABLE
         : FractalProposalState.ACTIVE;
     }
 
-    // FreezeGuard exists
     const timelockEvent = timelockByTxHash.get(proposal.safeTxHash);
-    if (!timelockEvent) {
+    if (!timelockEvent || timelockEvent.timelockedBlock === null) {
       return hasEnoughApprovals ? FractalProposalState.TIMELOCKABLE : FractalProposalState.ACTIVE;
     }
 
-    // Timelocked state
     const timelockEndMs =
-      BigInt(timelockEvent.timelockedBlock!) * 1000n + freezeGuardData.guardTimelockPeriodMs;
-
+      BigInt(timelockEvent.timelockedBlock) * 1000n + freezeGuardData.guardTimelockPeriodMs;
     if (nowMs <= timelockEndMs) return FractalProposalState.TIMELOCKED;
 
     const executionEndMs = timelockEndMs + freezeGuardData.guardExecutionPeriodMs;
     return nowMs < executionEndMs ? FractalProposalState.EXECUTABLE : FractalProposalState.EXPIRED;
   };
 
-  return proposals.map(proposal => ({ ...proposal, state: determineProposalState(proposal) }));
+  const activeProposalsWithState = activeProposals.map(p => ({
+    ...p,
+    state: determineProposalState(p),
+  }));
+
+  // -----------------------
+  // Merge and return
+  // -----------------------
+  return [...oldProposalsWithState, ...activeProposalsWithState];
 }
