@@ -69,14 +69,14 @@ export async function mergeMultisigProposalsWithState(
   const oldProposalHashes = oldProposals.map(p => p.safeTxHash);
   const executedRows = oldProposalHashes.length
     ? await db.query.safeProposalExecutionTable.findMany({
-        where: (t, { eq, and, inArray, isNotNull }) =>
-          and(
-            eq(t.daoChainId, chainId),
-            eq(t.daoAddress, daoAddress),
-            inArray(t.safeTxnHash, oldProposalHashes),
-            isNotNull(t.executedTxHash),
-          ),
-      })
+      where: (t, { eq, and, inArray, isNotNull }) =>
+        and(
+          eq(t.daoChainId, chainId),
+          eq(t.daoAddress, daoAddress),
+          inArray(t.safeTxnHash, oldProposalHashes),
+          isNotNull(t.executedTxHash),
+        ),
+    })
     : [];
 
   const executedHashSet = new Set(executedRows.map(e => e.safeTxnHash));
@@ -130,8 +130,8 @@ export async function mergeMultisigProposalsWithState(
   const nowMs =
     freezeGuardData || activeProposals.length > 0
       ? BigInt(
-          await getBlockTimestamp(Number(await getPublicClient(chainId).getBlockNumber()), chainId),
-        ) * 1000n
+        await getBlockTimestamp(Number(await getPublicClient(chainId).getBlockNumber()), chainId),
+      ) * 1000n
       : 0n;
 
   // -----------------------
@@ -149,14 +149,14 @@ export async function mergeMultisigProposalsWithState(
   const activeProposalHashes = activeProposals.map(p => p.safeTxHash);
   const timelockEvents = freezeGuardData
     ? await db.query.safeProposalExecutionTable.findMany({
-        where: (t, { eq, and, inArray, isNotNull }) =>
-          and(
-            eq(t.daoChainId, chainId),
-            eq(t.daoAddress, daoAddress),
-            inArray(t.safeTxnHash, activeProposalHashes),
-            isNotNull(t.timelockedBlock),
-          ),
-      })
+      where: (t, { eq, and, inArray, isNotNull }) =>
+        and(
+          eq(t.daoChainId, chainId),
+          eq(t.daoAddress, daoAddress),
+          inArray(t.safeTxnHash, activeProposalHashes),
+          isNotNull(t.timelockedBlock),
+        ),
+    })
     : [];
   const timelockByTxHash = new Map(timelockEvents.map(e => [e.safeTxnHash, e]));
 

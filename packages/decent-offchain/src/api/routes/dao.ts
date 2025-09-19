@@ -125,7 +125,6 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
           submissionDate: sql.raw(`excluded.${schema.safeProposalTable.submissionDate.name}`),
         },
       })
-      .returning();
   })();
 
   return resf(c, 'Task scheduled');
