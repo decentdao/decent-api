@@ -31,7 +31,6 @@ app.get('/', daoExists, async c => {
         eq(schema.safeProposalTable.daoChainId, dao.chainId),
         eq(schema.safeProposalTable.daoAddress, dao.address),
       ),
-      orderBy: desc(schema.safeProposalTable.safeNonce),
     });
     const proposalsWithState = await mergeMultisigProposalsWithState(
       dao.address,

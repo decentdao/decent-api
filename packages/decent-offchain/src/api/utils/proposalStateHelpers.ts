@@ -200,9 +200,9 @@ export async function mergeMultisigProposalsWithState(
   }));
 
   // -----------------------
-  // Merge and return
+  // Merge and return in nonce descending order
   // -----------------------
-  return [...oldProposalsWithState, ...activeProposalsWithState];
+  return [...oldProposalsWithState, ...activeProposalsWithState].sort((a, b) => b.safeNonce - a.safeNonce);
 }
 
 /**
