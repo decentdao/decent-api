@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
 import { hex } from './hex';
+import { TokenSaleRequirements } from '@/lib/requirements/types';
 
 export type Transaction = {
   to: Address;
@@ -196,6 +197,14 @@ export const splitWalletTable = onchainSchema.table(
   },
   t => [primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] })],
 );
+
+export const tokenSaleTable = onchainSchema.table('token_sale', {
+  tokenSaleAddress: hex().primaryKey(),
+  daoChainId: integer().notNull().$type<SupportedChainId>(),
+  daoAddress: hex().notNull(),
+  tokenSaleName: text(),
+  tokenSaleRequirements: json().$type<TokenSaleRequirements>().notNull(),
+});
 
 // ================================
 // ========= Relations ============

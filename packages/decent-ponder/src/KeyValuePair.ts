@@ -1,10 +1,10 @@
-import { isAddress, parseEventLogs } from 'viem';
+import { Address, isAddress, parseEventLogs } from 'viem';
 import { Context, ponder } from 'ponder:registry';
 import { isSafeCheck } from './utils/safeInfo';
 import { hatIdToTreeId } from './utils/hats';
 import { updateSubDaoAddresses } from './utils/subDao';
 import { SablierV2LockupLinearAbi } from '../abis/SablierV2LockupLinearAbi';
-import { dao, DaoInsert, stream, splitWallet } from 'ponder:schema';
+import { dao, DaoInsert, stream, splitWallet, tokenSale } from 'ponder:schema';
 
 const handleDataEntry = async (entry: DaoInsert, context: Context, timestamp: bigint) => {
   let newDao = true;
@@ -148,6 +148,19 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
       }
     } catch (e) {
       console.error('Failed to parse revShareWallets:', e);
+    }
+  } else if (key === 'newtokensale') {
+    try {
+      const { tokenSaleAddress, tokenSaleName, ...tokenSaleRequirements } = JSON.parse(value);
+      await context.db.insert(tokenSale).values({
+        daoChainId: chainId,
+        daoAddress: safeAddress,
+        tokenSaleAddress,
+        tokenSaleName,
+        tokenSaleRequirements,
+      });
+    } catch (e) {
+      console.error('Failed to parse newtokensale:', e);
     }
   } else {
     console.log('--------------------------------');

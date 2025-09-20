@@ -195,6 +195,14 @@ export const splitWallet = onchainTable(
   t => ({ pk: primaryKey({ columns: [t.address, t.daoChainId, t.daoAddress] }) }),
 );
 
+export const tokenSale = onchainTable('token_sale', {
+  tokenSaleAddress: hex().primaryKey(),
+  daoChainId: integer().notNull(),
+  daoAddress: hex().notNull(),
+  tokenSaleName: text(),
+  tokenSaleRequirements: json().notNull(),
+});
+
 // ================================
 // ========= Relations ============
 // ================================
