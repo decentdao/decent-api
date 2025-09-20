@@ -12,39 +12,37 @@ type BaseRequirement = {
   type: TokenSaleRequirementType;
 };
 
-export interface ERC20Requirement extends BaseRequirement {
+export type ERC20Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC20;
   tokenAddress: Address;
   amount: bigint;
 }
 
-export interface ERC721Requirement extends BaseRequirement {
+export type ERC721Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC721;
   tokenAddress: Address;
   amount: bigint;
 }
 
-export interface ERC1155Requirement extends BaseRequirement {
+export type ERC1155Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC1155;
   tokenAddress: Address;
   tokenId: bigint;
   amount: bigint;
 }
 
-export interface WhitelistRequirement extends BaseRequirement {
+export type WhitelistRequirement = BaseRequirement & {
   type: TokenSaleRequirementType.WHITELIST;
   addresses: Address[];
 }
 
-export interface KYCRequirement extends BaseRequirement {
+export type KYCRequirement = BaseRequirement & {
   type: TokenSaleRequirementType.KYC;
   provider: string;
   levelName: string;
 }
 
-export interface TokenSaleRequirements {
-  tokenSaleAddress: Address;
-  tokenSaleName: string;
+export type TokenSaleRequirements = {
   buyerRequirements: (
     | ERC20Requirement
     | ERC721Requirement
