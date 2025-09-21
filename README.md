@@ -57,6 +57,11 @@ a [Ponder](https://github.com/ponder-sh/ponder) project for indexing contracts a
   - [ERC721FreezeVoting](https://github.com/decentdao/decent-contracts/blob/v1.6.0/contracts/ERC721FreezeVoting.sol)
 - [SplitV2o2Factory](https://github.com/0xSplits/splits-contracts-monorepo/blob/splits-contracts-v2.2/packages/splits-v2/src/splitters/SplitFactoryV2.sol)  *(used with ponder.sh [factory pattern w/ non-factory contracts](https://ponder.sh/docs/guides/factory#usage-with-non-factory-contracts))*
   - [SplitV2](https://github.com/0xSplits/splits-contracts-monorepo/blob/splits-contracts-v2.2/packages/splits-v2/src/splitters/SplitWalletV2.sol)
+- [HatsModuleFactory](https://github.com/Hats-Protocol/hats-module/blob/main/src/HatsModuleFactory.sol) *(used with ponder.sh [factory pattern w/ non-factory contracts](https://ponder.sh/docs/guides/factory#usage-with-non-factory-contracts))*
+  - [HatsElectionEligibility](https://github.com/Hats-Protocol/hats-module/blob/main/src/HatsEligibilityModule.sol)
+- [Hats](https://github.com/Hats-Protocol/hats-protocol/blob/main/src/Hats.sol)
+- SafeKeyValuePair *(Safe integration for KeyValuePairs events)*
+- SafeFractalRegistry *(Safe integration for FractalRegistry events)*
 ### [decent-offchain](./packages/decent-offchain)
 
 API to access DAO information, DAOs, proposals and SIWE authentication
