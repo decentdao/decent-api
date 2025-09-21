@@ -42,7 +42,7 @@ Create a database
 createdb decent
 ```
 
-> The API depends on data from [decent-ponder](../decent-ponder). In order to speed up development, seed the database from the backup file in [decent-data repo release](https://github.com/decentdao/decent-data/releases/download/latest/db.sql). Download the file and save it to `packages/decent-offchain/database/db.sql`.
+> The API depends on data from [decent-ponder](../decent-ponder). In order to speed up development, seed the database from the backup file in [Google Drive](https://drive.google.com/file/d/1v9taWcyKK0YAtlp1m9pjRO3SLh5iunav/view?usp=sharing). Download the file and save it to `packages/decent-offchain/database/db.sql`.
 
 Restore the database from the backup file
 
