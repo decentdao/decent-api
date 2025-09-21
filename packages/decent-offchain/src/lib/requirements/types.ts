@@ -16,31 +16,31 @@ export type ERC20Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC20;
   tokenAddress: Address;
   amount: bigint;
-}
+};
 
 export type ERC721Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC721;
   tokenAddress: Address;
   amount: bigint;
-}
+};
 
 export type ERC1155Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC1155;
   tokenAddress: Address;
   tokenId: bigint;
   amount: bigint;
-}
+};
 
 export type WhitelistRequirement = BaseRequirement & {
   type: TokenSaleRequirementType.WHITELIST;
   addresses: Address[];
-}
+};
 
 export type KYCRequirement = BaseRequirement & {
   type: TokenSaleRequirementType.KYC;
   provider: string;
   levelName: string;
-}
+};
 
 export type TokenSaleRequirements = {
   buyerRequirements: (
@@ -51,7 +51,7 @@ export type TokenSaleRequirements = {
   )[];
   kyc: KYCRequirement | null;
   orOutOf?: number; // Number of requirements that must be met, undefined means all
-}
+};
 
 export type CheckResult = {
   eligible: boolean;

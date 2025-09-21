@@ -2,11 +2,11 @@ export type SumsubRequest = {
   method: 'GET' | 'POST';
   endpoint: string;
   body: string;
-}
+};
 
 export type ResponseWebSdkUrl = {
   url: string;
-}
+};
 
 type SumsubError = {
   code: number;
@@ -14,6 +14,6 @@ type SumsubError = {
   errorCode: number;
   errorName: string;
   description: string;
-}
+};
 
-export type SumsubResponse<T> = T | SumsubError
+export type SumsubResponse<T> = T | SumsubError;

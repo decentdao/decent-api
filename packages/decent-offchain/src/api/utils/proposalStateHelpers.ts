@@ -73,6 +73,7 @@ export async function mergeMultisigProposalsWithState(
   // Fetch executed proposals for oldProposals
   // -----------------------
   const oldProposalHashes = oldProposals.map(p => p.safeTxHash);
+  // prettier-ignore
   const executedRows = oldProposalHashes.length
     ? await db.query.safeProposalExecutionTable.findMany({
       where: (t, { eq, and, inArray, isNotNull }) =>
@@ -127,6 +128,7 @@ export async function mergeMultisigProposalsWithState(
   // -----------------------
   // Determine nowMs only if needed
   // -----------------------
+  // prettier-ignore
   const nowMs =
     freezeGuardData || activeProposals.length > 0
       ? BigInt(
@@ -147,6 +149,7 @@ export async function mergeMultisigProposalsWithState(
   // Fetch timelocked events only if FreezeGuard exists
   // -----------------------
   const activeProposalHashes = activeProposals.map(p => p.safeTxHash);
+  // prettier-ignore
   const timelockEvents = freezeGuardData
     ? await db.query.safeProposalExecutionTable.findMany({
       where: (t, { eq, and, inArray, isNotNull }) =>
