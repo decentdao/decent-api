@@ -4,27 +4,28 @@ import { zeroAddress } from 'viem';
 import { bearerAuth } from '@/api/middleware/auth';
 import { daoExists } from '@/api/middleware/dao';
 import { checkRequirements } from '@/lib/requirements';
-import { signVerification, getVerificationData, getAddressNonce } from '@/lib/verifier';
+import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { TokenSaleRequirements, TokenSaleRequirementType } from '@/lib/requirements/types';
 import { onchainProposalTable } from '@/db/schema/onchain';
 import { db } from '@/db';
+import { generateWebSdkLink } from '@/lib/sumsub';
 
 const app = new Hono();
 
 /**
- * @title List requirements for DAO
- * @route GET /d/{chainId}/{address}/requirements
+ * @title List sales for DAO
+ * @route GET /d/{chainId}/{address}/sales
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
- * @returns {object[]} Array of requirements
+ * @returns {object[]} Array of sales
  */
 app.get('/', daoExists, async c => {
   const daoInfo = c.get('basicDaoInfo');
   const { chainId, address: daoAddress } = daoInfo;
 
   try {
-    const requirements = await db
+    const sales = await db
       .select()
       .from(onchainProposalTable)
       .where(
@@ -34,15 +35,15 @@ app.get('/', daoExists, async c => {
         ),
       );
 
-    return resf(c, requirements);
+    return resf(c, sales);
   } catch {
-    throw new ApiError('Failed to fetch requirements', 500);
+    throw new ApiError('Failed to fetch sales', 500);
   }
 });
 
 /**
  * @title Verify wallet eligibility
- * @route POST /d/{chainId}/{address}/sale/verify
+ * @route POST /d/{chainId}/{address}/sales/{tokenSaleAddress}/verify
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
  * @param {string} tokenSaleAddress - The token sale contract address
@@ -60,8 +61,6 @@ app.post('/:tokenSaleAddress', bearerAuth, daoExists, async c => {
   try {
     // 1. Get token sale requirements from DB (sample for now)
     const requirements: TokenSaleRequirements = {
-      tokenSaleAddress: c.req.param('tokenSaleAddress') as `0x${string}`,
-      tokenSaleName: 'Sample Token Sale',
       buyerRequirements: [
         {
           type: TokenSaleRequirementType.ERC721,
@@ -97,7 +96,7 @@ app.post('/:tokenSaleAddress', bearerAuth, daoExists, async c => {
     const nonce = await getAddressNonce(chainId, address);
 
     // 4. Create and sign verification data
-    const verificationData = await getVerificationData(operator, address, nonce);
+    const verificationData = formatVerificationData(operator, address, nonce);
 
     const signature = await signVerification(chainId, verificationData);
 

@@ -48,7 +48,7 @@ export function getSignerAddress(): Address {
   return verifier.address;
 }
 
-export function getVerificationData(
+export function formatVerificationData(
   operator: Address,
   account: Address,
   nonce: bigint = 0n,
