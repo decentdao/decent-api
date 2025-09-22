@@ -1,9 +1,10 @@
+import { relations } from 'drizzle-orm';
 import * as onchainSchema from './onchain';
 import { sessionTable } from './offchain/sessions';
 import { safeProposalTable } from './offchain/safeProposals';
 import { blockTimestampTable } from './offchain/blockTimestamp';
 import { ipfsTable } from './offchain/ipfs';
-import { relations } from 'drizzle-orm';
+import { kycTable } from './offchain/kyc';
 
 export type RoleDetails = {
   type: string;
@@ -51,6 +52,7 @@ export const schema = {
   sessionTable,
   blockTimestampTable,
   ipfsTable,
+  kycTable,
   // offchain relationships
   onchainProposalBlockTimestampRelations,
   blockTimestampTableRelations,

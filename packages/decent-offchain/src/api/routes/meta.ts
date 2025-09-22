@@ -1,22 +1,24 @@
 import { Hono } from 'hono';
-import { Health, Meta, SupportedChainId } from 'decent-sdk';
+import { Health, SupportedChainId } from 'decent-sdk';
 import { count } from 'drizzle-orm';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { db } from '@/db';
 import { daoTable, onchainProposalTable } from '@/db/schema/onchain';
+import { getSignerAddress } from '@/lib/verifier';
 
 const app = new Hono();
 
 /**
  * @title Get API metadata
  * @route GET /
- * @returns {Meta} API metadata
+ * @returns {Meta} API metadata @DEV @TODO update Meta types
  */
 app.get('/', c => {
   const version = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local';
-  const meta: Meta = {
+  const meta = {
     name: 'decent-offchain',
     version,
+    verfier: getSignerAddress(),
   };
   return resf(c, meta);
 });

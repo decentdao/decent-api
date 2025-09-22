@@ -11,6 +11,7 @@ import splits from '@/api/routes/dao.splits';
 import proposals from '@/api/routes/dao.proposals';
 import points from '@/api/routes/points';
 import wallet from '@/api/routes/wallet';
+import sales from '@/api/routes/dao.sales';
 
 const app = new Hono();
 
@@ -52,6 +53,7 @@ app.route('/wallet', wallet);
 app.route('/d', dao);
 app.route('/d/:chainId/:address/splits', splits);
 app.route('/d/:chainId/:address/proposals', proposals);
+app.route('/d/:chainId/:address/sales', sales);
 
 export default {
   ...app,

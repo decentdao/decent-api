@@ -79,6 +79,7 @@ export const safeProposalExecutionTable = onchainSchema.table(
     safeTxnHash: hex().notNull(),
     executedTxHash: hex(),
     timelockedBlock: integer(),
+    executedBlock: integer(),
   },
   t => ({ pk: primaryKey({ columns: [t.daoChainId, t.daoAddress, t.safeTxnHash] }) }),
 );
@@ -179,7 +180,7 @@ export const voteTable = onchainSchema.table(
     votingStrategyAddress: hex().notNull(),
     voteType: integer().notNull(), // ['NO', 'YES', 'ABSTAIN']
     weight: bigint({ mode: 'number' }),
-    votedAt: text().notNull(),
+    votedAt: bigint({ mode: 'number' }),
   },
   t => [primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] })],
 );

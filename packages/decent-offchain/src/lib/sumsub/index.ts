@@ -26,10 +26,11 @@ export const getSumsubReq = (req: SumsubRequest) => {
   return { url, headers };
 };
 
-export async function generateWebSdkLink() {
+export async function generateWebSdkLink(externalId: string) {
   const data = {
     levelName: DEFAULT_LEVEL_NAME,
     ttlInSecs: DEFAULT_TTL_IN_SEC,
+    userId: externalId,
   };
   const body = JSON.stringify(data);
   const { url, headers } = getSumsubReq({

@@ -1,15 +1,13 @@
 import { Hono } from 'hono';
+import { Address, getAddress } from 'viem';
 import { and, eq } from 'drizzle-orm';
-import { zeroAddress } from 'viem';
 import { bearerAuth } from '@/api/middleware/auth';
 import { daoExists } from '@/api/middleware/dao';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { checkRequirements } from '@/lib/requirements';
 import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
-import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { TokenSaleRequirements, TokenSaleRequirementType } from '@/lib/requirements/types';
-import { onchainProposalTable } from '@/db/schema/onchain';
+import { onchainProposalTable, tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
-import { generateWebSdkLink } from '@/lib/sumsub';
 
 const app = new Hono();
 
@@ -27,11 +25,11 @@ app.get('/', daoExists, async c => {
   try {
     const sales = await db
       .select()
-      .from(onchainProposalTable)
+      .from(tokenSaleTable)
       .where(
         and(
-          eq(onchainProposalTable.daoAddress, daoAddress),
-          eq(onchainProposalTable.daoChainId, chainId),
+          eq(tokenSaleTable.daoAddress, daoAddress),
+          eq(tokenSaleTable.daoChainId, chainId),
         ),
       );
 
@@ -49,54 +47,50 @@ app.get('/', daoExists, async c => {
  * @param {string} tokenSaleAddress - The token sale contract address
  * @returns {object} Verification result with signature or KYC URL
  */
-app.post('/:tokenSaleAddress', bearerAuth, daoExists, async c => {
+app.post('/:tokenSaleAddress/verify', bearerAuth, daoExists, async c => {
+  const { tokenSaleAddress } = c.req.param();
   const user = c.get('user');
   const daoInfo = c.get('basicDaoInfo');
   const address = user.address;
   const chainId = daoInfo.chainId;
   const daoAddress = daoInfo.address;
 
-  const operator = zeroAddress; // TODO: token sale
+  if (!tokenSaleAddress) throw new ApiError('Must supply tokenSaleAddress', 400);
+  const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
   try {
-    // 1. Get token sale requirements from DB (sample for now)
-    const requirements: TokenSaleRequirements = {
-      buyerRequirements: [
-        {
-          type: TokenSaleRequirementType.ERC721,
-          tokenAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-          amount: 1n,
-        },
-        {
-          type: TokenSaleRequirementType.ERC20,
-          tokenAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-          amount: 1000000n,
-        },
-      ],
-      kyc: {
-        type: TokenSaleRequirementType.KYC,
-        provider: 'sumsub',
-        levelName: 'basic',
-      },
-      orOutOf: 1, // User needs to meet at least 1 of the 2 requirements
-    };
+    // 1. Get token sale requirements from DB
+    const [sale] = await db
+      .select()
+      .from(tokenSaleTable)
+      .where(
+        and(
+          eq(tokenSaleTable.daoAddress, daoAddress),
+          eq(tokenSaleTable.daoChainId, chainId),
+          eq(tokenSaleTable.tokenSaleAddress, lowerTokenSaleAddress),
+        ),
+      )
+      .limit(1);
+
+    if (!sale) throw new ApiError('Sale not found', 404);
 
     // 2. Run verification checks
-    const checkResult = await checkRequirements(chainId, address, requirements);
+    const checkResult = await checkRequirements(chainId, address, sale.tokenSaleRequirements);
 
-    if (!checkResult.eligible) {
-      // Return KYC URL if needed, or failure reason
+    // Return KYC URL if needed, or failure reason
+    if (checkResult.kycUrl) {
       return resf(c, {
         success: false,
         reason: checkResult.reason,
         kycUrl: checkResult.kycUrl,
       });
     }
+
     // 3. Get address nonce
     const nonce = await getAddressNonce(chainId, address);
 
     // 4. Create and sign verification data
-    const verificationData = formatVerificationData(operator, address, nonce);
+    const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
 
     const signature = await signVerification(chainId, verificationData);
 
