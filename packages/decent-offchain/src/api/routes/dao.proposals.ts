@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import { daoExists } from '@/api/middleware/dao';
@@ -19,19 +19,36 @@ const app = new Hono();
  * @route GET /d/{chainId}/{address}/proposals
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
+ * @param {string} sameNonceAs - Optional parameter to
+ *   filter proposals with the same nonce, only valid with MultisigDAO
  * @returns {Proposal[]} Array of proposal objects
  * TODO: Unify types for multisig and module DAO
  */
 app.get('/', daoExists, async c => {
   const dao = c.get('basicDaoInfo');
+  const sameNonceAsParam = c.req.query('sameNonceAs');
 
   if (!dao.isAzorius) {
     // Then it's Multisig DAO
+    const baseConditions = [
+      eq(schema.safeProposalTable.daoChainId, dao.chainId),
+      eq(schema.safeProposalTable.daoAddress, dao.address),
+    ];
+
+    if (sameNonceAsParam) {
+      baseConditions.push(
+        inArray(
+          schema.safeProposalTable.safeNonce,
+          db
+            .select({ nonce: schema.safeProposalTable.safeNonce })
+            .from(schema.safeProposalTable)
+            .where(eq(schema.safeProposalTable.safeTxHash, sameNonceAsParam as Hex)),
+        ),
+      );
+    }
+
     const proposals = await db.query.safeProposalTable.findMany({
-      where: and(
-        eq(schema.safeProposalTable.daoChainId, dao.chainId),
-        eq(schema.safeProposalTable.daoAddress, dao.address),
-      ),
+      where: and(...baseConditions),
     });
     const proposalsWithState = await mergeMultisigProposalsWithState(
       dao.address,
@@ -41,6 +58,8 @@ app.get('/', daoExists, async c => {
 
     return resf(c, proposalsWithState);
   } else {
+    if (sameNonceAsParam) throw new ApiError('sameNonceAs can only be used with Multisig DAO', 400);
+
     const proposals = (await db.query.onchainProposalTable.findMany({
       where: and(
         eq(schema.onchainProposalTable.daoChainId, dao.chainId),
