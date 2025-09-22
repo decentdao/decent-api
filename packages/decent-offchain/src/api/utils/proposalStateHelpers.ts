@@ -102,15 +102,14 @@ export async function mergeMultisigProposalsWithState(
   const oldProposalsWithState = oldProposals.map(p => {
     if (executedNonceMap.get(p.safeNonce) === p.safeTxHash) {
       return { ...p, state: FractalProposalState.EXECUTED };
-    }
-    if (executedNonceMap.has(p.safeNonce)) {
+    } else {
       return { ...p, state: FractalProposalState.REJECTED };
     }
-    return { ...p, state: FractalProposalState.ACTIVE }; // fallback (unlikely)
   });
 
   // If no active proposals or no FreezeGuard, we can return early
-  if (activeProposals.length === 0) return oldProposalsWithState;
+  if (activeProposals.length === 0)
+    return oldProposalsWithState.sort((a, b) => b.safeNonce - a.safeNonce);
 
   // -----------------------
   // Only compute for activeProposals
