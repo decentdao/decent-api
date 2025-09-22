@@ -10,6 +10,7 @@ import {
   mergeAzoriusProposalsWithState,
   mergeMultisigProposalsWithState,
 } from '../utils/proposalStateHelpers';
+import { Hex } from 'viem';
 
 const app = new Hono();
 
@@ -78,7 +79,8 @@ app.get('/', daoExists, async c => {
  * @route GET /d/{chainId}/{address}/proposals/{id}
  * @param {string} chainId - Chain ID parameter
  * @param {string} address - Address parameter
- * @param {string} id - id of the proposal
+ * @param {string} id - id of the proposal,
+ *   safeTxHash for Multisig DAO and proposalId for Azorius DAO
  * @returns {Proposal} Proposal object
  */
 app.get('/:id', daoExists, async c => {
@@ -86,31 +88,51 @@ app.get('/:id', daoExists, async c => {
   const { id } = c.req.param();
   if (!id) throw new ApiError('Proposal id is required', 400);
 
-  const proposal = (await db.query.onchainProposalTable.findFirst({
-    where: and(
-      eq(schema.onchainProposalTable.id, Number(id)),
-      eq(schema.onchainProposalTable.daoChainId, dao.chainId),
-      eq(schema.onchainProposalTable.daoAddress, dao.address),
-    ),
-    with: {
-      votes: {
-        extras: {
-          weight: bigIntText(schema.voteTable.weight),
+  if (!dao.isAzorius) {
+    // Then it's Multisig DAO
+    const proposal = await db.query.safeProposalTable.findFirst({
+      where: and(
+        eq(schema.safeProposalTable.daoChainId, dao.chainId),
+        eq(schema.safeProposalTable.daoAddress, dao.address),
+        eq(schema.safeProposalTable.safeTxHash, id as Hex),
+      ),
+    });
+    if (!proposal) throw new ApiError('Proposal not found', 404);
+    const proposalsWithState = await mergeMultisigProposalsWithState(dao.address, dao.chainId, [
+      proposal,
+    ]);
+
+    return resf(c, proposalsWithState[0]);
+  } else {
+    const proposal = (await db.query.onchainProposalTable.findFirst({
+      where: and(
+        eq(schema.onchainProposalTable.daoChainId, dao.chainId),
+        eq(schema.onchainProposalTable.daoAddress, dao.address),
+        eq(schema.onchainProposalTable.id, Number(id)),
+      ),
+      with: {
+        votes: {
+          extras: {
+            weight: bigIntText(schema.voteTable.weight),
+          },
+        },
+        blockTimestamp: {
+          columns: {
+            timestamp: true,
+          },
         },
       },
-      blockTimestamp: {
-        columns: {
-          timestamp: true,
-        },
-      },
-    },
-  })) as DbProposal;
+    })) as DbProposal | undefined;
+    if (!proposal) throw new ApiError('Proposal not found', 404);
+    const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
 
-  if (!proposal) throw new ApiError('Proposal not found', 404);
-
-  const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
-
-  return resf(c, formatProposal(proposalWithTimestamp));
+    const ret = await mergeAzoriusProposalsWithState(
+      dao.address,
+      dao.chainId,
+      [proposalWithTimestamp].map(formatProposal),
+    );
+    return resf(c, ret);
+  }
 });
 
 export default app;
