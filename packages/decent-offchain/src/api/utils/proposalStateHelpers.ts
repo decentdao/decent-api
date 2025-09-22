@@ -114,13 +114,11 @@ export async function mergeMultisigProposalsWithState(
   // -----------------------
   // Only compute for activeProposals
   // -----------------------
-  let freezeGuardData:
-    | { guardTimelockPeriodMs: bigint; guardExecutionPeriodMs: bigint }
-    | undefined;
+  let freezeGuardData: { guardTimelockPeriod: bigint; guardExecutionPeriod: bigint } | undefined;
   if (guardRow) {
     freezeGuardData = {
-      guardTimelockPeriodMs: BigInt(guardRow.timelockPeriod || 0) * 1000n,
-      guardExecutionPeriodMs: BigInt(guardRow.executionPeriod || 0) * 1000n,
+      guardTimelockPeriod: BigInt(guardRow.timelockPeriod || 0),
+      guardExecutionPeriod: BigInt(guardRow.executionPeriod || 0),
     };
   }
 
@@ -128,11 +126,11 @@ export async function mergeMultisigProposalsWithState(
   // Determine nowMs only if needed
   // -----------------------
   // prettier-ignore
-  const nowMs =
+  const nowSecond =
     freezeGuardData || activeProposals.length > 0
       ? BigInt(
         await getBlockTimestamp(Number(await getPublicClient(chainId).getBlockNumber()), chainId),
-      ) * 1000n
+      )
       : 0n;
 
   // -----------------------
@@ -165,7 +163,9 @@ export async function mergeMultisigProposalsWithState(
   // -----------------------
   // Helper: determine proposal state for activeProposals
   // -----------------------
-  const determineProposalState = (proposal: DbSafeProposal): FractalProposalState => {
+  const determineProposalState = async (
+    proposal: DbSafeProposal,
+  ): Promise<FractalProposalState> => {
     const safeTx = safeTxByHash.get(proposal.safeTxHash);
     const approvalsCount = safeTx?.confirmations?.length ?? 0;
     const hasEnoughApprovals = safeTx ? approvalsCount >= safeTx.confirmationsRequired : false;
@@ -181,18 +181,23 @@ export async function mergeMultisigProposalsWithState(
       return hasEnoughApprovals ? FractalProposalState.TIMELOCKABLE : FractalProposalState.ACTIVE;
     }
 
-    const timelockEndMs =
-      BigInt(timelockEvent.timelockedBlock) * 1000n + freezeGuardData.guardTimelockPeriodMs;
-    if (nowMs <= timelockEndMs) return FractalProposalState.TIMELOCKED;
+    const timelockEnd =
+      BigInt(await getBlockTimestamp(timelockEvent.timelockedBlock, chainId)) +
+      freezeGuardData.guardTimelockPeriod;
+    if (nowSecond <= timelockEnd) return FractalProposalState.TIMELOCKED;
 
-    const executionEndMs = timelockEndMs + freezeGuardData.guardExecutionPeriodMs;
-    return nowMs < executionEndMs ? FractalProposalState.EXECUTABLE : FractalProposalState.EXPIRED;
+    const executionEnd = timelockEnd + freezeGuardData.guardExecutionPeriod;
+    return nowSecond < executionEnd
+      ? FractalProposalState.EXECUTABLE
+      : FractalProposalState.EXPIRED;
   };
 
-  const activeProposalsWithState = activeProposals.map(p => ({
-    ...p,
-    state: determineProposalState(p),
-  }));
+  const activeProposalsWithState = await Promise.all(
+    activeProposals.map(async p => ({
+      ...p,
+      state: await determineProposalState(p),
+    })),
+  );
 
   // -----------------------
   // Merge and return in nonce descending order
