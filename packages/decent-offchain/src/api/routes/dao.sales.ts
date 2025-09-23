@@ -6,7 +6,7 @@ import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { checkRequirements } from '@/lib/requirements';
 import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
-import { onchainProposalTable, tokenSaleTable } from '@/db/schema/onchain';
+import { tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
 
 const app = new Hono();
@@ -24,7 +24,11 @@ app.get('/', daoExists, async c => {
 
   try {
     const sales = await db
-      .select()
+      .select({
+        tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
+        tokenSaleName: tokenSaleTable.tokenSaleName,
+        tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements
+      })
       .from(tokenSaleTable)
       .where(
         and(

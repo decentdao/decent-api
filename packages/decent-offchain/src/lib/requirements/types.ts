@@ -15,20 +15,20 @@ type BaseRequirement = {
 export type ERC20Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC20;
   tokenAddress: Address;
-  amount: bigint;
+  amount: string;
 };
 
 export type ERC721Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC721;
   tokenAddress: Address;
-  amount: bigint;
+  amount: string;
 };
 
 export type ERC1155Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC1155;
   tokenAddress: Address;
-  tokenId: bigint;
-  amount: bigint;
+  tokenId: number;
+  amount: string;
 };
 
 export type WhitelistRequirement = BaseRequirement & {
