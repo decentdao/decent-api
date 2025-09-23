@@ -27,14 +27,11 @@ app.get('/', daoExists, async c => {
       .select({
         tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
         tokenSaleName: tokenSaleTable.tokenSaleName,
-        tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements
+        tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements,
       })
       .from(tokenSaleTable)
       .where(
-        and(
-          eq(tokenSaleTable.daoAddress, daoAddress),
-          eq(tokenSaleTable.daoChainId, chainId),
-        ),
+        and(eq(tokenSaleTable.daoAddress, daoAddress), eq(tokenSaleTable.daoChainId, chainId)),
       );
 
     return resf(c, sales);

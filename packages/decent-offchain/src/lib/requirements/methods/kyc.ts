@@ -16,9 +16,12 @@ export async function kycCheck(address: Address, method: KYCRequirement): Promis
     };
   }
 
-  const newKyc = await db.insert(kycTable).values({
-    address
-  }).returning();
+  const newKyc = await db
+    .insert(kycTable)
+    .values({
+      address,
+    })
+    .returning();
   const id = newKyc[0]?.id;
   if (!id) throw new Error('DB error creating applicant');
 
