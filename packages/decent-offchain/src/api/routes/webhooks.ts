@@ -2,9 +2,9 @@ import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
 import resf from '@/api/utils/responseFormatter';
 import { SumsubWebhookPayload } from '@/lib/sumsub/types';
+import { verifyWebhookSignature } from '@/lib/sumsub';
 import { kycTable } from '@/db/schema/offchain/kyc';
 import { db } from '@/db';
-import { verifyWebhookSignature } from '@/lib/sumsub/webhook';
 
 const app = new Hono();
 
@@ -15,41 +15,21 @@ const app = new Hono();
  */
 app.post('/sumsub', async c => {
   try {
-    // Get raw body for signature verification
-    const rawBody = Buffer.from(await c.req.arrayBuffer());
+    const bodyBytes = Buffer.from(await c.req.arrayBuffer());
+    const digest = c.req.header('x-payload-digest') || '';
 
-    // Extract headers for signature verification
-    const headers: Record<string, string> = {
-      'x-payload-digest': c.req.header('x-payload-digest') || '',
-      'x-payload-digest-alg': c.req.header('x-payload-digest-alg') || '',
-      'x-correlation-id': c.req.header('x-correlation-id') || '',
-      'user-agent': c.req.header('user-agent') || '',
-      origin: c.req.header('origin') || '',
-    };
+    console.debug(c.req.header);
 
-    // Verify webhook signature
-    const isValidSignature = verifyWebhookSignature(rawBody, headers);
+    const isValidSignature = verifyWebhookSignature(bodyBytes, digest);
 
-    if (!isValidSignature) {
-      console.error('Invalid webhook signature - potential security threat', {
-        correlationId: headers['x-correlation-id'],
-        userAgent: headers['user-agent'],
-        origin: headers['origin'],
-      });
-      return c.json({ error: 'Invalid signature' }, 401);
-    }
+    if (!isValidSignature) return c.json({ error: 'Invalid signature' }, 401);
 
     // Parse JSON payload after signature verification
-    const payload: SumsubWebhookPayload = JSON.parse(rawBody.toString());
+    const payload: SumsubWebhookPayload = JSON.parse(bodyBytes.toString());
 
     // Log webhook for debugging
-    console.log('Received verified Sumsub webhook:', {
-      type: payload.type,
-      applicantId: payload.applicantId,
-      externalUserId: payload.externalUserId,
-      reviewAnswer: payload.reviewResult?.reviewAnswer,
-      correlationId: payload.correlationId,
-    });
+    console.log('Received verified Sumsub webhook:');
+    console.dir(payload, { depth: null });
 
     // Only process successful KYC completion events
     if (payload.type === 'applicantReviewed' && payload.reviewResult?.reviewAnswer === 'GREEN') {
