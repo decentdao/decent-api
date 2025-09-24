@@ -5,6 +5,13 @@ import { BasicSafeInfo } from '@/lib/safe/types';
 import { SubDaoInfo, ProposalTemplate } from '../middleware/dao';
 import { getAddress } from 'viem';
 import { DbProposal } from '@/db/schema';
+import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
+import { DecodedTransaction, MultisigProposal } from '../types';
+import {
+  isMultisigRejectionProposal,
+  ADDRESS_MULTISIG_METADATA,
+  parseDecodedData,
+} from './transactionParser';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -73,6 +80,68 @@ export const formatDao = (
 };
 
 const voteChoice = ['NO', 'YES', 'ABSTAIN'];
+
+export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
+  const eventDate = new Date(safeProposal.submissionDate);
+  const eventSafeTxHash = safeProposal.safeTxHash;
+  const eventNonce = safeProposal.safeNonce;
+
+  const isMultisigRejectionTx: boolean | undefined = isMultisigRejectionProposal(
+    safeProposal.daoAddress,
+    safeProposal.transactionData,
+    safeProposal.transactionTo,
+    BigInt(safeProposal.transactionValue),
+  );
+
+  const confirmations = safeProposal.confirmations ?? [];
+  const decodedData = safeProposal.dataDecoded;
+  const skipDecode = safeProposal.transactionTo === ADDRESS_MULTISIG_METADATA;
+
+  let data = { decodedTransactions: [] } as { decodedTransactions: DecodedTransaction[] };
+  if (decodedData) {
+    data = {
+      decodedTransactions: parseDecodedData(
+        safeProposal.transactionTo,
+        safeProposal.transactionValue,
+        decodedData,
+        true,
+      ),
+    };
+  } else if (!decodedData && !skipDecode) {
+    throw new Error('no decoded data available');
+    // data = {
+    //   decodedTransactions: await decode(
+    //     transaction.value,
+    //     getAddress(transaction.to),
+    //     transaction.data,
+    //   ),
+    // };
+  }
+
+  const targets = data
+    ? [...data.decodedTransactions.map(tx => tx.target)]
+    : [getAddress(safeProposal.transactionTo)];
+
+  const activity: MultisigProposal = {
+    //transaction,
+    eventDate,
+    confirmations,
+    signersThreshold: safeProposal.confirmationsRequired,
+    isMultisigRejectionTx,
+    proposalId: eventSafeTxHash,
+    targets,
+    proposer: safeProposal.proposer,
+    // FIXME note below comments when integrating
+    // @todo typing for `multiSigTransaction.transactionHash` is misleading, as ` multiSigTransaction.transactionHash` is not always defined (if ever). Need to tighten up the typing here.
+    // ! @todo This is why we are showing the two different hashes
+    //transactionHash: transaction.transactionHash ?? transaction.safeTxHash,
+    transactionHash: safeProposal.safeTxHash,
+    data: data,
+    state: null,
+    nonce: eventNonce,
+  };
+  return activity;
+}
 
 export const formatProposal = (dbProposal: DbProposal) => {
   const proposal = {

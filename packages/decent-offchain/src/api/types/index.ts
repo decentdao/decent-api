@@ -1,3 +1,9 @@
+import {
+  SafeMultisigConfirmationResponse,
+  SafeMultisigTransactionResponse,
+} from '@/lib/safe/types';
+import { Address, Hex } from 'viem';
+
 /**
  * The possible states of a DAO proposal, for both Token Voting (Azorius) and Multisignature
  * (Safe) governance, as well as Snapshot specific states.
@@ -102,3 +108,111 @@ export enum FractalProposalState {
 }
 
 export const strategyFractalProposalStates = Object.values(FractalProposalState);
+
+export type ActivityTransactionType = SafeMultisigTransactionResponse;
+
+export interface ActivityBase {
+  eventDate: Date;
+  // TODO could we return undefined for this if querying from db,
+  //   since we got all raw data and parsed fields?
+  transaction?: ActivityTransactionType;
+  transactionHash: string;
+}
+
+export type CreateProposalMetadata = {
+  title: string;
+  description: string;
+  documentationUrl?: string;
+  nonce?: number;
+};
+
+export interface MetaTransaction {
+  to: Address;
+  value: bigint;
+  data: Hex;
+  operation: number;
+}
+
+export interface DecodedTransaction {
+  target: Address;
+  value: string;
+  function: string;
+  parameterTypes: string[];
+  parameterValues: string[];
+  decodingFailed?: boolean;
+}
+
+export type ProposalData = {
+  metaData?: CreateProposalMetadata;
+  transactions?: MetaTransaction[];
+  decodedTransactions: DecodedTransaction[];
+};
+
+export interface GovernanceActivity extends ActivityBase {
+  proposer: Address | null;
+  state: FractalProposalState | null;
+  proposalId: string;
+  targets: Address[];
+  data?: ProposalData;
+  title?: string;
+}
+
+export type ProposalVotesSummary = {
+  yes: bigint;
+  no: bigint;
+  abstain: bigint;
+  quorum: bigint;
+};
+
+export const VOTE_CHOICES = [
+  {
+    label: 'yes',
+    value: 1,
+  },
+  {
+    label: 'no',
+    value: 0,
+  },
+  {
+    label: 'abstain',
+    value: 2,
+  },
+] as const;
+
+export type ProposalVote = {
+  voter: Address;
+  choice: (typeof VOTE_CHOICES)[number];
+  weight: bigint;
+};
+
+export type ERC721ProposalVote = {
+  tokenAddresses: Address[];
+  tokenIds: string[];
+} & ProposalVote;
+
+export interface AzoriusProposal extends GovernanceActivity {
+  votingStrategy: Address;
+  votesSummary: ProposalVotesSummary;
+  votes: ProposalVote[] | ERC721ProposalVote[];
+  /** The deadline timestamp for the proposal, in milliseconds. */
+  deadlineMs: number;
+  startBlock: bigint;
+}
+
+export interface MultisigProposal extends GovernanceActivity {
+  confirmations?: SafeMultisigConfirmationResponse[];
+  signersThreshold?: number;
+  isMultisigRejectionTx?: boolean;
+  nonce?: number;
+}
+
+export interface SnapshotProposal extends GovernanceActivity {
+  snapshotProposalId: string;
+  title: string;
+  description: string;
+  startTime: number;
+  endTime: number;
+  author: Address;
+}
+
+export type FractalProposal = AzoriusProposal | MultisigProposal | SnapshotProposal;
