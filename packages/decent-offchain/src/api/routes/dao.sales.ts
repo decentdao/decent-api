@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import { Address, getAddress } from 'viem';
 import { and, eq } from 'drizzle-orm';
-import { bearerAuth } from '@/api/middleware/auth';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { checkRequirements } from '@/lib/requirements';
 import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
 import { tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
+import { getPublicClient } from '../utils/publicClient';
 
 const app = new Hono();
 
@@ -46,13 +46,12 @@ app.get('/', daoExists, async c => {
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
  * @param {string} tokenSaleAddress - The token sale contract address
+ * @body { address: string, message: string, signature: string }
  * @returns {object} Verification result with signature or KYC URL
  */
-app.post('/:tokenSaleAddress/verify', bearerAuth, daoExists, async c => {
+app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   const { tokenSaleAddress } = c.req.param();
-  const user = c.get('user');
   const daoInfo = c.get('basicDaoInfo');
-  const address = user.address;
   const chainId = daoInfo.chainId;
   const daoAddress = daoInfo.address;
 
@@ -60,6 +59,12 @@ app.post('/:tokenSaleAddress/verify', bearerAuth, daoExists, async c => {
   const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
   try {
+    // 0. Verify signed message
+    const { address, message, signature } = await c.req.json();
+    const publicClient = getPublicClient(chainId);
+    const valid = await publicClient.verifyMessage({ address, message, signature });
+    if (!valid) throw new ApiError(`Bad signed message from ${address}`, 401);
+
     // 1. Get token sale requirements from DB
     const [sale] = await db
       .select()
@@ -93,9 +98,9 @@ app.post('/:tokenSaleAddress/verify', bearerAuth, daoExists, async c => {
     // 4. Create and sign verification data
     const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
 
-    const signature = await signVerification(chainId, verificationData);
+    const verify = await signVerification(chainId, verificationData);
 
-    return resf(c, signature);
+    return resf(c, verify);
   } catch {
     throw new ApiError('Verification failed', 500);
   }

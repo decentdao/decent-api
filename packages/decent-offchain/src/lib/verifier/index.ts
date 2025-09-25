@@ -3,7 +3,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { SupportedChainId } from 'decent-sdk';
 import { unixTimestamp } from '@/api/utils/time';
 import { getPublicClient } from '@/api/utils/publicClient';
-import { VerificationData, VerificationSignature } from './types';
+import { VerificationData, VerificationResponse } from './types';
 import { DOMAIN, EXPIRATION_SECONDS, TYPES, VERIFIER_ABI, VERIFIER_V1_ADDRESS } from './constants';
 
 const VERIFIER_PRIVATE_KEY = process.env.VERIFIER_PRIVATE_KEY as Hex;
@@ -24,7 +24,7 @@ export async function getAddressNonce(chainId: SupportedChainId, address: Addres
 export async function signVerification(
   chainId: SupportedChainId,
   data: VerificationData,
-): Promise<VerificationSignature> {
+): Promise<VerificationResponse> {
   if (!verifier) throw new Error('VERIFIER_PRIVATE_KEY not set');
   const domain = {
     ...DOMAIN,
@@ -39,8 +39,8 @@ export async function signVerification(
   });
 
   return {
-    data,
     signature,
+    expiration: data.signatureExpiration,
   };
 }
 
