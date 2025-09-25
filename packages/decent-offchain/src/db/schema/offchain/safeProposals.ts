@@ -19,7 +19,7 @@ export const safeProposalTable = offchainSchema.table(
     submissionDate: timestamp('submission_date').notNull(),
     transactionTo: hex('transaction_to').notNull(),
     transactionValue: text('transaction_value').notNull(),
-    transactionData: hex('transaction_data').notNull(),
+    transactionData: hex('transaction_data'),
     confirmations: json('confirmations').$type<SafeMultisigConfirmationResponse[]>(),
     confirmationsRequired: integer('confirmations_required').notNull(),
   },

@@ -55,8 +55,9 @@ app.get('/', daoExists, async c => {
       dao.chainId,
       proposals,
     );
+    const formattedProposals = await Promise.all(proposalsWithState.map(formatMultisigProposal));
 
-    return resf(c, proposalsWithState.map(formatMultisigProposal));
+    return resf(c, formattedProposals);
   } else {
     if (sameNonceAsParam) throw new ApiError('sameNonceAs can only be used with Multisig DAO', 400);
 
@@ -120,8 +121,9 @@ app.get('/:id', daoExists, async c => {
     const proposalsWithState = await mergeMultisigProposalsWithState(dao.address, dao.chainId, [
       proposal,
     ]);
+    const formattedProposal = await formatMultisigProposal(proposalsWithState[0]!);
 
-    return resf(c, formatMultisigProposal(proposalsWithState[0]!));
+    return resf(c, formattedProposal);
   } else {
     const proposal = (await db.query.onchainProposalTable.findFirst({
       where: and(
