@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { bigIntText, formatProposal } from '@/api/utils/typeConverter';
+import { bigIntText, formatMultisigProposal, formatProposal } from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
 import {
   mergeAzoriusProposalsWithState,
@@ -55,8 +55,9 @@ app.get('/', daoExists, async c => {
       dao.chainId,
       proposals,
     );
+    const formattedProposals = await Promise.all(proposalsWithState.map(formatMultisigProposal));
 
-    return resf(c, proposalsWithState);
+    return resf(c, formattedProposals);
   } else {
     if (sameNonceAsParam) throw new ApiError('sameNonceAs can only be used with Multisig DAO', 400);
 
@@ -120,8 +121,9 @@ app.get('/:id', daoExists, async c => {
     const proposalsWithState = await mergeMultisigProposalsWithState(dao.address, dao.chainId, [
       proposal,
     ]);
+    const formattedProposal = await formatMultisigProposal(proposalsWithState[0]!);
 
-    return resf(c, proposalsWithState[0]);
+    return resf(c, formattedProposal);
   } else {
     const proposal = (await db.query.onchainProposalTable.findFirst({
       where: and(

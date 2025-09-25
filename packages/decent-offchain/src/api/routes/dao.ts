@@ -10,6 +10,8 @@ import { getCIDFromSafeTransaction, getSafeTransactions } from '@/lib/safe';
 import { schema } from '@/db/schema';
 import { DAO_SELECT_FIELDS, DAO_GOVERNANCE_MODULE_JOIN_CONDITION } from '@/db/queries';
 import { fetchMetadata } from '@/api/utils/metadata';
+import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
+import { Hex } from 'viem';
 
 const app = new Hono();
 
@@ -73,19 +75,19 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
 
   // Return immediately; run update in background to avoid timeout.
   (async () => {
-    const latestProposal = await db.query.safeProposalTable.findFirst({
-      where: (safeProposal, { eq, and }) =>
-        and(eq(safeProposal.daoChainId, dao.chainId), eq(safeProposal.daoAddress, dao.address)),
-      orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
-    });
-    const since = latestProposal
-      ? new Date(latestProposal.submissionDate.getTime() + 1)
-      : undefined;
-
-    const transactions = await getSafeTransactions(dao.chainId, dao.address, { since });
+    // const latestProposal = await db.query.safeProposalTable.findFirst({
+    //   where: (safeProposal, { eq, and }) =>
+    //     and(eq(safeProposal.daoChainId, dao.chainId), eq(safeProposal.daoAddress, dao.address)),
+    //   orderBy: (safeProposal, { desc }) => desc(safeProposal.submissionDate),
+    // });
+    // const since = latestProposal
+    //   ? new Date(latestProposal.submissionDate.getTime() + 1)
+    //   : undefined;
+    // TODO: add back since to do pagination if this get too slow?
+    const transactions = await getSafeTransactions(dao.chainId, dao.address);
     if (transactions.results.length === 0) return resf(c, []);
 
-    const proposals = await Promise.all(
+    const proposals: DbSafeProposal[] = await Promise.all(
       transactions.results.map(async t => {
         const proposer = (t.proposer || t.confirmations?.[0]?.owner) as `0x${string}`;
         const safeTxHash = t.safeTxHash as `0x${string}`;
@@ -96,14 +98,19 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
         return {
           daoChainId: dao.chainId,
           daoAddress: dao.address,
-          proposer,
           safeNonce: t.nonce,
-          safeTxHash,
-          transactions: t.dataDecoded,
-          metadataCID: cid,
           title,
           description,
+          proposer,
+          metadataCID: cid,
+          dataDecoded: t.dataDecoded,
+          safeTxHash,
           submissionDate,
+          transactionTo: t.to as Hex,
+          transactionValue: t.value,
+          transactionData: t.data as Hex,
+          confirmations: t.confirmations,
+          confirmationsRequired: t.confirmationsRequired,
         };
       }),
     );
@@ -118,11 +125,19 @@ app.post('/:chainId/:address/safe-proposals', daoExists, async c => {
           schema.safeProposalTable.safeTxHash,
         ],
         set: {
-          metadataCID: sql.raw(`excluded.${schema.safeProposalTable.metadataCID.name}`),
-          transactions: sql.raw(`excluded.${schema.safeProposalTable.transactions.name}`),
           title: sql.raw(`excluded.${schema.safeProposalTable.title.name}`),
           description: sql.raw(`excluded.${schema.safeProposalTable.description.name}`),
+          proposer: sql.raw(`excluded.${schema.safeProposalTable.proposer.name}`),
+          metadataCID: sql.raw(`excluded.${schema.safeProposalTable.metadataCID.name}`),
+          dataDecoded: sql.raw(`excluded.${schema.safeProposalTable.dataDecoded.name}`),
           submissionDate: sql.raw(`excluded.${schema.safeProposalTable.submissionDate.name}`),
+          transactionTo: sql.raw(`excluded.${schema.safeProposalTable.transactionTo.name}`),
+          transactionValue: sql.raw(`excluded.${schema.safeProposalTable.transactionValue.name}`),
+          transactionData: sql.raw(`excluded.${schema.safeProposalTable.transactionData.name}`),
+          confirmations: sql.raw(`excluded.${schema.safeProposalTable.confirmations.name}`),
+          confirmationsRequired: sql.raw(
+            `excluded.${schema.safeProposalTable.confirmationsRequired.name}`,
+          ),
         },
       });
   })();

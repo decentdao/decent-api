@@ -12,6 +12,7 @@
     "migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "dev": "bun --watch run src/api/index.ts",
     "start": "bun run src/api/index.ts",
+    "syncSafe": "bun run scripts/sync.ts",
     "test": "bun test test/order.test.ts",
     "sockettest": "bun test test/socket.test.ts",
     "lint": "eslint .",
