@@ -9,6 +9,15 @@ import { signVerification, getAddressNonce, formatVerificationData } from '@/lib
 import { tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
 import { getPublicClient } from '../utils/publicClient';
+import { unixTimestamp } from '../utils/time';
+
+const VERIFICATION_TYPES = {
+  Verification: [
+    { name: 'saleAddress', type: 'address' },
+    { name: 'signerAddress', type: 'address' },
+    { name: 'timestamp', type: 'uint256' },
+  ],
+};
 
 const app = new Hono();
 
@@ -54,12 +63,33 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   if (!tokenSaleAddress) throw new ApiError('Must supply tokenSaleAddress', 400);
   const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
-  // 0. Verify signed message
+  // 0. Verify signed typed data
   const { address, message, signature } = await c.req.json();
   if (!message) throw new ApiError('Missing message', 400);
   if (!signature) throw new ApiError('Missing signature', 400);
   const publicClient = getPublicClient(chainId);
-  const valid = await publicClient.verifyMessage({ address, message, signature });
+
+  const domain = {
+    name: 'Decent DAO Verification',
+    version: '1',
+    chainId,
+  };
+
+  // Validate timestamp is recent (within last 5 minutes)
+  const now = unixTimestamp();
+  const maxAge = 5 * 60;
+  if (message.timestamp && (now - message.timestamp > maxAge)) {
+    throw new ApiError('Message timestamp is too old', 400);
+  }
+
+  const valid = await publicClient.verifyTypedData({
+    address,
+    domain,
+    types: VERIFICATION_TYPES,
+    primaryType: 'Verification',
+    message,
+    signature,
+  });
   if (!valid) throw new ApiError(`Bad signed message from ${address}`, 401);
 
   // 1. Get token sale requirements from DB
