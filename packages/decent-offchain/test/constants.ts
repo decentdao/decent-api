@@ -17,3 +17,24 @@ export const typedData = {
     content: 'Test message for signing',
   },
 } as const;
+
+// EIP-712 types for token sale verification
+export const VERIFICATION_TYPES = {
+  Verification: [
+    { name: 'saleAddress', type: 'address' },
+    { name: 'signerAddress', type: 'address' },
+    { name: 'timestamp', type: 'uint256' },
+  ],
+};
+
+export const getVerificationDomain = (chainId: number) => ({
+  name: 'Decent DAO Verification',
+  version: '1',
+  chainId,
+});
+
+export const createVerificationMessage = (saleAddress: Address, signerAddress: Address, timestamp?: number) => ({
+  saleAddress,
+  signerAddress,
+  timestamp: timestamp || Math.floor(Date.now() / 1000),
+});

@@ -2,8 +2,10 @@ import { beforeAll } from 'bun:test';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
+import { Address } from 'viem';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
+import { VERIFICATION_TYPES, getVerificationDomain, createVerificationMessage } from './constants';
 
 // delete all sessions before running tests
 beforeAll(async () => {
@@ -79,6 +81,31 @@ export const signMessage = async (accountNumber: WalletNumber) => {
 
   const message = 'Test message for signing';
   const signature = await account.signMessage({ message });
+
+  return {
+    signature,
+    message,
+    address: account.address,
+  };
+};
+
+export const signVerificationData = async (
+  accountNumber: WalletNumber,
+  saleAddress: Address,
+  chainId: number = 11155111,
+  timestamp?: number
+) => {
+  const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
+
+  const domain = getVerificationDomain(chainId);
+  const message = createVerificationMessage(saleAddress, account.address, timestamp);
+
+  const signature = await account.signTypedData({
+    domain,
+    types: VERIFICATION_TYPES,
+    primaryType: 'Verification',
+    message,
+  });
 
   return {
     signature,

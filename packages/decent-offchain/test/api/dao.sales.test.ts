@@ -2,7 +2,7 @@ import { Address } from 'viem';
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
 import { ApiResponse } from 'decent-sdk';
-import { signMessage, WALLETS } from 'test/client';
+import { signVerificationData, WALLETS } from 'test/client';
 import { VerificationResponse } from '@/lib/verifier/types';
 import { TokenSaleRequirements } from '@/lib/requirements/types';
 
@@ -38,7 +38,7 @@ describe('DAO Sales API', () => {
       return;
     }
 
-    const { message, signature, address } = await signMessage(1);
+    const { message, signature, address } = await signVerificationData(1, tokenSaleAddress, daoChainId);
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify?kycType=url`,
@@ -69,7 +69,7 @@ describe('DAO Sales API', () => {
       return;
     }
 
-    const testMessage = `Verify eligibility for token sale ${tokenSaleAddress}`;
+    const { message } = await signVerificationData(1, tokenSaleAddress, daoChainId);
     const testAddress = WALLETS[1].address;
     const invalidSignature =
       '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1b';
@@ -83,7 +83,7 @@ describe('DAO Sales API', () => {
         },
         body: JSON.stringify({
           address: testAddress,
-          message: testMessage,
+          message,
           signature: invalidSignature,
         }),
       },
@@ -125,8 +125,8 @@ describe('DAO Sales API', () => {
   it('POST verify with invalid token sale address', async () => {
     const invalidTokenSaleAddress = '0x1234567890123456789012345678901234567890';
 
-    // Create valid signature
-    const { message, signature, address } = await signMessage(1);
+    // Create valid signature for the invalid token sale address
+    const { message, signature, address } = await signVerificationData(1, invalidTokenSaleAddress, daoChainId);
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${invalidTokenSaleAddress}/verify`,
@@ -157,7 +157,7 @@ describe('DAO Sales API', () => {
     }
 
     // Sign with wallet index 1 but use address from wallet index 2
-    const { message, signature } = await signMessage(1);
+    const { message, signature } = await signVerificationData(1, tokenSaleAddress, daoChainId);
     const mismatchedAddress = WALLETS[2].address;
 
     const res = await app.request(
@@ -188,9 +188,13 @@ describe('DAO Sales API', () => {
       return;
     }
 
-    // Sign message for this token sale but submit different message content
-    const { signature, address } = await signMessage(1);
-    const wrongMessage = `Verify eligibility for token sale 0x1234567890123456789012345678901234567890`;
+    // Sign message for one token sale but submit different message content
+    const { signature, address } = await signVerificationData(1, tokenSaleAddress, daoChainId);
+    const wrongMessage = {
+      saleAddress: '0x1234567890123456789012345678901234567890',
+      signerAddress: address,
+      timestamp: Math.floor(Date.now() / 1000),
+    };
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify`,
@@ -211,5 +215,38 @@ describe('DAO Sales API', () => {
     const json = (await res.json()) as ApiResponse<VerificationResponse>;
     expect(json.success).toBeFalsy();
     expect(json.error).toBeDefined();
+  });
+
+  it('POST verify with expired timestamp', async () => {
+    // Skip if no token sales exist
+    if (!tokenSaleAddress) {
+      console.log('No token sales found, skipping verify test');
+      return;
+    }
+
+    // Create a timestamp from 10 minutes ago (older than 5 minute limit)
+    const expiredTimestamp = Math.floor(Date.now() / 1000) - (10 * 60);
+    const { message, signature, address } = await signVerificationData(1, tokenSaleAddress, daoChainId, expiredTimestamp);
+
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address,
+          message,
+          signature,
+        }),
+      },
+    );
+
+    expect(res.status).toBe(400);
+    const json = (await res.json()) as ApiResponse<VerificationResponse>;
+    expect(json.success).toBeFalsy();
+    expect(json.error).toBeDefined();
+    expect(json.error?.message).toContain('timestamp is too old');
   });
 });
