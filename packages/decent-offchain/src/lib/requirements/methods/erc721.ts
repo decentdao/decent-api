@@ -17,16 +17,18 @@ export async function erc721Check(
       args: [address],
     });
 
-    const eligible = balance >= method.amount;
+    const eligible = balance >= BigInt(method.amount);
 
     return {
       eligible,
-      reason: eligible ? undefined : `Need ${method.amount} NFTs, have ${balance}`,
+      ineligibleReason: eligible
+        ? undefined
+        : `ERC721 balance of ${method.amount} ${method.tokenAddress}, ${address} has ${balance}`,
     };
   } catch (error) {
     return {
       eligible: false,
-      reason: `Failed to check ERC721 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ineligibleReason: `Failed to check ERC721 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }

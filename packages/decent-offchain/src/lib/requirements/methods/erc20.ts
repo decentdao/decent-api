@@ -17,16 +17,18 @@ export async function erc20Check(
       args: [address],
     });
 
-    const eligible = balance >= method.amount;
+    const eligible = balance >= BigInt(method.amount);
 
     return {
       eligible,
-      reason: eligible ? undefined : `Need ${method.amount} tokens, have ${balance}`,
+      ineligibleReason: eligible
+        ? undefined
+        : `ERC20 balance of ${method.amount} ${method.tokenAddress}, ${address} has ${balance}`,
     };
   } catch (error) {
     return {
       eligible: false,
-      reason: `Failed to check ERC20 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ineligibleReason: `Failed to check ERC20 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }

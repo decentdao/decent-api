@@ -90,10 +90,7 @@ export function verifyWebhookSignature(body: Buffer, digest: string): boolean {
 
     // Use constant-time comparison to prevent timing attacks
     try {
-      return timingSafeEqual(
-        Buffer.from(calculatedDigest, 'hex'),
-        Buffer.from(digest, 'hex')
-      );
+      return timingSafeEqual(Buffer.from(calculatedDigest, 'hex'), Buffer.from(digest, 'hex'));
     } catch {
       return false;
     }

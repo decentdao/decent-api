@@ -14,12 +14,12 @@ export async function checkRequirements(
 ): Promise<CheckResult> {
   // If KYC is required and not complete, return url for user to complete
   if (requirements.kyc) {
-    const kycResult = await kycCheck(address, requirements.kyc);
-    if (!kycResult.eligible) {
+    const { eligible, ineligibleReason, kycUrl } = await kycCheck(address, requirements.kyc);
+    if (!eligible) {
       return {
         eligible: false,
-        reason: kycResult.reason,
-        kycUrl: kycResult.kycUrl,
+        ineligibleReason,
+        kycUrl,
       };
     }
   }
@@ -44,11 +44,16 @@ export async function checkRequirements(
     eligible = passedRequirements === requirements.buyerRequirements.length;
   }
 
-  const failedRequirements = onchainRequirements.filter(r => !r.eligible && r.reason);
-  const reason = failedRequirements.map(r => r.reason).join(', ');
+  const failedRequirements = onchainRequirements.filter(r => !r.eligible && r.ineligibleReason);
+  const ineligibleReason = eligible
+    ? undefined
+    : [
+        `${passedRequirements} out of ${requirements.orOutOf ?? requirements.buyerRequirements.length} requirements met`,
+        ...failedRequirements.map(r => r.ineligibleReason),
+      ].join('. ');
 
   return {
     eligible,
-    reason,
+    ineligibleReason,
   };
 }

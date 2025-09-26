@@ -55,6 +55,6 @@ export type TokenSaleRequirements = {
 
 export type CheckResult = {
   eligible: boolean;
-  reason?: string;
   kycUrl?: string;
+  ineligibleReason?: string;
 };

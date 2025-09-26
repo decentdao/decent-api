@@ -27,21 +27,21 @@ export async function erc1155Check(
       address: method.tokenAddress,
       abi: ERC1155_ABI,
       functionName: 'balanceOf',
-      args: [address, method.tokenId],
+      args: [address, BigInt(method.tokenId)],
     });
 
-    const eligible = balance >= method.amount;
+    const eligible = balance >= BigInt(method.amount);
 
     return {
       eligible,
-      reason: eligible
+      ineligibleReason: eligible
         ? undefined
-        : `Need ${method.amount} of token ${method.tokenId}, have ${balance}`,
+        : `ERC1155 balance of ${method.amount} token ${method.tokenId} from ${method.tokenAddress}, ${address} has ${balance}`,
     };
   } catch (error) {
     return {
       eligible: false,
-      reason: `Failed to check ERC1155 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ineligibleReason: `Failed to check ERC1155 balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }

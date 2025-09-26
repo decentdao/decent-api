@@ -22,22 +22,16 @@ app.get('/', daoExists, async c => {
   const daoInfo = c.get('basicDaoInfo');
   const { chainId, address: daoAddress } = daoInfo;
 
-  try {
-    const sales = await db
-      .select({
-        tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
-        tokenSaleName: tokenSaleTable.tokenSaleName,
-        tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements,
-      })
-      .from(tokenSaleTable)
-      .where(
-        and(eq(tokenSaleTable.daoAddress, daoAddress), eq(tokenSaleTable.daoChainId, chainId)),
-      );
+  const sales = await db
+    .select({
+      tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
+      tokenSaleName: tokenSaleTable.tokenSaleName,
+      tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements,
+    })
+    .from(tokenSaleTable)
+    .where(and(eq(tokenSaleTable.daoAddress, daoAddress), eq(tokenSaleTable.daoChainId, chainId)));
 
-    return resf(c, sales);
-  } catch {
-    throw new ApiError('Failed to fetch sales', 500);
-  }
+  return resf(c, sales);
 });
 
 /**
@@ -58,52 +52,51 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   if (!tokenSaleAddress) throw new ApiError('Must supply tokenSaleAddress', 400);
   const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
-  try {
-    // 0. Verify signed message
-    const { address, message, signature } = await c.req.json();
-    const publicClient = getPublicClient(chainId);
-    const valid = await publicClient.verifyMessage({ address, message, signature });
-    if (!valid) throw new ApiError(`Bad signed message from ${address}`, 401);
+  // 0. Verify signed message
+  const { address, message, signature } = await c.req.json();
+  if (!message) throw new ApiError('Missing message', 400);
+  if (!signature) throw new ApiError('Missing signature', 400);
+  const publicClient = getPublicClient(chainId);
+  const valid = await publicClient.verifyMessage({ address, message, signature });
+  if (!valid) throw new ApiError(`Bad signed message from ${address}`, 401);
 
-    // 1. Get token sale requirements from DB
-    const [sale] = await db
-      .select()
-      .from(tokenSaleTable)
-      .where(
-        and(
-          eq(tokenSaleTable.daoAddress, daoAddress),
-          eq(tokenSaleTable.daoChainId, chainId),
-          eq(tokenSaleTable.tokenSaleAddress, lowerTokenSaleAddress),
-        ),
-      )
-      .limit(1);
+  // 1. Get token sale requirements from DB
+  const [sale] = await db
+    .select()
+    .from(tokenSaleTable)
+    .where(
+      and(
+        eq(tokenSaleTable.daoAddress, daoAddress),
+        eq(tokenSaleTable.daoChainId, chainId),
+        eq(tokenSaleTable.tokenSaleAddress, lowerTokenSaleAddress),
+      ),
+    )
+    .limit(1);
 
-    if (!sale) throw new ApiError('Sale not found', 404);
+  if (!sale) throw new ApiError('Sale not found', 404);
 
-    // 2. Run verification checks
-    const checkResult = await checkRequirements(chainId, address, sale.tokenSaleRequirements);
+  // 2. Run verification checks
+  const { eligible, kycUrl, ineligibleReason } = await checkRequirements(
+    chainId,
+    address,
+    sale.tokenSaleRequirements,
+  );
 
-    // Return KYC URL if needed, or failure reason
-    if (checkResult.kycUrl) {
-      return resf(c, {
-        success: false,
-        reason: checkResult.reason,
-        kycUrl: checkResult.kycUrl,
-      });
-    }
+  // Return KYC URL if required and address is not in database
+  if (kycUrl) return resf(c, { kycUrl });
 
-    // 3. Get address nonce
-    const nonce = await getAddressNonce(chainId, address);
+  // Return reasons if onchain requirements not met
+  if (!eligible && ineligibleReason) throw new ApiError(ineligibleReason, 401);
 
-    // 4. Create and sign verification data
-    const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
+  // 3. Get address nonce
+  const nonce = await getAddressNonce(chainId, address);
 
-    const verify = await signVerification(chainId, verificationData);
+  // 4. Create and sign verification data
+  const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
 
-    return resf(c, verify);
-  } catch {
-    throw new ApiError('Verification failed', 500);
-  }
+  const verify = await signVerification(chainId, verificationData);
+
+  return resf(c, verify);
 });
 
 export default app;

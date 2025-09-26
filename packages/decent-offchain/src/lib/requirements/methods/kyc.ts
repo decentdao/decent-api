@@ -29,7 +29,7 @@ export async function kycCheck(address: Address, method: KYCRequirement): Promis
 
   return {
     eligible: false,
-    reason: `KYC verification required: ${method.provider} level ${method.levelName}`,
     kycUrl,
+    ineligibleReason: `KYC verification required for ${address}: ${method.provider} level ${method.levelName}`,
   };
 }
