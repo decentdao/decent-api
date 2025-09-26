@@ -33,7 +33,11 @@ export const getVerificationDomain = (chainId: number) => ({
   chainId,
 });
 
-export const createVerificationMessage = (saleAddress: Address, signerAddress: Address, timestamp?: number) => ({
+export const createVerificationMessage = (
+  saleAddress: Address,
+  signerAddress: Address,
+  timestamp?: number,
+) => ({
   saleAddress,
   signerAddress,
   timestamp: timestamp || Math.floor(Date.now() / 1000),

@@ -9,7 +9,7 @@ import { generateWebSdkLink, generateAccessToken } from '@/lib/sumsub';
 export async function kycCheck(
   address: Address,
   method: KYCRequirement,
-  kycType: KYCResponseType = 'url',
+  kycResponseType: KYCResponseType = 'url',
 ): Promise<CheckResult> {
   const { isKycApproved } = (await db.query.kycTable.findFirst({
     where: eq(kycTable.address, address),
@@ -30,7 +30,8 @@ export async function kycCheck(
   const id = newKyc[0]?.id;
   if (!id) throw new Error('DB error creating applicant');
 
-  const kyc = kycType === 'url' ? await generateWebSdkLink(id) : await generateAccessToken(id);
+  const kyc =
+    kycResponseType === 'url' ? await generateWebSdkLink(id) : await generateAccessToken(id);
 
   const ineligibleReason = `KYC verification required for ${address}: ${method.provider} level ${method.levelName}`;
 

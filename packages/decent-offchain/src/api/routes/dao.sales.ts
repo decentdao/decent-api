@@ -50,7 +50,7 @@ app.get('/', daoExists, async c => {
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
  * @param {string} tokenSaleAddress - The token sale contract address
- * @param {string} [kycType] - Optional KYC response type query parameter ('url' or 'token', defaults to 'url')
+ * @param {string} [kycResponseType] - Optional KYC response type query parameter ('url' or 'token', defaults to 'url')
  * @body { address: string, message: string, signature: string }
  * @returns {object} Verification result with signature or KYC URL
  */
@@ -78,7 +78,7 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   // Validate timestamp is recent (within last 5 minutes)
   const now = unixTimestamp();
   const maxAge = 5 * 60;
-  if (message.timestamp && (now - message.timestamp > maxAge)) {
+  if (message.timestamp && now - message.timestamp > maxAge) {
     throw new ApiError('Message timestamp is too old', 400);
   }
 
@@ -108,16 +108,16 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   if (!sale) throw new ApiError('Sale not found', 404);
 
   // 2. Run verification checks
-  const kycType = (c.req.query('kycType') || 'url') as KYCResponseType;
-  if (kycType !== 'url' && kycType !== 'token') {
-    throw new ApiError('Unsupported kycType requested', 400);
+  const kycResponseType = (c.req.query('kycResponseType') || 'url') as KYCResponseType;
+  if (kycResponseType !== 'url' && kycResponseType !== 'token') {
+    throw new ApiError('Unsupported kycResponseType requested', 400);
   }
 
   const { eligible, kyc, ineligibleReason } = await checkRequirements(
     chainId,
     address,
     sale.tokenSaleRequirements,
-    kycType,
+    kycResponseType,
   );
 
   // Return KYC URL or access token if required and address is not in database

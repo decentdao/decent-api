@@ -12,11 +12,15 @@ export async function checkRequirements(
   chainId: SupportedChainId,
   address: Address,
   requirements: TokenSaleRequirements,
-  kycType: KYCResponseType = 'url',
+  kycResponseType: KYCResponseType = 'url',
 ): Promise<CheckResult> {
   // If KYC is required and not complete, return url or access token for user to complete
   if (requirements.kyc) {
-    const { eligible, ineligibleReason, kyc } = await kycCheck(address, requirements.kyc, kycType);
+    const { eligible, ineligibleReason, kyc } = await kycCheck(
+      address,
+      requirements.kyc,
+      kycResponseType,
+    );
     if (!eligible) {
       return {
         eligible: false,

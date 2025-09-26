@@ -38,7 +38,11 @@ describe('DAO Sales API', () => {
       return;
     }
 
-    const { message, signature, address } = await signVerificationData(1, tokenSaleAddress, daoChainId);
+    const { message, signature, address } = await signVerificationData(
+      1,
+      tokenSaleAddress,
+      daoChainId,
+    );
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify?kycType=url`,
@@ -126,7 +130,11 @@ describe('DAO Sales API', () => {
     const invalidTokenSaleAddress = '0x1234567890123456789012345678901234567890';
 
     // Create valid signature for the invalid token sale address
-    const { message, signature, address } = await signVerificationData(1, invalidTokenSaleAddress, daoChainId);
+    const { message, signature, address } = await signVerificationData(
+      1,
+      invalidTokenSaleAddress,
+      daoChainId,
+    );
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${invalidTokenSaleAddress}/verify`,
@@ -225,8 +233,13 @@ describe('DAO Sales API', () => {
     }
 
     // Create a timestamp from 10 minutes ago (older than 5 minute limit)
-    const expiredTimestamp = Math.floor(Date.now() / 1000) - (10 * 60);
-    const { message, signature, address } = await signVerificationData(1, tokenSaleAddress, daoChainId, expiredTimestamp);
+    const expiredTimestamp = Math.floor(Date.now() / 1000) - 10 * 60;
+    const { message, signature, address } = await signVerificationData(
+      1,
+      tokenSaleAddress,
+      daoChainId,
+      expiredTimestamp,
+    );
 
     const res = await app.request(
       `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify`,

@@ -93,7 +93,7 @@ export const signVerificationData = async (
   accountNumber: WalletNumber,
   saleAddress: Address,
   chainId: number = 11155111,
-  timestamp?: number
+  timestamp?: number,
 ) => {
   const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
 

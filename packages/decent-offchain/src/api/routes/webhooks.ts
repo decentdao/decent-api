@@ -48,7 +48,11 @@ app.post('/sumsub', async c => {
   }
 });
 
-async function updateKycStatus(externalUserId: string, applicantId: string, isKycApproved: boolean) {
+async function updateKycStatus(
+  externalUserId: string,
+  applicantId: string,
+  isKycApproved: boolean,
+) {
   try {
     // Find the KYC record by our internal ID
     const kycRecord = await db.query.kycTable.findFirst({
