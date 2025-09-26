@@ -32,8 +32,9 @@ app.post('/sumsub', async c => {
     console.dir(payload, { depth: null });
 
     // Only process successful KYC completion events
-    if (payload.type === 'applicantReviewed' && payload.reviewResult?.reviewAnswer === 'GREEN') {
-      await updateKycStatus(payload.externalUserId, payload.applicantId);
+    if (payload.type === 'applicantReviewed') {
+      const approved = payload.reviewResult?.reviewAnswer === 'GREEN';
+      await updateKycStatus(payload.externalUserId, payload.applicantId, approved);
     }
 
     return resf(c, { received: true });
@@ -47,7 +48,7 @@ app.post('/sumsub', async c => {
   }
 });
 
-async function updateKycStatus(externalUserId: string, applicantId: string) {
+async function updateKycStatus(externalUserId: string, applicantId: string, approved: boolean) {
   try {
     // Find the KYC record by our internal ID
     const kycRecord = await db.query.kycTable.findFirst({

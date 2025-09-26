@@ -1,4 +1,4 @@
-import { boolean, text, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, index, text } from 'drizzle-orm/pg-core';
 import { nanoid } from 'nanoid';
 import { offchainSchema } from './offchain';
 import { hex } from '../hex';
@@ -17,5 +17,5 @@ export const kycTable = offchainSchema.table('kyc', {
   isKycApproved: boolean().notNull().default(false),
   ...timestamps,
 }, (table) => [
-  uniqueIndex('kyc_address_idx').on(table.address),
+  index('kyc_address_idx').on(table.address),
 ]);

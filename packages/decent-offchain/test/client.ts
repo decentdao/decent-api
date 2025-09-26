@@ -1,5 +1,4 @@
 import { beforeAll } from 'bun:test';
-import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
@@ -57,11 +56,6 @@ export const clientStore: ClientStore = {
 
 export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumber) => {
   const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
-  const client = createWalletClient({
-    account,
-    chain: base,
-    transport: http(process.env.PONDER_RPC_URL_8453 as string),
-  });
 
   const message = createSiweMessage({
     chainId: base.id,
@@ -72,11 +66,24 @@ export const signedSiweMessage = async (nonce: string, accountNumber: WalletNumb
     version: '1',
   });
 
-  const signature = await client.signMessage({ message });
+  const signature = await account.signMessage({ message });
 
   return {
     message,
     signature,
+  };
+};
+
+export const signMessage = async (accountNumber: WalletNumber) => {
+  const account = privateKeyToAccount(PRIVATE_KEYS[accountNumber]);
+
+  const message = 'Test message for signing';
+  const signature = await account.signMessage({ message });
+
+  return {
+    signature,
+    message,
+    address: account.address,
   };
 };
 
