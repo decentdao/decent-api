@@ -55,6 +55,6 @@ export type TokenSaleRequirements = {
 
 export type CheckResult = {
   eligible: boolean;
-  kycUrl?: string;
+  kyc?: string; // Can be either URL or access token depending on kycType
   ineligibleReason?: string;
 };

@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { checkRequirements } from '@/lib/requirements';
+import { KYCResponseType } from '@/lib/sumsub/types';
 import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
 import { tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
@@ -40,6 +41,7 @@ app.get('/', daoExists, async c => {
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
  * @param {string} tokenSaleAddress - The token sale contract address
+ * @param {string} [kycType] - Optional KYC response type query parameter ('url' or 'token', defaults to 'url')
  * @body { address: string, message: string, signature: string }
  * @returns {object} Verification result with signature or KYC URL
  */
@@ -76,14 +78,16 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   if (!sale) throw new ApiError('Sale not found', 404);
 
   // 2. Run verification checks
-  const { eligible, kycUrl, ineligibleReason } = await checkRequirements(
+  const kycType = (c.req.query('kycType') as KYCResponseType) || 'url';
+  const { eligible, kyc, ineligibleReason } = await checkRequirements(
     chainId,
     address,
     sale.tokenSaleRequirements,
+    kycType,
   );
 
-  // Return KYC URL if required and address is not in database
-  if (kycUrl) return resf(c, { kycUrl });
+  // Return KYC URL or access token if required and address is not in database
+  if (kyc) return resf(c, { kyc });
 
   // Return reasons if onchain requirements not met
   if (!eligible && ineligibleReason) throw new ApiError(ineligibleReason, 401);

@@ -4,8 +4,13 @@ export type SumsubRequest = {
   body: string;
 };
 
-export type ResponseWebSdkUrl = {
+export type WebSdkUrlResponse = {
   url: string;
+};
+
+export type AccessTokenResponse = {
+  token: string;
+  userId: string;
 };
 
 type SumsubError = {
@@ -15,6 +20,8 @@ type SumsubError = {
   errorName: string;
   description: string;
 };
+
+export type KYCResponseType = 'url' | 'token';
 
 export type SumsubResponse<T> = T | SumsubError;
 

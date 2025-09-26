@@ -1,11 +1,16 @@
 import { Address } from 'viem';
 import { eq } from 'drizzle-orm';
 import { CheckResult, KYCRequirement } from '../types';
+import { KYCResponseType } from '@/lib/sumsub/types';
 import { kycTable } from '@/db/schema/offchain/kyc';
 import { db } from '@/db';
-import { generateWebSdkLink } from '@/lib/sumsub';
+import { generateWebSdkLink, generateAccessToken } from '@/lib/sumsub';
 
-export async function kycCheck(address: Address, method: KYCRequirement): Promise<CheckResult> {
+export async function kycCheck(
+  address: Address,
+  method: KYCRequirement,
+  kycType: KYCResponseType = 'url',
+): Promise<CheckResult> {
   const { isKycApproved } = (await db.query.kycTable.findFirst({
     where: eq(kycTable.address, address),
   })) || { isKycApproved: false };
@@ -25,11 +30,13 @@ export async function kycCheck(address: Address, method: KYCRequirement): Promis
   const id = newKyc[0]?.id;
   if (!id) throw new Error('DB error creating applicant');
 
-  const kycUrl = await generateWebSdkLink(id);
+  const kyc = kycType === 'url' ? await generateWebSdkLink(id) : await generateAccessToken(id);
+
+  const ineligibleReason = `KYC verification required for ${address}: ${method.provider} level ${method.levelName}`;
 
   return {
     eligible: false,
-    kycUrl,
-    ineligibleReason: `KYC verification required for ${address}: ${method.provider} level ${method.levelName}`,
+    kyc,
+    ineligibleReason,
   };
 }

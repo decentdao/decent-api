@@ -1,7 +1,13 @@
 import { createHmac, timingSafeEqual } from 'crypto';
-import { ResponseWebSdkUrl, SumsubRequest, SumsubResponse } from './types';
+import { WebSdkUrlResponse, AccessTokenResponse, SumsubRequest, SumsubResponse } from './types';
 import { unixTimestamp } from '@/api/utils/time';
-import { DEFAULT_LEVEL_NAME, DEFAULT_TTL_IN_SEC, BASE_API, WEB_SDK_ENDPOINT } from './constants';
+import {
+  DEFAULT_LEVEL_NAME,
+  DEFAULT_TTL_IN_SEC,
+  BASE_API,
+  WEB_SDK_ENDPOINT,
+  ACCESS_TOKEN_ENDPOINT,
+} from './constants';
 
 const SUMSUB_TOKEN = process.env.SUMSUB_TOKEN;
 const SUMSUB_SECRET_KEY = process.env.SUMSUB_SECRET_KEY;
@@ -60,13 +66,48 @@ export async function generateWebSdkLink(externalId: string) {
     body,
   });
 
-  const response = (await linkRequest.json()) as SumsubResponse<ResponseWebSdkUrl>;
+  const response = (await linkRequest.json()) as SumsubResponse<WebSdkUrlResponse>;
 
   if ('errorCode' in response) {
     throw new Error(response.description);
   }
 
   return response.url;
+}
+
+/**
+ * Generates an access token for SDK integration
+ * @param externalId - External user identifier to associate with the KYC session
+ * @returns Promise resolving to the access token for SDK
+ * @throws Error if the Sumsub API returns an error response
+ * @see https://docs.sumsub.com/reference/generate-access-token
+ */
+export async function generateAccessToken(externalId: string) {
+  const data = {
+    levelName: DEFAULT_LEVEL_NAME,
+    ttlInSecs: DEFAULT_TTL_IN_SEC,
+    userId: externalId,
+  };
+  const body = JSON.stringify(data);
+  const { url, headers } = getSumsubReq({
+    method: 'POST',
+    endpoint: ACCESS_TOKEN_ENDPOINT,
+    body,
+  });
+
+  const tokenRequest = await fetch(url, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  const response = (await tokenRequest.json()) as SumsubResponse<AccessTokenResponse>;
+
+  if ('errorCode' in response) {
+    throw new Error(response.description);
+  }
+
+  return response.token;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
 import { CheckResult, TokenSaleRequirements, TokenSaleRequirementType } from './types';
+import { KYCResponseType } from '@/lib/sumsub/types';
 import { whitelistCheck } from './methods/whitelist';
 import { erc20Check } from './methods/erc20';
 import { erc721Check } from './methods/erc721';
@@ -11,15 +12,16 @@ export async function checkRequirements(
   chainId: SupportedChainId,
   address: Address,
   requirements: TokenSaleRequirements,
+  kycType: KYCResponseType = 'url',
 ): Promise<CheckResult> {
-  // If KYC is required and not complete, return url for user to complete
+  // If KYC is required and not complete, return url or access token for user to complete
   if (requirements.kyc) {
-    const { eligible, ineligibleReason, kycUrl } = await kycCheck(address, requirements.kyc);
+    const { eligible, ineligibleReason, kyc } = await kycCheck(address, requirements.kyc, kycType);
     if (!eligible) {
       return {
         eligible: false,
         ineligibleReason,
-        kycUrl,
+        kyc,
       };
     }
   }
