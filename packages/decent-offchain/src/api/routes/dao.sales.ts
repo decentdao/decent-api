@@ -78,7 +78,11 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   if (!sale) throw new ApiError('Sale not found', 404);
 
   // 2. Run verification checks
-  const kycType = (c.req.query('kycType') as KYCResponseType) || 'url';
+  const kycType = (c.req.query('kycType') || 'url') as KYCResponseType;
+  if (kycType !== 'url' && kycType !== 'token') {
+    throw new ApiError('Unsupported kycType requested', 400);
+  }
+
   const { eligible, kyc, ineligibleReason } = await checkRequirements(
     chainId,
     address,
