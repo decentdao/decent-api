@@ -148,4 +148,68 @@ describe('DAO Sales API', () => {
     expect(json.success).toBeFalsy();
     expect(json.error).toBeDefined();
   });
+
+  it('POST verify with mismatched address and signature', async () => {
+    // Skip if no token sales exist
+    if (!tokenSaleAddress) {
+      console.log('No token sales found, skipping verify test');
+      return;
+    }
+
+    // Sign with wallet index 1 but use address from wallet index 2
+    const { message, signature } = await signMessage(1);
+    const mismatchedAddress = WALLETS[2].address;
+
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: mismatchedAddress,
+          message,
+          signature,
+        }),
+      },
+    );
+
+    expect(res.status).toBe(401);
+    const json = (await res.json()) as ApiResponse<VerificationResponse>;
+    expect(json.success).toBeFalsy();
+    expect(json.error).toBeDefined();
+  });
+
+  it('POST verify with mismatched message content', async () => {
+    // Skip if no token sales exist
+    if (!tokenSaleAddress) {
+      console.log('No token sales found, skipping verify test');
+      return;
+    }
+
+    // Sign message for this token sale but submit different message content
+    const { signature, address } = await signMessage(1);
+    const wrongMessage = `Verify eligibility for token sale 0x1234567890123456789012345678901234567890`;
+
+    const res = await app.request(
+      `/d/${daoChainId}/${daoAddress}/sales/${tokenSaleAddress}/verify`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address,
+          message: wrongMessage,
+          signature,
+        }),
+      },
+    );
+
+    expect(res.status).toBe(401);
+    const json = (await res.json()) as ApiResponse<VerificationResponse>;
+    expect(json.success).toBeFalsy();
+    expect(json.error).toBeDefined();
+  });
 });
