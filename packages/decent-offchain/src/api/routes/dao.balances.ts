@@ -18,7 +18,7 @@ app.get('/', daoExists, async c => {
   const queryParams = {
     excludeSpamTokens: true,
     metadata: true,
-    chainIds: String(dao.chainId)
+    chainIds: String(dao.chainId),
   };
 
   const [balances, collectibles] = await Promise.all([
