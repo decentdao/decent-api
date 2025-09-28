@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao } from '@/db/schema/onchain';
 import { BasicSafeInfo } from '@/lib/safe/types';
+import { FreezeInfo } from '@/lib/freezeGuard/types';
 import { SubDaoInfo, ProposalTemplate } from '../middleware/dao';
 import { getAddress } from 'viem';
 import { DbProposal } from '@/db/schema';
@@ -15,6 +16,7 @@ export const formatDao = (
   safeInfo: BasicSafeInfo,
   subDaos: SubDaoInfo[],
   proposalTemplates: ProposalTemplate[] | null,
+  freezeInfo?: FreezeInfo,
 ) => {
   const guard = dbDao?.governanceGuards?.[0];
   // prettier-ignore
@@ -22,6 +24,8 @@ export const formatDao = (
     address: getAddress(guard.address),
     executionPeriod: guard.executionPeriod,
     timelockPeriod: guard.timelockPeriod,
+    isFrozen: freezeInfo?.isFrozen || false,
+    freezeProposalCreatedBlock: freezeInfo?.freezeProposalCreatedBlock,
     freezeVotingStrategy: guard.freezeVotingStrategies?.[0] ? {
       address: getAddress(guard.freezeVotingStrategies[0].address),
       freezePeriod: guard.freezeVotingStrategies[0].freezePeriod,

@@ -15,6 +15,8 @@ import { DbDao } from '@/db/schema/onchain';
 import { getChainId } from '@/api/utils/chains';
 import { getSafeInfo } from '@/lib/safe';
 import { BasicSafeInfo } from '@/lib/safe/types';
+import { getFreezeInfo } from '@/lib/freezeGuard';
+import { FreezeInfo } from '@/lib/freezeGuard/types';
 import { schema } from '@/db/schema';
 import { ipfsCacheFetch } from '../utils/ipfs';
 import { formatRoles } from '../utils/roles';
@@ -145,6 +147,15 @@ export const daoFetch = async (c: Context, next: Next) => {
   // get most uptodate safe info with contract read
   const safeInfo = await getSafeInfo(chainIdNumber, addressLower);
 
+  // check if DAO is frozen (if it has a freeze voting strategy)
+  let freezeInfo: FreezeInfo | undefined;
+  const governanceGuard = dao.governanceGuards?.[0];
+  const freezeVotingStrategy = governanceGuard?.freezeVotingStrategies?.[0];
+
+  if (freezeVotingStrategy?.address) {
+    freezeInfo = await getFreezeInfo(dao.chainId, freezeVotingStrategy.address);
+  }
+
   // fetch custom templates from IPFS if available
   const proposalTemplates = dao.proposalTemplatesCID
     ? ((await ipfsCacheFetch(dao.proposalTemplatesCID)) as ProposalTemplate[])
@@ -152,6 +163,6 @@ export const daoFetch = async (c: Context, next: Next) => {
 
   dao.roles = await formatRoles(dao.roles);
 
-  c.set('dao', formatDao(dao, safeInfo, subDaos, proposalTemplates));
+  c.set('dao', formatDao(dao, safeInfo, subDaos, proposalTemplates, freezeInfo));
   await next();
 };
