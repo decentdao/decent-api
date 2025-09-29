@@ -10,7 +10,7 @@ import {
 
 // Database connections
 const DATABASE_URL = process.env.DATABASE_URL;
-const LOCAL_DB = 'postgresql://eddie:postgres@localhost:5432/decent';
+const LOCAL_DB = `postgresql://${process.env.USER}:postgres@localhost:5432/decent`;
 
 if (!DATABASE_URL) {
   console.error('ERROR: DATABASE_URL environment variable is required');
