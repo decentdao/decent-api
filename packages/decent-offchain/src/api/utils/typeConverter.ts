@@ -98,6 +98,7 @@ export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
   const confirmations = safeProposal.confirmations ?? [];
   const decodedData = safeProposal.dataDecoded;
   const skipDecode = safeProposal.transactionTo === ADDRESS_MULTISIG_METADATA;
+  const dataIsEmpty = !safeProposal.transactionData || safeProposal.transactionData.length <= 2;
 
   let data = { decodedTransactions: [] } as { decodedTransactions: DecodedTransaction[] };
   if (decodedData) {
@@ -109,9 +110,8 @@ export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
         true,
       ),
     };
-  } else if (!decodedData && !skipDecode) {
-    // FIXME: this can be ratelimited
-    //   save to db when manually synced?
+  } else if (!decodedData && !dataIsEmpty && !skipDecode) {
+    console.debug('wut', safeProposal.safeNonce, safeProposal.safeTxHash);
     data = {
       decodedTransactions: await decodeWithAPI(
         safeProposal.daoChainId,

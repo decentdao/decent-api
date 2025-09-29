@@ -58,6 +58,11 @@ export const getSafeTransactions = async (
     `${url}/safes/${address}/multisig-transactions?${params.toString()}`,
     { headers: { Authorization: `Bearer ${process.env.SAFE_API_KEY}` } },
   );
+
+  if (response.statusText !== 'OK') {
+    throw new Error(`[${response.status}] ${response.statusText}`);
+  }
+
   const data = (await response.json()) as ListResponse<SafeMultisigTransactionResponse>;
   return data;
 };
@@ -129,7 +134,7 @@ export const decodeTransactionData = async (
   });
 
   if (response.statusText !== 'OK') {
-    throw new Error('SafeAPI:' + response.statusText);
+    throw new Error(`[${response.status}] ${response.statusText}`);
   }
 
   return (await response.json()) as DataDecoded;

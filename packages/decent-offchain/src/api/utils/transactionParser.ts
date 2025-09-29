@@ -76,6 +76,7 @@ export const parseDecodedData = (
   return Array.from(eventTransactionMap.values());
 };
 
+// Attention: this could be ratelimited
 export async function decodeWithAPI(
   chainId: SupportedChainId,
   value: string,
