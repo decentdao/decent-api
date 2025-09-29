@@ -23,6 +23,7 @@
     "@fractal-framework/fractal-contracts": "^1.5.0-rc.5",
     "decent-sdk": "^0.2.2",
     "drizzle-orm": "^0.40.0",
+    "evm-proxy-detection": "^3.0.0",
     "hono": "^4.7.4",
     "nanoid": "^5.1.3",
     "pg": "^8.14.0",

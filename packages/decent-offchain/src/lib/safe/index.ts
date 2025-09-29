@@ -1,6 +1,6 @@
 import { SupportedChainId } from 'decent-sdk';
 import { getAddress, decodeAbiParameters, parseAbiParameters, Address } from 'viem';
-import { BasicSafeInfo, ListResponse, SafeMultisigTransactionResponse } from './types';
+import { BasicSafeInfo, DataDecoded, ListResponse, SafeMultisigTransactionResponse } from './types';
 import { getPublicClient } from '@/api/utils/publicClient';
 import { GnosisSafeL2Abi } from './GnosisSafeL2Abi';
 
@@ -110,4 +110,27 @@ export const getSafeInfo = async (
     threshold: Number(threshold),
     owners: Array(...owners), // to convert from readonly
   };
+};
+
+export const decodeTransactionData = async (
+  chainId: SupportedChainId,
+  data: string,
+  to: string,
+) => {
+  const url = 'https://safe-decoder.safe.global/api/v1/data-decoder';
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      chainId,
+      data,
+      to,
+    }),
+  });
+
+  if (response.statusText !== 'OK') {
+    throw new Error('SafeAPI:' + response.statusText);
+  }
+
+  return (await response.json()) as DataDecoded;
 };

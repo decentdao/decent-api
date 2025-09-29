@@ -11,6 +11,7 @@ import {
   isMultisigRejectionProposal,
   ADDRESS_MULTISIG_METADATA,
   parseDecodedData,
+  decodeWithAPI,
 } from './transactionParser';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
@@ -81,6 +82,7 @@ export const formatDao = (
 
 const voteChoice = ['NO', 'YES', 'ABSTAIN'];
 
+// FIXME: try catch this to prevent error out a list
 export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
   const eventDate = new Date(safeProposal.submissionDate);
   const eventSafeTxHash = safeProposal.safeTxHash;
@@ -108,14 +110,16 @@ export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
       ),
     };
   } else if (!decodedData && !skipDecode) {
-    throw new Error('no decoded data available');
-    // data = {
-    //   decodedTransactions: await decode(
-    //     transaction.value,
-    //     getAddress(transaction.to),
-    //     transaction.data,
-    //   ),
-    // };
+    // FIXME: this can be ratelimited
+    //   save to db when manually synced?
+    data = {
+      decodedTransactions: await decodeWithAPI(
+        safeProposal.daoChainId,
+        safeProposal.transactionValue,
+        safeProposal.transactionTo,
+        safeProposal.transactionData,
+      ),
+    };
   }
 
   const targets = data
