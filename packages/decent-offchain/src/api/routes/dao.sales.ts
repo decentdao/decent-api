@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { Address, getAddress } from 'viem';
+import { Address, getAddress, Hex } from 'viem';
 import { and, eq } from 'drizzle-orm';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
@@ -18,6 +18,18 @@ const VERIFICATION_TYPES = {
     { name: 'timestamp', type: 'uint256' },
   ],
 };
+
+type VerificationMessage = {
+  saleAddress: Address;
+  signerAddress: Address;
+  timestamp: number;
+}
+
+type VerificationBody = {
+  address: Address;
+  message: VerificationMessage;
+  signature: Hex;
+}
 
 const app = new Hono();
 
@@ -64,13 +76,18 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
   // 0. Verify signed typed data
-  const { address, message, signature } = await c.req.json();
-  if (!message) throw new ApiError('Missing message', 400);
-  if (!signature) throw new ApiError('Missing signature', 400);
+  const { address, message, signature } = await c.req.json() as VerificationBody;
+  if (!signature) throw new ApiError('Missing signature in body', 400);
+  if (!message) throw new ApiError('Missing message in body', 400);
+  if (!address) throw new ApiError('Missing address in body', 400)
+  if (!message.timestamp) throw new ApiError('Missing message.timestamp', 400);
+  if (!message.signerAddress) throw new ApiError('Missing message.signerAddress', 400);
+  if (!message.saleAddress) throw new ApiError('Missing message.saleAddress', 400);
+  if (address !== message.signerAddress) throw new ApiError('Address mismatch', 401);
   const publicClient = getPublicClient(chainId);
 
   const domain = {
-    name: 'Decent DAO Verification',
+    name: 'Decent Token Sale',
     version: '1',
     chainId,
   };
@@ -78,7 +95,8 @@ app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   // Validate timestamp is recent (within last 5 minutes)
   const now = unixTimestamp();
   const maxAge = 5 * 60;
-  if (message.timestamp && now - message.timestamp > maxAge) {
+  const timestamp = unixTimestamp(message.timestamp);
+  if (now - timestamp > maxAge) {
     throw new ApiError('Message timestamp is too old', 400);
   }
 

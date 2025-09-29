@@ -28,7 +28,7 @@ export const VERIFICATION_TYPES = {
 };
 
 export const getVerificationDomain = (chainId: number) => ({
-  name: 'Decent DAO Verification',
+  name: 'Decent Token Sale',
   version: '1',
   chainId,
 });
