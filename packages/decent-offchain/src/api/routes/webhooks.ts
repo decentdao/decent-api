@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
-import resf from '@/api/utils/responseFormatter';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { SumsubWebhookPayload } from '@/lib/sumsub/types';
 import { verifyWebhookSignature } from '@/lib/sumsub';
 import { kycTable } from '@/db/schema/offchain/kyc';
@@ -16,25 +16,17 @@ const app = new Hono();
 app.post('/sumsub', async c => {
   try {
     const bodyBytes = Buffer.from(await c.req.arrayBuffer());
-    const digest = c.req.header('x-payload-digest') || '';
-
-    console.debug(c.req.header);
+    const digest = c.req.header('x-payload-digest');
+    if (!digest) throw new ApiError('Missing digest', 400);
 
     const isValidSignature = verifyWebhookSignature(bodyBytes, digest);
-
-    if (!isValidSignature) return c.json({ error: 'Invalid signature' }, 401);
+    if (!isValidSignature) throw new ApiError('Bad signature', 401);
 
     // Parse JSON payload after signature verification
     const payload: SumsubWebhookPayload = JSON.parse(bodyBytes.toString());
 
-    // Log webhook for debugging
-    console.log('Received verified Sumsub webhook:');
-    console.dir(payload, { depth: null });
-
-    // Only process successful KYC completion events
     if (payload.type === 'applicantReviewed') {
-      const isKycApproved = payload.reviewResult?.reviewAnswer === 'GREEN';
-      await updateKycStatus(payload.externalUserId, payload.applicantId, isKycApproved);
+      await updateKycStatus(payload);
     }
 
     return resf(c, { received: true });
@@ -48,28 +40,31 @@ app.post('/sumsub', async c => {
   }
 });
 
-async function updateKycStatus(
-  externalUserId: string,
-  applicantId: string,
-  isKycApproved: boolean,
-) {
+async function updateKycStatus(payload: SumsubWebhookPayload) {
   try {
+    const { externalUserId, applicantId, sandboxMode, reviewResult, reviewStatus } = payload;
+    const isKycApproved = reviewResult.reviewAnswer === 'GREEN';
+    const rejectLabels = isKycApproved ? null : reviewResult.rejectLabels;
+
     // Find the KYC record by our internal ID
     const kycRecord = await db.query.kycTable.findFirst({
       where: eq(kycTable.id, externalUserId),
     });
 
     if (!kycRecord) {
+      // Don't throw error otherwise Sumsub will retry
+      // This is probably spam
       console.error(`KYC record not found for externalUserId: ${externalUserId}`);
       return;
     }
 
-    // Update KYC status to approved
     await db
       .update(kycTable)
       .set({
         isKycApproved,
-        reviewStatus: 'completed',
+        sandboxMode,
+        rejectLabels,
+        reviewStatus,
         applicantId,
       })
       .where(eq(kycTable.id, externalUserId));

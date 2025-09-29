@@ -30,12 +30,12 @@ export type SumsubWebhookPayload = {
   inspectionId: string;
   externalUserId: string;
   type: SumsubWebhookEventType;
-  reviewResult?: {
+  reviewResult: {
     reviewAnswer: 'GREEN' | 'RED';
     rejectLabels?: string[];
     reviewRejectType?: string;
   };
-  reviewStatus?: 'init' | 'pending' | 'completed' | 'onHold';
+  reviewStatus: 'init' | 'pending' | 'completed' | 'onHold';
   levelName?: string;
   correlationId: string;
   createdAt: string;
