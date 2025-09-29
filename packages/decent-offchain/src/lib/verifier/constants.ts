@@ -3,7 +3,7 @@ import { Address } from 'viem';
 export const VERIFIER_V1_ADDRESS = '0xA8F29B98c6237cdc93E43787E949b018855a6002' as Address;
 
 export const DOMAIN = {
-  name: 'VerifierV1',
+  name: 'Verifier',
   version: '1',
   chainId: 0,
   verifyingContract: VERIFIER_V1_ADDRESS,
