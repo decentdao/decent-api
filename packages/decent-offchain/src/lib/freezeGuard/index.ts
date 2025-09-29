@@ -1,6 +1,6 @@
 import { SupportedChainId } from 'decent-sdk';
 import { Address } from 'viem';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
 import { getPublicClient } from '@/api/utils/publicClient';
 import { FreezeInfo } from './types';
 
@@ -12,7 +12,7 @@ export const getFreezeInfo = async (
 
   // First check if frozen
   const isFrozen = await publicClient.readContract({
-    abi: abis.MultisigFreezeVoting,
+    abi: legacy.abis.MultisigFreezeVoting,
     address: freezeGuardAddress,
     functionName: 'isFrozen',
   });
@@ -20,7 +20,7 @@ export const getFreezeInfo = async (
   // Only fetch the created block if frozen
   const freezeProposalCreatedBlock = isFrozen
     ? await publicClient.readContract({
-        abi: abis.MultisigFreezeVoting,
+        abi: legacy.abis.MultisigFreezeVoting,
         address: freezeGuardAddress,
         functionName: 'freezeProposalCreatedBlock',
       })

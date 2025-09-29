@@ -4,7 +4,7 @@ import { Address, getAbiItem, isAddress, toFunctionSelector } from 'viem';
 import { db } from '@/db';
 import { schema } from '@/db/schema';
 import { ApiError } from '@/api/utils/responseFormatter';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
 
 const app = new Hono();
 
@@ -17,13 +17,13 @@ const functionSelectors = {
   disperseToken: toFunctionSelector('disperseToken(address,address[],uint256[])'),
   createRoleHats: toFunctionSelector(
     getAbiItem({
-      abi: abis.DecentHatsModificationModule,
+      abi: legacy.abis.DecentHatsModificationModule,
       name: 'createRoleHats',
     }),
   ),
   createAndDeclareTree: toFunctionSelector(
     getAbiItem({
-      abi: abis.DecentHatsCreationModule,
+      abi: legacy.abis.DecentHatsCreationModule,
       name: 'createAndDeclareTree',
     }),
   ),

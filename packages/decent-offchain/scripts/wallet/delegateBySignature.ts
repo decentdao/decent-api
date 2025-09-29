@@ -1,5 +1,5 @@
 import { createWalletClient, getContract, http, Address } from 'viem';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { signTypedData } from 'viem/actions';
@@ -18,7 +18,7 @@ const walletClient = createWalletClient({
 
 const contract = getContract({
   address: tokenAddress,
-  abi: abis.VotesERC20,
+  abi: legacy.abis.VotesERC20,
   client: walletClient,
 });
 
