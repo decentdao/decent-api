@@ -20,7 +20,7 @@ ponder.on('LinearERC721Voting:GovernanceTokenAdded', async ({ event, context }) 
       })
       .onConflictDoNothing();
   } catch (e) {
-    console.error('LinearERC721Voting:GovernanceTokenAdded', e);
+    // console.error('LinearERC721Voting:GovernanceTokenAdded', e);
   }
 });
 
@@ -30,7 +30,7 @@ ponder.on('LinearERC721Voting:GovernanceTokenRemoved', async ({ event, context }
     const votingStrategyId = event.log.address;
     await context.db.delete(votingToken, { address: token, votingStrategyId });
   } catch (e) {
-    console.error('LinearERC721Voting:GovernanceTokenRemoved', e);
+    // console.error('LinearERC721Voting:GovernanceTokenRemoved', e);
   }
 });
 
@@ -46,7 +46,7 @@ ponder.on('LinearERC721Voting:ProposerThresholdUpdated', async ({ event, context
       })
       .onConflictDoUpdate({ requiredProposerWeight: proposerThreshold });
   } catch (e) {
-    console.error('LinearERC721Voting:ProposerThresholdUpdated', e);
+    // console.error('LinearERC721Voting:ProposerThresholdUpdated', e);
   }
 });
 
@@ -62,7 +62,7 @@ ponder.on('LinearERC721Voting:QuorumThresholdUpdated', async ({ event, context }
       })
       .onConflictDoUpdate({ quorumNumerator: quorumThreshold });
   } catch (e) {
-    console.error('LinearERC721Voting:QuorumThresholdUpdated', e);
+    // console.error('LinearERC721Voting:QuorumThresholdUpdated', e);
   }
 });
 
@@ -88,6 +88,6 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
       })
       .onConflictDoNothing();
   } catch (e) {
-    console.error('LinearERC721Voting:Voted');
+    // console.error('LinearERC721Voting:Voted');
   }
 });

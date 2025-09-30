@@ -54,6 +54,6 @@ ponder.on('SplitV2:SplitUpdated', async ({ event, context }) => {
         updatedAt: timestamp,
       });
   } catch (e) {
-    console.error('SplitV2:SplitUpdated', e);
+    // console.error('SplitV2:SplitUpdated', e);
   }
 });

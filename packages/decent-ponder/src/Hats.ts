@@ -34,7 +34,7 @@ ponder.on('Hats:HatCreated', async ({ event, context }) => {
       });
     }
   } catch (e) {
-    console.error('Hats:HatCreated');
+    // console.error('Hats:HatCreated');
   }
 });
 
@@ -53,6 +53,6 @@ ponder.on('Hats:TransferSingle', async ({ context, event }) => {
         wearerAddress,
       });
   } catch (e) {
-    console.error('Hats:TransferSingle');
+    // console.error('Hats:TransferSingle');
   }
 });

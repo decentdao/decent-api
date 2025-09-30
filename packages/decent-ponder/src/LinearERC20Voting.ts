@@ -39,7 +39,7 @@ ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
       // insertion of token info is handled in `LinearERC721Voting.ts`
     }
   } catch (e) {
-    console.error('LinearERC20Voting:AzoriusSet', e);
+    // console.error('LinearERC20Voting:AzoriusSet', e);
   }
 });
 
@@ -55,7 +55,7 @@ ponder.on('LinearERC20Voting:RequiredProposerWeightUpdated', async ({ event, con
       })
       .onConflictDoUpdate({ requiredProposerWeight });
   } catch (e) {
-    console.error('LinearERC20Voting:RequiredProposerWeightUpdated', e);
+    // console.error('LinearERC20Voting:RequiredProposerWeightUpdated', e);
   }
 });
 
@@ -71,7 +71,7 @@ ponder.on('LinearERC20Voting:QuorumNumeratorUpdated', async ({ event, context })
       })
       .onConflictDoUpdate({ quorumNumerator });
   } catch (e) {
-    console.error('LinearERC20Voting:QuorumNumeratorUpdated', e);
+    // console.error('LinearERC20Voting:QuorumNumeratorUpdated', e);
   }
 });
 
@@ -87,7 +87,7 @@ ponder.on('LinearERC20Voting:BasisNumeratorUpdated', async ({ event, context }) 
       })
       .onConflictDoUpdate({ basisNumerator });
   } catch (e) {
-    console.error('LinearERC20Voting:BasisNumeratorUpdated', e);
+    // console.error('LinearERC20Voting:BasisNumeratorUpdated', e);
   }
 });
 
@@ -104,7 +104,7 @@ ponder.on('LinearERC20Voting:VotingPeriodUpdated', async ({ event, context }) =>
       })
       .onConflictDoUpdate({ votingPeriod });
   } catch (e) {
-    console.error('LinearERC20Voting:VotingPeriodUpdated', e);
+    // console.error('LinearERC20Voting:VotingPeriodUpdated', e);
   }
 });
 
@@ -125,6 +125,6 @@ ponder.on('LinearERC20Voting:Voted', async ({ event, context }) => {
       })
       .onConflictDoNothing();
   } catch (e) {
-    console.error('LinearERC20Voting:Voted', e);
+    // console.error('LinearERC20Voting:Voted', e);
   }
 });

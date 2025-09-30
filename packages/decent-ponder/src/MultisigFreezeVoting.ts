@@ -22,7 +22,7 @@ ponder.on('MultisigFreezeVoting:FreezePeriodUpdated', async ({ event, context })
       })
       .onConflictDoUpdate({ freezePeriod });
   } catch (e) {
-    console.error('MultisigFreezeVoting:FreezePeriodUpdated', e);
+    // console.error('MultisigFreezeVoting:FreezePeriodUpdated', e);
   }
 });
 
@@ -38,7 +38,7 @@ ponder.on('MultisigFreezeVoting:FreezeProposalPeriodUpdated', async ({ event, co
       })
       .onConflictDoUpdate({ freezeProposalPeriod });
   } catch (e) {
-    console.error('MultisigFreezeVoting:FreezeProposalPeriodUpdated', e);
+    // console.error('MultisigFreezeVoting:FreezeProposalPeriodUpdated', e);
   }
 });
 
@@ -54,6 +54,6 @@ ponder.on('MultisigFreezeVoting:FreezeVotesThresholdUpdated', async ({ event, co
       })
       .onConflictDoUpdate({ freezeVotesThreshold });
   } catch (e) {
-    console.error('MultisigFreezeVoting:FreezeVotesThresholdUpdated', e);
+    // console.error('MultisigFreezeVoting:FreezeVotesThresholdUpdated', e);
   }
 });

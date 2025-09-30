@@ -9,6 +9,6 @@ ponder.on('ERC721FreezeVoting:ERC721FreezeVotingSetUp', async ({ event, context 
     const address = event.log.address;
     await context.db.update(freezeVotingStrategy, { address }).set({ freezeVoteType: 'ERC721' });
   } catch (e) {
-    console.error('ERC721FreezeVoting:ERC721FreezeVotingSetUp', e);
+    // console.error('ERC721FreezeVoting:ERC721FreezeVotingSetUp', e);
   }
 });

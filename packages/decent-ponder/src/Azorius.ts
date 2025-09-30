@@ -31,7 +31,7 @@ ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
       })
       .onConflictDoUpdate({ isAzorius: true });
   } catch (e) {
-    console.error('Azorius:EnabledStrategy', e);
+    // console.error('Azorius:EnabledStrategy', e);
   }
 });
 
@@ -40,7 +40,7 @@ ponder.on('Azorius:DisabledStrategy', async ({ event, context }) => {
     const { strategy } = event.args;
     await context.db.delete(votingStrategy, { address: strategy });
   } catch (e) {
-    console.error('Azorius:DisabledStrategy', e);
+    // console.error('Azorius:DisabledStrategy', e);
   }
 });
 
@@ -50,7 +50,7 @@ ponder.on('Azorius:ExecutionPeriodUpdated', async ({ event, context }) => {
     const address = event.log.address;
     await context.db.update(governanceModule, { address }).set({ executionPeriod });
   } catch (e) {
-    console.error('Azorius:ExecutionPeriodUpdated', e);
+    // console.error('Azorius:ExecutionPeriodUpdated', e);
   }
 });
 
@@ -60,7 +60,7 @@ ponder.on('Azorius:TimelockPeriodUpdated', async ({ event, context }) => {
     const address = event.log.address;
     await context.db.update(governanceModule, { address }).set({ timelockPeriod });
   } catch (e) {
-    console.error('Azorius:TimelockPeriodUpdated', e);
+    // console.error('Azorius:TimelockPeriodUpdated', e);
   }
 });
 
@@ -112,7 +112,7 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
 
     deleteProposalEndBlock(event);
   } catch (e) {
-    console.log('Azorius:ProposalCreated', e);
+    // console.log('Azorius:ProposalCreated', e);
   }
 });
 
@@ -137,6 +137,6 @@ ponder.on('Azorius:ProposalExecuted', async ({ event, context }) => {
         executedTxHash: event.transaction.hash,
       });
   } catch (e) {
-    console.log('Azorius:ProposalExecuted', e);
+    // console.log('Azorius:ProposalExecuted', e);
   }
 });

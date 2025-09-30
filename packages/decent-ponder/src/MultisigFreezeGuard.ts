@@ -27,7 +27,7 @@ ponder.on('MultisigFreezeGuard:MultisigFreezeGuardSetup', async ({ event, contex
       })
       .onConflictDoUpdate({ governanceGuardId: address });
   } catch (e) {
-    console.error('MultisigFreezeGuard:MultisigFreezeGuardSetup', e);
+    // console.error('MultisigFreezeGuard:MultisigFreezeGuardSetup', e);
   }
 });
 

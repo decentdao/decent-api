@@ -155,7 +155,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
           .set({ name: wallet.name });
       }
     } catch (e) {
-      console.error('Failed to parse revShareWallets:', e);
+      // console.error('Failed to parse revShareWallets:', e);
     }
     // =======================================================
   } else if (key === 'newtokensale') {
@@ -169,7 +169,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
         tokenSaleRequirements,
       });
     } catch (e) {
-      console.error('Failed to parse newtokensale:', e);
+      // console.error('Failed to parse newtokensale:', e);
     }
     // =======================================================
   } else {

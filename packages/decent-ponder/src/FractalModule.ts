@@ -46,6 +46,6 @@ ponder.on('FractalModule:ControllersAdded', async ({ event, context }) => {
         .onConflictDoNothing();
     }
   } catch (e) {
-    console.error('FractalModule:AvatarSet', e);
+    // console.error('FractalModule:AvatarSet', e);
   }
 });

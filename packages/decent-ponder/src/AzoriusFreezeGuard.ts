@@ -12,6 +12,6 @@ ponder.on('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', async ({ event, context 
       .update(freezeVotingStrategy, { address: freezeVoting })
       .set({ governanceGuardId: address });
   } catch (e) {
-    console.error('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', e);
+    // console.error('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', e);
   }
 });
