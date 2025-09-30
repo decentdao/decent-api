@@ -144,6 +144,8 @@ export const proposal = onchainTable(
     votingEndBlock: integer(),
     proposedTxHash: hex().notNull(),
     executedTxHash: hex(),
+    // For calculating ERC20 proposal quorum later
+    //votingSupply: bigint(),
   },
   t => ({ pk: primaryKey({ columns: [t.id, t.daoChainId, t.daoAddress] }) }),
 );

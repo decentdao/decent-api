@@ -277,6 +277,10 @@ export const onchainProposalTableRelations = relations(onchainProposalTable, ({ 
     fields: [onchainProposalTable.votingStrategyAddress],
     references: [votingStrategyTable.address],
   }),
+  votingTokens: one(votingTokenTable, {
+    fields: [onchainProposalTable.votingStrategyAddress],
+    references: [votingTokenTable.votingStrategyId],
+  }),
   votes: many(voteTable),
 }));
 
@@ -336,6 +340,7 @@ export type DbVotingToken = typeof votingTokenTable.$inferSelect;
 export type DbStream = typeof streamTable.$inferSelect;
 export type DbOnchainProposal = typeof onchainProposalTable.$inferSelect & {
   votes?: DbVote[];
+  votingTokens: DbVotingToken;
 };
 export type DbVote = typeof voteTable.$inferSelect;
 export type SplitWallet = typeof splitWalletTable.$inferSelect;

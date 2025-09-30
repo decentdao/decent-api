@@ -118,7 +118,7 @@ export async function decodeWithAPI(
         ];
       }
     } catch (e) {
-      console.error('Error decoding transaction using Safe API. Trying to decode with ABI', e);
+      console.error('SafeDecoder failed, trying Etherscan', e);
       const abi = await getABI(chainId, to);
       if (abi === undefined) {
         return [
@@ -152,7 +152,7 @@ export async function decodeWithAPI(
       ];
     }
   } catch (e) {
-    console.error('Error decoding transaction using ABI. Returning empty decoded transaction', e);
+    console.error('ABI Decoding failed', e);
     return [
       {
         target: to,

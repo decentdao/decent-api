@@ -4,10 +4,9 @@ import { SupportedChainId } from 'decent-sdk';
 import { getPublicClient } from './publicClient';
 import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { getSafeInfo, getSafeTransactions } from '@/lib/safe';
-import { FractalProposalState, strategyFractalProposalStates } from '../types';
+import { AzoriusProposal, FractalProposalState, strategyFractalProposalStates } from '../types';
 import { db } from '@/db';
 import { abis } from '@fractal-framework/fractal-contracts';
-import { DbProposal } from '@/db/schema';
 
 /**
  * Merge proposals from DB with their current state.
@@ -213,7 +212,7 @@ export async function mergeMultisigProposalsWithState(
 export async function mergeAzoriusProposalsWithState(
   daoAddress: Address,
   chainId: SupportedChainId,
-  proposals: Pick<DbProposal, 'id'>[],
+  proposals: AzoriusProposal[],
 ) {
   if (proposals.length === 0) return [];
 
@@ -233,7 +232,7 @@ export async function mergeAzoriusProposalsWithState(
   const client = getPublicClient(chainId);
 
   // Extract proposal IDs as BigInt (uint32 in Solidity)
-  const proposalIds = proposals.map(p => BigInt(p.id));
+  const proposalIds = proposals.map(p => BigInt(p.proposalId));
 
   // Prepare multicall inputs
   const calls = proposalIds.map(id => ({

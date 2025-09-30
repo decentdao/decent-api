@@ -26,5 +26,9 @@ export async function getABI(chainId: SupportedChainId, to: Address) {
   if (responseData.result === 'Contract source code not verified') {
     return undefined;
   }
+  if (responseData.result.startsWith('Missing')) {
+    console.debug('Missing Error??? ', responseData.result);
+    return undefined;
+  }
   return JSON.parse(responseData.result) as Abi;
 }

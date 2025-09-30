@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/indent */
 import { sql } from 'drizzle-orm';
 import { PgColumn } from 'drizzle-orm/pg-core';
 import { DbDao } from '@/db/schema/onchain';
@@ -6,13 +7,22 @@ import { SubDaoInfo, ProposalTemplate } from '../middleware/dao';
 import { getAddress } from 'viem';
 import { DbProposal } from '@/db/schema';
 import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
-import { DecodedTransaction, MultisigProposal } from '../types';
+import {
+  AzoriusProposal,
+  DecodedTransaction,
+  FractalProposalState,
+  MultisigProposal,
+  ProposalVotesSummary,
+  VOTE_CHOICES,
+} from '../types';
 import {
   isMultisigRejectionProposal,
   ADDRESS_MULTISIG_METADATA,
   parseDecodedData,
   decodeWithAPI,
 } from './transactionParser';
+import { getPublicClient } from './publicClient';
+import { abis } from '@fractal-framework/fractal-contracts';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -80,71 +90,158 @@ export const formatDao = (
   return dao;
 };
 
-const voteChoice = ['NO', 'YES', 'ABSTAIN'];
+const VOTE_CHOICES_INDEX_MAP = [VOTE_CHOICES[1], VOTE_CHOICES[0], VOTE_CHOICES[2]];
 
 // FIXME: try catch this to prevent error out a list
-export async function formatMultisigProposal(safeProposal: DbSafeProposal) {
-  const eventDate = new Date(safeProposal.submissionDate);
-  const eventSafeTxHash = safeProposal.safeTxHash;
-  const eventNonce = safeProposal.safeNonce;
+export async function formatMultisigProposal(
+  proposal: DbSafeProposal & { state: FractalProposalState },
+): Promise<MultisigProposal> {
+  const eventDate = new Date(proposal.submissionDate);
+  const eventSafeTxHash = proposal.safeTxHash;
+  const eventNonce = proposal.safeNonce;
 
   const isMultisigRejectionTx: boolean | undefined = isMultisigRejectionProposal(
-    safeProposal.daoAddress,
-    safeProposal.transactionData,
-    safeProposal.transactionTo,
-    BigInt(safeProposal.transactionValue),
+    proposal.daoAddress,
+    proposal.transactionData,
+    proposal.transactionTo,
+    BigInt(proposal.transactionValue),
   );
 
-  const confirmations = safeProposal.confirmations ?? [];
-  const decodedData = safeProposal.dataDecoded;
-  const skipDecode = safeProposal.transactionTo === ADDRESS_MULTISIG_METADATA;
-  const dataIsEmpty = !safeProposal.transactionData || safeProposal.transactionData.length <= 2;
+  const confirmations = proposal.confirmations ?? [];
+  const decodedData = proposal.dataDecoded;
+  const skipDecode = proposal.transactionTo === ADDRESS_MULTISIG_METADATA;
+  const dataIsEmpty = !proposal.transactionData || proposal.transactionData.length <= 2;
 
   let data = { decodedTransactions: [] } as { decodedTransactions: DecodedTransaction[] };
   if (decodedData) {
     data = {
       decodedTransactions: parseDecodedData(
-        safeProposal.transactionTo,
-        safeProposal.transactionValue,
+        proposal.transactionTo,
+        proposal.transactionValue,
         decodedData,
         true,
       ),
     };
   } else if (!decodedData && !dataIsEmpty && !skipDecode) {
-    console.debug('wut', safeProposal.safeNonce, safeProposal.safeTxHash);
     data = {
       decodedTransactions: await decodeWithAPI(
-        safeProposal.daoChainId,
-        safeProposal.transactionValue,
-        safeProposal.transactionTo,
-        safeProposal.transactionData,
+        proposal.daoChainId,
+        proposal.transactionValue,
+        proposal.transactionTo,
+        proposal.transactionData,
       ),
     };
   }
 
   const targets = data
     ? [...data.decodedTransactions.map(tx => tx.target)]
-    : [getAddress(safeProposal.transactionTo)];
+    : [getAddress(proposal.transactionTo)];
 
-  const activity: MultisigProposal = {
+  const multisigProposal: MultisigProposal = {
     //transaction,
     eventDate,
     confirmations,
-    signersThreshold: safeProposal.confirmationsRequired,
+    signersThreshold: proposal.confirmationsRequired,
     isMultisigRejectionTx,
     proposalId: eventSafeTxHash,
     targets,
-    proposer: safeProposal.proposer,
+    proposer: proposal.proposer,
     // FIXME note below comments when integrating
     // @todo typing for `multiSigTransaction.transactionHash` is misleading, as ` multiSigTransaction.transactionHash` is not always defined (if ever). Need to tighten up the typing here.
     // ! @todo This is why we are showing the two different hashes
     //transactionHash: transaction.transactionHash ?? transaction.safeTxHash,
-    transactionHash: safeProposal.safeTxHash,
+    transactionHash: proposal.safeTxHash,
+    // TODO: title and description should be put in data.metadata?
     data: data,
-    state: null,
+    state: proposal.state,
     nonce: eventNonce,
   };
-  return activity;
+  return multisigProposal;
+}
+
+export async function formatAzoriusProposal(proposal: DbProposal): Promise<AzoriusProposal> {
+  // Which type is the voting strategy?
+  const votingType = proposal.votingTokens.type;
+
+  // Get quorum based on votingType
+  let quorum = 0n;
+  if (votingType === 'ERC20') {
+    const client = getPublicClient(proposal.daoChainId);
+    quorum = await client.readContract({
+      address: proposal.votingStrategyAddress,
+      abi: abis.LinearERC20Voting,
+      functionName: 'quorumVotes',
+      args: [proposal.id],
+    });
+  } else {
+    // TODO: we could fetch from DB
+    //  today we send a RPC for quick implmentation
+    const client = getPublicClient(proposal.daoChainId);
+    quorum = await client.readContract({
+      address: proposal.votingStrategyAddress,
+      abi: abis.LinearERC721Voting,
+      functionName: 'quorumThreshold',
+    });
+  }
+
+  // TODO: handle ERC721? tokenIds in votes type
+  const votes =
+    proposal.votes?.map(v => ({
+      voter: v.voter,
+      choice: VOTE_CHOICES_INDEX_MAP[v.voteType]!,
+      weight: BigInt(v.weight || 0),
+    })) || [];
+  const votesSummary: ProposalVotesSummary = {
+    yes: 0n,
+    no: 0n,
+    abstain: 0n,
+    quorum,
+  };
+  votes.forEach(v => {
+    const choice = v.choice.label;
+    if (choice === 'yes') {
+      votesSummary.yes += v.weight;
+    } else if (choice === 'no') {
+      votesSummary.no += v.weight;
+    } else if (choice === 'abstain') {
+      votesSummary.abstain += v.weight;
+    }
+  });
+
+  // Decode
+  const decodedTransactions = proposal.transactions
+    ? (
+        await Promise.all(
+          proposal.transactions.map(async tx =>
+            decodeWithAPI(proposal.daoChainId, tx.value.toString(), tx.to, tx.data),
+          ),
+        )
+      ).flat()
+    : [];
+  const data = {
+    decodedTransactions,
+  };
+  const targets = [...data.decodedTransactions.map(tx => tx.target)];
+
+  const azoriusProposal: AzoriusProposal = {
+    eventDate: new Date(proposal.createdAt * 1000),
+    // FIXME should be executedTxHash?
+    //   can be null if not executed yet?
+    transactionHash: proposal.proposedTxHash,
+    proposer: proposal.proposer,
+    state: null, // will be added in mergeState function
+    proposalId: proposal.id.toString(),
+    targets,
+    data,
+    // TODO: description should be put in data.metadata.description?
+    title: proposal.title,
+    votingStrategy: proposal.votingStrategyAddress,
+    votesSummary,
+    votes,
+    deadlineMs: proposal.blockTimestamp?.timestamp || 0,
+    startBlock: BigInt(proposal.snapshotBlock),
+  };
+  return azoriusProposal;
 }
 
 export const formatProposal = (dbProposal: DbProposal) => {
@@ -163,7 +260,7 @@ export const formatProposal = (dbProposal: DbProposal) => {
     votingEndTimestamp: dbProposal.blockTimestamp?.timestamp || null,
     votes: dbProposal.votes?.map(v => ({
       voter: v.voter,
-      choice: voteChoice[v.voteType],
+      choice: VOTE_CHOICES_INDEX_MAP[v.voteType],
       weight: v.weight,
     })),
   };

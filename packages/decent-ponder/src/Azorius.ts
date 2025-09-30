@@ -3,6 +3,7 @@ import { ponder } from 'ponder:registry';
 import { dao, governanceModule, proposal, votingStrategy } from 'ponder:schema';
 import { AzoriusAbi } from '../abis/AzoriusAbi';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
+import { LinearERC20VotingAbi } from '../abis/LinearERC20VotingAbi';
 
 ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {
@@ -75,6 +76,19 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
     const daoAddress = moduleQuery.daoAddress;
     if (!daoAddress) return;
 
+    // let votingSupply = null;
+    // try {
+    //   // TODO: maybe we bundle endBlock here too
+    //   //   since we need to send a RPC call already
+    //   console.debug('query ', strategy, proposalId);
+    //   votingSupply = await context.client.readContract({
+    //     address: strategy,
+    //     abi: LinearERC20VotingAbi,
+    //     functionName: 'getProposalVotingSupply',
+    //     args: [Number(proposalId)],
+    //   });
+    // } catch (e) {}
+
     const votingEndBlock = getProposalEndBlock(event);
 
     const { title, description } = JSON.parse(metadata);
@@ -93,6 +107,7 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
         createdAt: event.block.timestamp,
         votingEndBlock,
         proposedTxHash: event.transaction.hash,
+        //votingSupply,
       })
       .onConflictDoNothing();
 

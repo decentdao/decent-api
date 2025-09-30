@@ -4,7 +4,11 @@ import { db } from '@/db';
 import { DbProposal, schema } from '@/db/schema';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
-import { bigIntText, formatMultisigProposal, formatProposal } from '@/api/utils/typeConverter';
+import {
+  bigIntText,
+  formatAzoriusProposal,
+  formatMultisigProposal,
+} from '@/api/utils/typeConverter';
 import { addVoteEndTimestamp } from '../utils/blockTimestamp';
 import {
   mergeAzoriusProposalsWithState,
@@ -22,7 +26,6 @@ const app = new Hono();
  * @param {string} sameNonceAs - Optional parameter to
  *   filter proposals with the same nonce, only valid with MultisigDAO
  * @returns {Proposal[]} Array of proposal objects
- * TODO: Unify types for multisig and module DAO
  */
 app.get('/', daoExists, async c => {
   const dao = c.get('basicDaoInfo');
@@ -68,6 +71,7 @@ app.get('/', daoExists, async c => {
       ),
       orderBy: desc(schema.onchainProposalTable.id),
       with: {
+        votingTokens: true,
         votes: {
           extras: {
             weight: bigIntText(schema.voteTable.weight),
@@ -88,7 +92,7 @@ app.get('/', daoExists, async c => {
     const ret = await mergeAzoriusProposalsWithState(
       dao.address,
       dao.chainId,
-      proposalsWithTimestamps.map(formatProposal),
+      await Promise.all(proposalsWithTimestamps.map(formatAzoriusProposal)),
     );
     return resf(c, ret);
   }
@@ -132,6 +136,7 @@ app.get('/:id', daoExists, async c => {
         eq(schema.onchainProposalTable.id, Number(id)),
       ),
       with: {
+        votingTokens: true,
         votes: {
           extras: {
             weight: bigIntText(schema.voteTable.weight),
@@ -146,12 +151,12 @@ app.get('/:id', daoExists, async c => {
     })) as DbProposal | undefined;
     if (!proposal) throw new ApiError('Proposal not found', 404);
     const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
-
-    const ret = await mergeAzoriusProposalsWithState(
-      dao.address,
-      dao.chainId,
-      [proposalWithTimestamp].map(formatProposal),
-    );
+    const azoriusProposal = await formatAzoriusProposal(proposalWithTimestamp);
+    const ret = await mergeAzoriusProposalsWithState(dao.address, dao.chainId, [azoriusProposal]);
+    // FIXME check response here for now
+    //   AzoriusProposal type has BigInts which
+    //   can't be serialized by c.json()
+    console.debug('DEBUG', ret);
     return resf(c, ret);
   }
 });
