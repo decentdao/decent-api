@@ -14,6 +14,7 @@ import {
   FractalProposalState,
   MultisigProposal,
   ProposalVotesSummary,
+  ProposalVotesSummaryString,
   VOTE_CHOICES,
 } from '../types';
 import {
@@ -212,6 +213,17 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
     }
   });
 
+  // Must convert to string to be able to return as JSON
+  const votesSummaryString: ProposalVotesSummaryString = {
+    yes: votesSummary.yes.toString(),
+    no: votesSummary.no.toString(),
+    abstain: votesSummary.abstain.toString(),
+    quorum: votesSummary.quorum.toString(),
+  };
+
+  // Must convert to string to be able to return as JSON
+  const votesString = votes.map(v => ({ ...v, weight: v.weight.toString() }))
+
   // Decode
   const decodedTransactions = proposal.transactions
     ? (
@@ -240,10 +252,10 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
     // TODO: description should be put in data.metadata.description?
     title: proposal.title,
     votingStrategy: proposal.votingStrategyAddress,
-    votesSummary,
-    votes,
+    votesSummary: votesSummaryString,
+    votes: votesString,
     deadlineMs: proposal.blockTimestamp?.timestamp || 0,
-    startBlock: BigInt(proposal.snapshotBlock),
+    startBlock: proposal.snapshotBlock,
   };
   return azoriusProposal;
 }

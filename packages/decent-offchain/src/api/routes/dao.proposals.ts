@@ -153,10 +153,6 @@ app.get('/:id', daoExists, async c => {
     const proposalWithTimestamp = await addVoteEndTimestamp(proposal, dao.chainId);
     const azoriusProposal = await formatAzoriusProposal(proposalWithTimestamp);
     const ret = await mergeAzoriusProposalsWithState(dao.address, dao.chainId, [azoriusProposal]);
-    // FIXME check response here for now
-    //   AzoriusProposal type has BigInts which
-    //   can't be serialized by c.json()
-    console.debug('DEBUG', ret);
     return resf(c, ret);
   }
 });

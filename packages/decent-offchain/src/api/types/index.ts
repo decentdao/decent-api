@@ -164,6 +164,13 @@ export type ProposalVotesSummary = {
   quorum: bigint;
 };
 
+export type ProposalVotesSummaryString = {
+  yes: string;
+  no: string;
+  abstain: string;
+  quorum: string;
+};
+
 export const VOTE_CHOICES = [
   {
     label: 'yes',
@@ -182,7 +189,7 @@ export const VOTE_CHOICES = [
 export type ProposalVote = {
   voter: Address;
   choice: (typeof VOTE_CHOICES)[number];
-  weight: bigint;
+  weight: bigint | string;
 };
 
 export type ERC721ProposalVote = {
@@ -192,11 +199,11 @@ export type ERC721ProposalVote = {
 
 export interface AzoriusProposal extends GovernanceActivity {
   votingStrategy: Address;
-  votesSummary: ProposalVotesSummary;
+  votesSummary: ProposalVotesSummaryString;
   votes: ProposalVote[] | ERC721ProposalVote[];
   /** The deadline timestamp for the proposal, in milliseconds. */
   deadlineMs: number;
-  startBlock: bigint;
+  startBlock: number;
 }
 
 export interface MultisigProposal extends GovernanceActivity {
