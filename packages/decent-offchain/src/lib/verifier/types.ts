@@ -7,7 +7,7 @@ export type VerificationData = {
   nonce: bigint;
 };
 
-export type VerificationSignature = {
-  data: VerificationData;
+export type VerificationResponse = {
   signature: Hex;
+  expiration: number;
 };

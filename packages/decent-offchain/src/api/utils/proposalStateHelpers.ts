@@ -6,7 +6,8 @@ import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { getSafeInfo, getSafeTransactions } from '@/lib/safe';
 import { AzoriusProposal, FractalProposalState, strategyFractalProposalStates } from '../types';
 import { db } from '@/db';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
+import { DbProposal } from '@/db/schema';
 
 /**
  * Merge proposals from DB with their current state.
@@ -237,7 +238,7 @@ export async function mergeAzoriusProposalsWithState(
   // Prepare multicall inputs
   const calls = proposalIds.map(id => ({
     address: azoriusAddress,
-    abi: abis.Azorius,
+    abi: legacy.abis.Azorius,
     functionName: 'proposalState',
     args: [id],
   }));

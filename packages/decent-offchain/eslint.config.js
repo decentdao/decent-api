@@ -18,7 +18,7 @@ export default defineConfig([
       'no-trailing-spaces': 'warn',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
-      '@stylistic/indent': ['error', 2],
+      '@stylistic/indent': ['off'],
       '@stylistic/quotes': ['error', 'single'],
     },
   },

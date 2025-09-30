@@ -1,6 +1,7 @@
 import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
 import { CheckResult, TokenSaleRequirements, TokenSaleRequirementType } from './types';
+import { KYCResponseType } from '@/lib/sumsub/types';
 import { whitelistCheck } from './methods/whitelist';
 import { erc20Check } from './methods/erc20';
 import { erc721Check } from './methods/erc721';
@@ -11,15 +12,20 @@ export async function checkRequirements(
   chainId: SupportedChainId,
   address: Address,
   requirements: TokenSaleRequirements,
+  kycResponseType: KYCResponseType = 'url',
 ): Promise<CheckResult> {
-  // If KYC is required and not complete, return url for user to complete
+  // If KYC is required and not complete, return url or access token for user to complete
   if (requirements.kyc) {
-    const kycResult = await kycCheck(address, requirements.kyc);
-    if (!kycResult.eligible) {
+    const { eligible, ineligibleReason, kyc } = await kycCheck(
+      address,
+      requirements.kyc,
+      kycResponseType,
+    );
+    if (!eligible) {
       return {
         eligible: false,
-        reason: kycResult.reason,
-        kycUrl: kycResult.kycUrl,
+        ineligibleReason,
+        kyc,
       };
     }
   }
@@ -44,11 +50,16 @@ export async function checkRequirements(
     eligible = passedRequirements === requirements.buyerRequirements.length;
   }
 
-  const failedRequirements = onchainRequirements.filter(r => !r.eligible && r.reason);
-  const reason = failedRequirements.map(r => r.reason).join(', ');
+  const failedRequirements = onchainRequirements.filter(r => !r.eligible && r.ineligibleReason);
+  const ineligibleReason = eligible
+    ? undefined
+    : [
+        `${passedRequirements} out of ${requirements.orOutOf ?? requirements.buyerRequirements.length} requirements met`,
+        ...failedRequirements.map(r => r.ineligibleReason),
+      ].join('. ');
 
   return {
     eligible,
-    reason,
+    ineligibleReason,
   };
 }

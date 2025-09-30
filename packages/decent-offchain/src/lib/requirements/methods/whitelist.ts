@@ -5,6 +5,6 @@ export function whitelistCheck(address: Address, method: WhitelistRequirement): 
   const passes = method.addresses.includes(address);
   return {
     eligible: passes,
-    reason: passes ? undefined : 'Not on whitelist',
+    ineligibleReason: passes ? undefined : `Address ${address} not on whitelist`,
   };
 }

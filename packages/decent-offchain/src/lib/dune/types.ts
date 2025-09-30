@@ -177,3 +177,27 @@ export type TokenData = {
   tokens: TokenInfo[];
   next_offset?: string | null;
 };
+
+type Collectible = {
+  contract_address: string;
+  token_standard: 'ERC721' | 'ERC1155';
+  token_id: string;
+  chain: string;
+  chain_id: SupportedChainId;
+  name?: string;
+  symbol?: string;
+  description?: string;
+  image_url?: string;
+  last_sale_price?: number;
+  metadata?: Record<string, unknown>;
+  balance: string;
+  last_acquired?: string;
+};
+
+export type CollectiblesData = {
+  request_time: string;
+  response_time: string;
+  address: string;
+  next_offset?: string | null;
+  entries: Collectible[];
+};

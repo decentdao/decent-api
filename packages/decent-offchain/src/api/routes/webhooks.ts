@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
-import resf from '@/api/utils/responseFormatter';
+import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { SumsubWebhookPayload } from '@/lib/sumsub/types';
+import { verifyWebhookSignature } from '@/lib/sumsub';
 import { kycTable } from '@/db/schema/offchain/kyc';
 import { db } from '@/db';
-import { verifyWebhookSignature } from '@/lib/sumsub/webhook';
 
 const app = new Hono();
 
@@ -15,45 +15,18 @@ const app = new Hono();
  */
 app.post('/sumsub', async c => {
   try {
-    // Get raw body for signature verification
-    const rawBody = Buffer.from(await c.req.arrayBuffer());
+    const bodyBytes = Buffer.from(await c.req.arrayBuffer());
+    const digest = c.req.header('x-payload-digest');
+    if (!digest) throw new ApiError('Missing digest', 400);
 
-    // Extract headers for signature verification
-    const headers: Record<string, string> = {
-      'x-payload-digest': c.req.header('x-payload-digest') || '',
-      'x-payload-digest-alg': c.req.header('x-payload-digest-alg') || '',
-      'x-correlation-id': c.req.header('x-correlation-id') || '',
-      'user-agent': c.req.header('user-agent') || '',
-      origin: c.req.header('origin') || '',
-    };
-
-    // Verify webhook signature
-    const isValidSignature = verifyWebhookSignature(rawBody, headers);
-
-    if (!isValidSignature) {
-      console.error('Invalid webhook signature - potential security threat', {
-        correlationId: headers['x-correlation-id'],
-        userAgent: headers['user-agent'],
-        origin: headers['origin'],
-      });
-      return c.json({ error: 'Invalid signature' }, 401);
-    }
+    const isValidSignature = verifyWebhookSignature(bodyBytes, digest);
+    if (!isValidSignature) throw new ApiError('Bad signature', 401);
 
     // Parse JSON payload after signature verification
-    const payload: SumsubWebhookPayload = JSON.parse(rawBody.toString());
+    const payload: SumsubWebhookPayload = JSON.parse(bodyBytes.toString());
 
-    // Log webhook for debugging
-    console.log('Received verified Sumsub webhook:', {
-      type: payload.type,
-      applicantId: payload.applicantId,
-      externalUserId: payload.externalUserId,
-      reviewAnswer: payload.reviewResult?.reviewAnswer,
-      correlationId: payload.correlationId,
-    });
-
-    // Only process successful KYC completion events
-    if (payload.type === 'applicantReviewed' && payload.reviewResult?.reviewAnswer === 'GREEN') {
-      await updateKycStatus(payload.externalUserId, payload.applicantId);
+    if (payload.type === 'applicantReviewed') {
+      await updateKycStatus(payload);
     }
 
     return resf(c, { received: true });
@@ -67,24 +40,31 @@ app.post('/sumsub', async c => {
   }
 });
 
-async function updateKycStatus(externalUserId: string, applicantId: string) {
+async function updateKycStatus(payload: SumsubWebhookPayload) {
   try {
+    const { externalUserId, applicantId, sandboxMode, reviewResult, reviewStatus } = payload;
+    const isKycApproved = reviewResult.reviewAnswer === 'GREEN';
+    const rejectLabels = isKycApproved ? null : reviewResult.rejectLabels;
+
     // Find the KYC record by our internal ID
     const kycRecord = await db.query.kycTable.findFirst({
       where: eq(kycTable.id, externalUserId),
     });
 
     if (!kycRecord) {
+      // Don't throw error otherwise Sumsub will retry
+      // This is probably spam
       console.error(`KYC record not found for externalUserId: ${externalUserId}`);
       return;
     }
 
-    // Update KYC status to approved
     await db
       .update(kycTable)
       .set({
-        isKycApproved: true,
-        reviewStatus: 'completed',
+        isKycApproved,
+        sandboxMode,
+        rejectLabels,
+        reviewStatus,
         applicantId,
       })
       .where(eq(kycTable.id, externalUserId));

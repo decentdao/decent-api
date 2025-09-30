@@ -2,7 +2,7 @@ import { Context, Next } from 'hono';
 import { erc20Abi } from 'viem';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { getPublicClient } from '@/api/utils/publicClient';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
 
 export const permissionsCheck = async (c: Context, next: Next) => {
   const dao = c.get('dao');
@@ -25,7 +25,7 @@ export const permissionsCheck = async (c: Context, next: Next) => {
     // multicall each strategy address to see if the user address has isProposer permissions
     const allIsProposer = await publicClient.multicall({
       contracts: strategyAddresses.map(address => ({
-        abi: abis.LinearERC20Voting,
+        abi: legacy.abis.LinearERC20Voting,
         address,
         functionName: 'isProposer' as const, // ERC20, ERC721, & w/ hats all use this
         args: [user.address],

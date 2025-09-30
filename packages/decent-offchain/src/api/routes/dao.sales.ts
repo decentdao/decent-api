@@ -1,13 +1,35 @@
 import { Hono } from 'hono';
-import { Address, getAddress } from 'viem';
+import { Address, getAddress, Hex } from 'viem';
 import { and, eq } from 'drizzle-orm';
-import { bearerAuth } from '@/api/middleware/auth';
 import { daoExists } from '@/api/middleware/dao';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { checkRequirements } from '@/lib/requirements';
+import { KYCResponseType } from '@/lib/sumsub/types';
 import { signVerification, getAddressNonce, formatVerificationData } from '@/lib/verifier';
 import { tokenSaleTable } from '@/db/schema/onchain';
 import { db } from '@/db';
+import { getPublicClient } from '../utils/publicClient';
+import { unixTimestamp } from '../utils/time';
+
+const VERIFICATION_TYPES = {
+  Verification: [
+    { name: 'saleAddress', type: 'address' },
+    { name: 'signerAddress', type: 'address' },
+    { name: 'timestamp', type: 'uint256' },
+  ],
+};
+
+type VerificationMessage = {
+  saleAddress: Address;
+  signerAddress: Address;
+  timestamp: number;
+}
+
+type VerificationBody = {
+  address: Address;
+  message: VerificationMessage;
+  signature: Hex;
+}
 
 const app = new Hono();
 
@@ -22,22 +44,16 @@ app.get('/', daoExists, async c => {
   const daoInfo = c.get('basicDaoInfo');
   const { chainId, address: daoAddress } = daoInfo;
 
-  try {
-    const sales = await db
-      .select({
-        tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
-        tokenSaleName: tokenSaleTable.tokenSaleName,
-        tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements,
-      })
-      .from(tokenSaleTable)
-      .where(
-        and(eq(tokenSaleTable.daoAddress, daoAddress), eq(tokenSaleTable.daoChainId, chainId)),
-      );
+  const sales = await db
+    .select({
+      tokenSaleAddress: tokenSaleTable.tokenSaleAddress,
+      tokenSaleName: tokenSaleTable.tokenSaleName,
+      tokenSaleRequirements: tokenSaleTable.tokenSaleRequirements,
+    })
+    .from(tokenSaleTable)
+    .where(and(eq(tokenSaleTable.daoAddress, daoAddress), eq(tokenSaleTable.daoChainId, chainId)));
 
-    return resf(c, sales);
-  } catch {
-    throw new ApiError('Failed to fetch sales', 500);
-  }
+  return resf(c, sales);
 });
 
 /**
@@ -46,59 +62,97 @@ app.get('/', daoExists, async c => {
  * @param {string} chainId - The blockchain network ID
  * @param {string} address - The DAO address
  * @param {string} tokenSaleAddress - The token sale contract address
+ * @param {string} [kycResponseType] - Optional KYC response type query parameter ('url' or 'token', defaults to 'url')
+ * @body { address: string, message: string, signature: string }
  * @returns {object} Verification result with signature or KYC URL
  */
-app.post('/:tokenSaleAddress/verify', bearerAuth, daoExists, async c => {
+app.post('/:tokenSaleAddress/verify', daoExists, async c => {
   const { tokenSaleAddress } = c.req.param();
-  const user = c.get('user');
   const daoInfo = c.get('basicDaoInfo');
-  const address = user.address;
   const chainId = daoInfo.chainId;
   const daoAddress = daoInfo.address;
 
   if (!tokenSaleAddress) throw new ApiError('Must supply tokenSaleAddress', 400);
   const lowerTokenSaleAddress = getAddress(tokenSaleAddress).toLowerCase() as Address;
 
-  try {
-    // 1. Get token sale requirements from DB
-    const [sale] = await db
-      .select()
-      .from(tokenSaleTable)
-      .where(
-        and(
-          eq(tokenSaleTable.daoAddress, daoAddress),
-          eq(tokenSaleTable.daoChainId, chainId),
-          eq(tokenSaleTable.tokenSaleAddress, lowerTokenSaleAddress),
-        ),
-      )
-      .limit(1);
+  // 0. Verify signed typed data
+  const { address, message, signature } = await c.req.json() as VerificationBody;
+  if (!signature) throw new ApiError('Missing signature in body', 400);
+  if (!message) throw new ApiError('Missing message in body', 400);
+  if (!address) throw new ApiError('Missing address in body', 400)
+  if (!message.timestamp) throw new ApiError('Missing message.timestamp', 400);
+  if (!message.signerAddress) throw new ApiError('Missing message.signerAddress', 400);
+  if (!message.saleAddress) throw new ApiError('Missing message.saleAddress', 400);
+  if (address !== message.signerAddress) throw new ApiError('Address mismatch', 401);
+  const publicClient = getPublicClient(chainId);
 
-    if (!sale) throw new ApiError('Sale not found', 404);
+  const domain = {
+    name: 'Decent Token Sale',
+    version: '1',
+    chainId,
+  };
 
-    // 2. Run verification checks
-    const checkResult = await checkRequirements(chainId, address, sale.tokenSaleRequirements);
-
-    // Return KYC URL if needed, or failure reason
-    if (checkResult.kycUrl) {
-      return resf(c, {
-        success: false,
-        reason: checkResult.reason,
-        kycUrl: checkResult.kycUrl,
-      });
-    }
-
-    // 3. Get address nonce
-    const nonce = await getAddressNonce(chainId, address);
-
-    // 4. Create and sign verification data
-    const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
-
-    const signature = await signVerification(chainId, verificationData);
-
-    return resf(c, signature);
-  } catch {
-    throw new ApiError('Verification failed', 500);
+  // Validate timestamp is recent (within last 5 minutes)
+  const now = unixTimestamp();
+  const maxAge = 5 * 60;
+  const timestamp = unixTimestamp(message.timestamp);
+  if (now - timestamp > maxAge) {
+    throw new ApiError('Message timestamp is too old', 400);
   }
+
+  const valid = await publicClient.verifyTypedData({
+    address,
+    domain,
+    types: VERIFICATION_TYPES,
+    primaryType: 'Verification',
+    message,
+    signature,
+  });
+  if (!valid) throw new ApiError(`Bad signed message from ${address}`, 401);
+
+  // 1. Get token sale requirements from DB
+  const [sale] = await db
+    .select()
+    .from(tokenSaleTable)
+    .where(
+      and(
+        eq(tokenSaleTable.daoAddress, daoAddress),
+        eq(tokenSaleTable.daoChainId, chainId),
+        eq(tokenSaleTable.tokenSaleAddress, lowerTokenSaleAddress),
+      ),
+    )
+    .limit(1);
+
+  if (!sale) throw new ApiError('Sale not found', 404);
+
+  // 2. Run verification checks
+  const kycResponseType = (c.req.query('kycResponseType') || 'url') as KYCResponseType;
+  if (kycResponseType !== 'url' && kycResponseType !== 'token') {
+    throw new ApiError('Unsupported kycResponseType requested', 400);
+  }
+
+  const { eligible, kyc, ineligibleReason } = await checkRequirements(
+    chainId,
+    address,
+    sale.tokenSaleRequirements,
+    kycResponseType,
+  );
+
+  // Return KYC URL or access token if required and address is not in database
+  if (kyc) return resf(c, { kyc });
+
+  // Return reasons if onchain requirements not met
+  if (!eligible && ineligibleReason) throw new ApiError(ineligibleReason, 401);
+
+  // 3. Get address nonce
+  const nonce = await getAddressNonce(chainId, address);
+
+  // 4. Create and sign verification data
+  const verificationData = formatVerificationData(sale.tokenSaleAddress, address, nonce);
+
+  const verify = await signVerification(chainId, verificationData);
+
+  return resf(c, verify);
 });
 
 export default app;

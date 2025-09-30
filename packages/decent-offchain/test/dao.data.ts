@@ -56,37 +56,34 @@ async function insertDaoData() {
       .onConflictDoNothing();
 
     // Insert Token Sale
-    await db
-      .insert(tokenSaleTable)
-      .values({
-        tokenSaleAddress: '0x1234567890abcdef1234567890abcdef12345678',
-        daoChainId: daoChainId,
-        daoAddress: daoAddress,
-        tokenSaleName: 'Test Token Sale',
-        tokenSaleRequirements: {
-          buyerRequirements: [
-            {
-              type: TokenSaleRequirementType.ERC20,
-              tokenAddress: '0x4e885bf7370499074ef59df80be1f97b590066e2',
-              amount: '1000000000000000000', // 1 token in wei
-            },
-            {
-              type: TokenSaleRequirementType.WHITELIST,
-              addresses: [
-                '0x25910143c255828f623786f46fe9a8941b7983bb',
-                '0xd0cbdf4b48d3abc9cc3df373ed2f0f91a38c954c',
-              ],
-            },
-          ],
-          kyc: {
-            type: TokenSaleRequirementType.KYC,
-            provider: 'sumsub',
-            levelName: 'basic-kyc-level',
+    await db.insert(tokenSaleTable).values({
+      tokenSaleAddress: '0x1234567890abcdef1234567890abcdef12345678',
+      daoChainId: daoChainId,
+      daoAddress: daoAddress,
+      tokenSaleName: 'Test Token Sale',
+      tokenSaleRequirements: {
+        buyerRequirements: [
+          {
+            type: TokenSaleRequirementType.ERC20,
+            tokenAddress: '0x4e885bf7370499074ef59df80be1f97b590066e2',
+            amount: '1000000000000000000', // 1 token in wei
           },
-          orOutOf: 2,
+          {
+            type: TokenSaleRequirementType.WHITELIST,
+            addresses: [
+              '0x25910143c255828f623786f46fe9a8941b7983bb',
+              '0xd0cbdf4b48d3abc9cc3df373ed2f0f91a38c954c',
+            ],
+          },
+        ],
+        kyc: {
+          type: TokenSaleRequirementType.KYC,
+          provider: 'sumsub',
+          levelName: 'basic-kyc-level',
         },
-      })
-
+        orOutOf: 2,
+      },
+    });
 
     console.log('Successfully inserted DAO data');
     const dao = (await db.query.daoTable.findFirst({

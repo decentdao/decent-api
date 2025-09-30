@@ -3,15 +3,17 @@
 import { Address } from 'viem';
 import {
   BalanceData,
+  CollectiblesData,
   TokenBalancesParams,
   TokenData,
-  TokenQueryParams,
   TransactionData,
+  TokenQueryParams,
   TransactionsParams,
 } from './types';
 
 const BASE_URL = 'https://api.sim.dune.com';
 const BALANCES_ROUTE = 'v1/evm/balances';
+const COLLECTIBILES_ROUTE = 'v1/evm/collectibles';
 const TRANSACTIONS_ROUTE = 'v1/evm/transactions';
 const TOKEN_ROUTE = 'v1/evm/token-info';
 
@@ -114,4 +116,25 @@ export async function duneFetchToken(
   }
 
   return response.json() as Promise<TokenData>;
+}
+
+export async function duneFetchCollectibles(
+  address: Address,
+  params: TokenQueryParams,
+): Promise<CollectiblesData> {
+  if (!DUNE_API_KEY) throw new Error('DUNE_API_KEY is not set');
+
+  const queryParams = getTokenQueryParams(params);
+  const url = `${BASE_URL}/${COLLECTIBILES_ROUTE}/${address}?${queryParams.toString()}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json() as Promise<CollectiblesData>;
 }

@@ -1,17 +1,8 @@
 import { createConfig, factory } from 'ponder';
 import { getAbiItem, http } from 'viem';
-import { KeyValuePairsAbi } from './abis/KeyValuePairsAbi';
+import { legacy } from '@decentdao/decent-contracts';
 import { FractalRegistryAbi } from './abis/FractalRegistryAbi';
-import { AzoriusAbi } from './abis/AzoriusAbi';
-import { LinearERC20VotingAbi } from './abis/LinearERC20VotingAbi';
 import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactoryAbi';
-import { LinearERC721VotingAbi } from './abis/LinearERC721VotingAbi';
-import { MultisigFreezeGuardAbi } from './abis/MultisigFreezeGuardAbi';
-import { MultisigFreezeVotingAbi } from './abis/MultisigFreezeVotingAbi';
-import { AzoriusFreezeGuardAbi } from './abis/AzoriusFreezeGuardAbi';
-import { FractalModuleAbi } from './abis/FractalModuleAbi';
-import { ERC20FreezeVotingAbi } from './abis/ERC20FreezeVotingAbi';
-import { ERC721FreezeVotingAbi } from './abis/ERC721FreezeVotingAbi';
 import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
 import { SplitV2Abi } from './abis/SplitV2Abi';
 import { HatsAbi } from './abis/HatsAbi';
@@ -44,27 +35,27 @@ export default createConfig({
   },
   contracts: {
     KeyValuePairs: {
-      abi: KeyValuePairsAbi,
+      abi: legacy.abis.KeyValuePairs,
       chain: {
         mainnet: {
-          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
-          startBlock: 17389311,
+          address: legacy.addresses[1].KeyValuePairs.address,
+          startBlock: legacy.addresses[1].KeyValuePairs.deploymentBlock,
         },
         base: {
-          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
-          startBlock: 12996645,
+          address: legacy.addresses[8453].KeyValuePairs.address,
+          startBlock: legacy.addresses[8453].KeyValuePairs.deploymentBlock,
         },
         optimism: {
-          address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
-          startBlock: 118640420,
+          address: legacy.addresses[10].KeyValuePairs.address,
+          startBlock: legacy.addresses[10].KeyValuePairs.deploymentBlock,
         },
         polygon: {
-          address: '0x68e3b985B93eA0a10178c7ae919299699559Aaab',
-          startBlock: 43952879,
+          address: legacy.addresses[137].KeyValuePairs.address,
+          startBlock: legacy.addresses[137].KeyValuePairs.deploymentBlock,
         },
         sepolia: {
-          address: '0xC0E08581b70cF745770154f3E9a9A8890198b024',
-          startBlock: 4916643,
+          address: legacy.addresses[11155111].KeyValuePairs.address,
+          startBlock: legacy.addresses[11155111].KeyValuePairs.deploymentBlock,
         },
       },
     },
@@ -94,7 +85,7 @@ export default createConfig({
       },
     },
     Azorius: {
-      abi: AzoriusAbi,
+      abi: legacy.abis.Azorius,
       chain: {
         mainnet: {
           startBlock: 17389307,
@@ -151,7 +142,7 @@ export default createConfig({
       },
     },
     FractalModule: {
-      abi: FractalModuleAbi,
+      abi: legacy.abis.FractalModule,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -208,7 +199,7 @@ export default createConfig({
       },
     },
     LinearERC20Voting: {
-      abi: LinearERC20VotingAbi,
+      abi: legacy.abis.LinearERC20Voting,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -265,7 +256,7 @@ export default createConfig({
       },
     },
     LinearERC721Voting: {
-      abi: LinearERC721VotingAbi,
+      abi: legacy.abis.LinearERC721Voting,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -322,7 +313,7 @@ export default createConfig({
       },
     },
     MultisigFreezeGuard: {
-      abi: MultisigFreezeGuardAbi,
+      abi: legacy.abis.MultisigFreezeGuard,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -379,7 +370,7 @@ export default createConfig({
       },
     },
     AzoriusFreezeGuard: {
-      abi: AzoriusFreezeGuardAbi,
+      abi: legacy.abis.AzoriusFreezeGuard,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -436,7 +427,7 @@ export default createConfig({
       },
     },
     MultisigFreezeVoting: {
-      abi: MultisigFreezeVotingAbi,
+      abi: legacy.abis.MultisigFreezeVoting,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -493,7 +484,7 @@ export default createConfig({
       },
     },
     ERC20FreezeVoting: {
-      abi: ERC20FreezeVotingAbi,
+      abi: legacy.abis.ERC20FreezeVoting,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -550,7 +541,7 @@ export default createConfig({
       },
     },
     ERC721FreezeVoting: {
-      abi: ERC721FreezeVotingAbi,
+      abi: legacy.abis.ERC721FreezeVoting,
       chain: {
         mainnet: {
           startBlock: 17389302,
@@ -742,9 +733,9 @@ export default createConfig({
         mainnet: {
           startBlock: 17389311,
           address: factory({
-            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            address: legacy.addresses[1].KeyValuePairs.address,
             event: getAbiItem({
-              abi: KeyValuePairsAbi,
+              abi: legacy.abis.KeyValuePairs,
               name: 'ValueUpdated',
             }),
             parameter: 'theAddress',
@@ -753,9 +744,9 @@ export default createConfig({
         base: {
           startBlock: 12996645,
           address: factory({
-            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            address: legacy.addresses[8453].KeyValuePairs.address,
             event: getAbiItem({
-              abi: KeyValuePairsAbi,
+              abi: legacy.abis.KeyValuePairs,
               name: 'ValueUpdated',
             }),
             parameter: 'theAddress',
@@ -764,9 +755,9 @@ export default createConfig({
         optimism: {
           startBlock: 118640420,
           address: factory({
-            address: '0x535B64f9Ef529Ac8B34Ac7273033bBE67B34f131',
+            address: legacy.addresses[10].KeyValuePairs.address,
             event: getAbiItem({
-              abi: KeyValuePairsAbi,
+              abi: legacy.abis.KeyValuePairs,
               name: 'ValueUpdated',
             }),
             parameter: 'theAddress',
@@ -775,9 +766,9 @@ export default createConfig({
         polygon: {
           startBlock: 43952879,
           address: factory({
-            address: '0x68e3b985B93eA0a10178c7ae919299699559Aaab',
+            address: legacy.addresses[137].KeyValuePairs.address,
             event: getAbiItem({
-              abi: KeyValuePairsAbi,
+              abi: legacy.abis.KeyValuePairs,
               name: 'ValueUpdated',
             }),
             parameter: 'theAddress',
@@ -786,9 +777,9 @@ export default createConfig({
         sepolia: {
           startBlock: 4916643,
           address: factory({
-            address: '0xC0E08581b70cF745770154f3E9a9A8890198b024',
+            address: legacy.addresses[11155111].KeyValuePairs.address,
             event: getAbiItem({
-              abi: KeyValuePairsAbi,
+              abi: legacy.abis.KeyValuePairs,
               name: 'ValueUpdated',
             }),
             parameter: 'theAddress',

@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { Health, SupportedChainId } from 'decent-sdk';
-import { count } from 'drizzle-orm';
+import { count, and, eq, lt, isNull } from 'drizzle-orm';
 import resf, { ApiError } from '@/api/utils/responseFormatter';
 import { db } from '@/db';
 import { daoTable, onchainProposalTable } from '@/db/schema/onchain';
+import { kycTable } from '@/db/schema/offchain/kyc';
 import { getSignerAddress } from '@/lib/verifier';
 
 const app = new Hono();
@@ -64,4 +65,28 @@ app.get('/stats', async c => {
 
   return resf(c, { daoCount, proposalCount });
 });
+
+/**
+ * @title KYC garbage collection (kycgc), remove unused kyc entries
+ * @route POST /kycgc
+ * @returns Cleanup result
+ */
+app.post('/kycgc', async c => {
+  const cutoffTime = new Date(Date.now() - 20 * 60 * 1000);
+
+  const result = await db
+    .delete(kycTable)
+    .where(
+      and(
+        eq(kycTable.reviewStatus, 'init'),
+        isNull(kycTable.applicantId),
+        lt(kycTable.createdAt, cutoffTime),
+      ),
+    );
+
+  return resf(c, {
+    garbage: result.rowCount || 0,
+  });
+});
+
 export default app;

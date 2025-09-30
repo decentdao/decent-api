@@ -4,8 +4,13 @@ export type SumsubRequest = {
   body: string;
 };
 
-export type ResponseWebSdkUrl = {
+export type WebSdkUrlResponse = {
   url: string;
+};
+
+export type AccessTokenResponse = {
+  token: string;
+  userId: string;
 };
 
 type SumsubError = {
@@ -16,6 +21,8 @@ type SumsubError = {
   description: string;
 };
 
+export type KYCResponseType = 'url' | 'token';
+
 export type SumsubResponse<T> = T | SumsubError;
 
 export type SumsubWebhookPayload = {
@@ -23,12 +30,12 @@ export type SumsubWebhookPayload = {
   inspectionId: string;
   externalUserId: string;
   type: SumsubWebhookEventType;
-  reviewResult?: {
+  reviewResult: {
     reviewAnswer: 'GREEN' | 'RED';
     rejectLabels?: string[];
     reviewRejectType?: string;
   };
-  reviewStatus?: 'init' | 'pending' | 'completed' | 'onHold';
+  reviewStatus: 'init' | 'pending' | 'completed' | 'onHold';
   levelName?: string;
   correlationId: string;
   createdAt: string;

@@ -1,16 +1,15 @@
 import { replaceBigInts } from 'ponder';
+import { legacy } from '@decentdao/decent-contracts';
 import { ponder } from 'ponder:registry';
 import { dao, governanceModule, proposal, votingStrategy } from 'ponder:schema';
-import { AzoriusAbi } from '../abis/AzoriusAbi';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
-import { LinearERC20VotingAbi } from '../abis/LinearERC20VotingAbi';
 
 ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {
     const address = event.log.address;
     const daoAddress = await context.client.readContract({
       address,
-      abi: AzoriusAbi,
+      abi: legacy.abis.Azorius,
       functionName: 'target',
     });
     const daoChainId = context.chain.id;
@@ -83,7 +82,7 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
     //   console.debug('query ', strategy, proposalId);
     //   votingSupply = await context.client.readContract({
     //     address: strategy,
-    //     abi: LinearERC20VotingAbi,
+    //     abi: legacy.abis.LinearERC20Voting,
     //     functionName: 'getProposalVotingSupply',
     //     args: [Number(proposalId)],
     //   });
