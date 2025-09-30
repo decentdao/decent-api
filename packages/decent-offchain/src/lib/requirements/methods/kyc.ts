@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { eq } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { CheckResult, KYCRequirement } from '../types';
 import { KYCResponseType } from '@/lib/sumsub/types';
 import { kycTable } from '@/db/schema/offchain/kyc';
@@ -11,14 +11,27 @@ export async function kycCheck(
   method: KYCRequirement,
   kycResponseType: KYCResponseType = 'url',
 ): Promise<CheckResult> {
-  const { isKycApproved } = (await db.query.kycTable.findFirst({
-    where: eq(kycTable.address, address),
-  })) || { isKycApproved: false };
+  if (method.provider !== 'sumsub') throw new Error('KYC provider not supported');
 
-  if (isKycApproved) {
+  const applicant = (await db.query.kycTable.findFirst({
+    where: and(
+      eq(kycTable.address, address),
+      ne(kycTable.reviewStatus, 'init')
+    )
+  }));
+
+  if (applicant?.isKycApproved) {
     return {
       eligible: true,
     };
+  }
+
+  if (applicant?.rejectLabels) {
+    const ineligibleReason = `KYC verification failed: ${applicant?.rejectLabels?.join(', ')}`;
+    return {
+      eligible: false,
+      ineligibleReason,
+    }
   }
 
   const newKyc = await db
@@ -33,11 +46,8 @@ export async function kycCheck(
   const kyc =
     kycResponseType === 'url' ? await generateWebSdkLink(id) : await generateAccessToken(id);
 
-  const ineligibleReason = `KYC verification required for ${address}: ${method.provider} level ${method.levelName}`;
-
   return {
     eligible: false,
     kyc,
-    ineligibleReason,
   };
 }
