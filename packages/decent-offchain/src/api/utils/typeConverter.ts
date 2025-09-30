@@ -23,7 +23,7 @@ import {
   decodeWithAPI,
 } from './transactionParser';
 import { getPublicClient } from './publicClient';
-import { abis } from '@fractal-framework/fractal-contracts';
+import { legacy } from '@decentdao/decent-contracts';
 
 export const bigIntText = (column: PgColumn, alias?: string) => {
   return sql<string>`${column}::text`.as(alias || column.name);
@@ -173,7 +173,7 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
     const client = getPublicClient(proposal.daoChainId);
     quorum = await client.readContract({
       address: proposal.votingStrategyAddress,
-      abi: abis.LinearERC20Voting,
+      abi: legacy.abis.LinearERC20Voting,
       functionName: 'quorumVotes',
       args: [proposal.id],
     });
@@ -183,7 +183,7 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
     const client = getPublicClient(proposal.daoChainId);
     quorum = await client.readContract({
       address: proposal.votingStrategyAddress,
-      abi: abis.LinearERC721Voting,
+      abi: legacy.abis.LinearERC721Voting,
       functionName: 'quorumThreshold',
     });
   }
