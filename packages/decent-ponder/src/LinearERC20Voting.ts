@@ -1,6 +1,6 @@
+import { legacy } from '@decentdao/decent-contracts';
 import { ponder } from 'ponder:registry';
 import { vote, votingStrategy, votingToken } from 'ponder:schema';
-import { LinearERC20VotingAbi } from '../abis/LinearERC20VotingAbi';
 import { setProposalEndBlock } from './utils/endBlock';
 
 ponder.on('LinearERC20Voting:ProposalInitialized', async ({ event }) => {
@@ -23,7 +23,7 @@ ponder.on('LinearERC20Voting:AzoriusSet', async ({ event, context }) => {
     try {
       const token = await context.client.readContract({
         address,
-        abi: LinearERC20VotingAbi,
+        abi: legacy.abis.LinearERC20Voting,
         functionName: 'governanceToken',
       });
       await context.db

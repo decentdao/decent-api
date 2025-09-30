@@ -1,7 +1,7 @@
 import { getAddress, zeroAddress } from 'viem';
+import { legacy } from '@decentdao/decent-contracts';
 import { ponder } from 'ponder:registry';
 import { governanceGuard, governanceModule } from 'ponder:schema';
-import { FractalModuleAbi } from '../abis/FractalModuleAbi';
 
 // keccak256("guard_manager.guard.address")
 // https://github.com/safe-global/safe-smart-account/blob/1c8b24a0a438e8c2cd089a9d830d1688a47a28d5/contracts/base/GuardManager.sol#L66
@@ -15,7 +15,7 @@ ponder.on('FractalModule:ControllersAdded', async ({ event, context }) => {
     const address = event.log.address;
     const daoAddress = await context.client.readContract({
       address,
-      abi: FractalModuleAbi,
+      abi: legacy.abis.FractalModule,
       functionName: 'target',
     });
     const daoChainId = context.chain.id;

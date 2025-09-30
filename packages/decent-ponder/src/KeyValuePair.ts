@@ -50,14 +50,14 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
   // =======================================================
   if (key === 'daoName') {
     entry.name = value;
-  // =======================================================
+    // =======================================================
   } else if (key === 'proposalTemplates') {
     entry.proposalTemplatesCID = value;
-  // =======================================================
+    // =======================================================
   } else if (key === 'snapshotENS' || key === 'snapshotURL') {
     const cleanedValue = value === '' ? null : value;
     entry.snapshotENS = cleanedValue;
-  // =======================================================
+    // =======================================================
   } else if (key === 'childDao') {
     if (!isAddress(value)) {
       throw new Error(`Invalid childDao: ${value} for ${safeAddress}`);
@@ -66,11 +66,11 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     entry.subDaoOf = safeAddress;
 
     await updateSubDaoAddresses(context, chainId, safeAddress, value, event.block.timestamp);
-  // =======================================================
+    // =======================================================
   } else if (key === 'topHatId') {
     entry.topHatId = value; // can we get rid of this? we may only need treeId
     entry.treeId = hatIdToTreeId(value);
-  // =======================================================
+    // =======================================================
   } else if (key === 'hatIdToStreamId') {
     const [hatId, streamIdString] = value.split(':');
     if (!streamIdString) return;
@@ -115,16 +115,16 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
       transferable,
     });
     return;
-  // =======================================================
+    // =======================================================
   } else if (key === 'gaslessVotingEnabled') {
     entry.gasTankEnabled = value === 'true';
-  // =======================================================
+    // =======================================================
   } else if (key === 'erc20Address') {
     if (!isAddress(value)) {
       throw new Error(`Invalid erc20Address: ${value} for ${safeAddress}`);
     }
     entry.erc20Address = value;
-  // =======================================================
+    // =======================================================
   } else if (key === 'revShareWallets') {
     try {
       // Parse JSON array: ["0x123:WalletA", "0x456:WalletB"]
@@ -157,7 +157,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     } catch (e) {
       console.error('Failed to parse revShareWallets:', e);
     }
-  // =======================================================
+    // =======================================================
   } else if (key === 'newtokensale') {
     try {
       const { tokenSaleAddress, tokenSaleName, ...tokenSaleRequirements } = JSON.parse(value);
@@ -171,7 +171,7 @@ ponder.on('KeyValuePairs:ValueUpdated', async ({ event, context }) => {
     } catch (e) {
       console.error('Failed to parse newtokensale:', e);
     }
-  // =======================================================
+    // =======================================================
   } else {
     console.log('--------------------------------');
     console.log('Unknown key:', key);
