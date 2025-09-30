@@ -139,6 +139,42 @@
         }
       }
     },
+    "/kycgc": {
+      "post": {
+        "tags": ["meta"],
+        "summary": "KYC garbage collection",
+        "description": "Remove unused KYC entries older than 20 minutes",
+        "security": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "garbage": {
+                              "type": "integer",
+                              "description": "Number of KYC entries removed"
+                            }
+                          },
+                          "required": ["garbage"]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/nonce": {
       "get": {
         "tags": ["auth"],
@@ -523,7 +559,7 @@
       "get": {
         "tags": ["proposals"],
         "summary": "Get DAO proposals",
-        "description": "Retrieve all onchain proposals for a specific DAO",
+        "description": "Retrieve all proposals for a specific DAO (both onchain and Safe proposals)",
         "security": [],
         "parameters": [
           {
@@ -541,6 +577,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "sameNonceAs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter proposals with the same nonce (only valid with Multisig DAOs)"
           }
         ],
         "responses": {
@@ -572,8 +617,8 @@
     "/d/{chainId}/{address}/proposals/{id}": {
       "get": {
         "tags": ["proposals"],
-        "summary": "Get onchain proposal by ID",
-        "description": "Retrieve a specific onchain proposal by proposal ID",
+        "summary": "Get proposal by ID",
+        "description": "Retrieve a specific proposal by ID (safeTxHash for Multisig DAOs, proposalId for Azorius DAOs)",
         "security": [],
         "parameters": [
           {
@@ -700,6 +745,178 @@
         }
       }
     },
+    "/d/{chainId}/{address}/balances": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get DAO token balances and collectibles",
+        "description": "Retrieve token balances and NFT collectibles for a specific DAO",
+        "security": [],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DaoBalances"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/sales": {
+      "get": {
+        "tags": ["dao"],
+        "summary": "Get DAO token sales",
+        "description": "Retrieve all token sales for a specific DAO",
+        "security": [],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TokenSale"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/d/{chainId}/{address}/sales/{tokenSaleAddress}/verify": {
+      "post": {
+        "tags": ["dao"],
+        "summary": "Verify wallet eligibility for token sale",
+        "description": "Verify if a wallet meets the requirements for participating in a token sale",
+        "security": [],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tokenSaleAddress",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kycResponseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["url", "token"]
+            },
+            "description": "Type of KYC response (defaults to 'url')"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/VerificationResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/points/proposals": {
       "get": {
         "tags": ["points"],
@@ -731,20 +948,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string"
-                    },
-                    "proposalCount": {
-                      "type": "integer"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "failed"]
-                    }
-                  },
-                  "required": ["address", "proposalCount", "status"]
+                  "$ref": "#/components/schemas/PointsResponse"
                 }
               }
             }
@@ -774,20 +978,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string"
-                    },
-                    "transferCount": {
-                      "type": "integer"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "failed"]
-                    }
-                  },
-                  "required": ["address", "transferCount", "status"]
+                  "$ref": "#/components/schemas/PointsResponse"
                 }
               }
             }
@@ -817,20 +1008,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string"
-                    },
-                    "disperseCount": {
-                      "type": "integer"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "failed"]
-                    }
-                  },
-                  "required": ["address", "disperseCount", "status"]
+                  "$ref": "#/components/schemas/PointsResponse"
                 }
               }
             }
@@ -860,20 +1038,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string"
-                    },
-                    "roleCount": {
-                      "type": "integer"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "failed"]
-                    }
-                  },
-                  "required": ["address", "roleCount", "status"]
+                  "$ref": "#/components/schemas/PointsResponse"
                 }
               }
             }
@@ -903,20 +1068,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string"
-                    },
-                    "streamCount": {
-                      "type": "integer"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "failed"]
-                    }
-                  },
-                  "required": ["address", "streamCount", "status"]
+                  "$ref": "#/components/schemas/PointsResponse"
                 }
               }
             }
@@ -966,7 +1118,7 @@
           }
         }
       }
-    }
+    },
   },
   "components": {
     "schemas": {
@@ -1008,9 +1160,13 @@
           },
           "version": {
             "type": "string"
+          },
+          "verfier": {
+            "type": "string",
+            "description": "The verifier address used for signatures"
           }
         },
-        "required": ["name", "version"]
+        "required": ["name", "version", "verfier"]
       },
       "Health": {
         "type": "string",
@@ -1823,7 +1979,128 @@
           }
         },
         "required": ["address"]
-      }
+      },
+      "PointsResponse": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "proposalCount": {
+            "type": "integer"
+          },
+          "transferCount": {
+            "type": "integer"
+          },
+          "disperseCount": {
+            "type": "integer"
+          },
+          "roleCount": {
+            "type": "integer"
+          },
+          "streamCount": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "failed"]
+          }
+        },
+        "required": ["address", "status"]
+      },
+      "DaoBalances": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WalletToken"
+            }
+          },
+          "collectibles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "collection_name": {
+                  "type": "string"
+                },
+                "token_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "image_url": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        },
+        "required": ["tokens", "collectibles"]
+      },
+      "TokenSale": {
+        "type": "object",
+        "properties": {
+          "tokenSaleAddress": {
+            "type": "string"
+          },
+          "tokenSaleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenSaleRequirements": {
+            "type": "object"
+          }
+        },
+        "required": ["tokenSaleAddress", "tokenSaleRequirements"]
+      },
+      "VerificationRequest": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+              "saleAddress": {
+                "type": "string"
+              },
+              "signerAddress": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "integer"
+              }
+            },
+            "required": ["saleAddress", "signerAddress", "timestamp"]
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["address", "message", "signature"]
+      },
+      "VerificationResponse": {
+        "type": "object",
+        "properties": {
+          "kyc": {
+            "type": "object",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "nonce": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
     },
     "securitySchemes": {
       "BearerAuth": {
