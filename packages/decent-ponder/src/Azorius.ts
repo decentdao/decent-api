@@ -75,6 +75,19 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
     const daoAddress = moduleQuery.daoAddress;
     if (!daoAddress) return;
 
+    // let votingSupply = null;
+    // try {
+    //   // TODO: maybe we bundle endBlock here too
+    //   //   since we need to send a RPC call already
+    //   console.debug('query ', strategy, proposalId);
+    //   votingSupply = await context.client.readContract({
+    //     address: strategy,
+    //     abi: legacy.abis.LinearERC20Voting,
+    //     functionName: 'getProposalVotingSupply',
+    //     args: [Number(proposalId)],
+    //   });
+    // } catch (e) {}
+
     const votingEndBlock = getProposalEndBlock(event);
 
     const { title, description } = JSON.parse(metadata);
@@ -93,6 +106,7 @@ ponder.on('Azorius:ProposalCreated', async ({ event, context }) => {
         createdAt: event.block.timestamp,
         votingEndBlock,
         proposedTxHash: event.transaction.hash,
+        //votingSupply,
       })
       .onConflictDoNothing();
 
