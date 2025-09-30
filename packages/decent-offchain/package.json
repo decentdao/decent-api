@@ -14,7 +14,6 @@
     "start": "bun run src/api/index.ts",
     "syncSafe": "bun run scripts/sync.ts",
     "test": "bun test test/order.test.ts",
-    "sockettest": "bun test test/socket.test.ts",
     "lint": "eslint .",
     "pretty": "prettier . --write",
     "pretty:check": "prettier . --check"
