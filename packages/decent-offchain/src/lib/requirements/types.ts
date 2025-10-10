@@ -27,7 +27,7 @@ export type ERC721Requirement = BaseRequirement & {
 export type ERC1155Requirement = BaseRequirement & {
   type: TokenSaleRequirementType.ERC1155;
   tokenAddress: Address;
-  tokenId: number;
+  //tokenId: number;
   amount: string;
 };
 

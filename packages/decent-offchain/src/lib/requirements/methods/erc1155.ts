@@ -1,20 +1,7 @@
 import { Address } from 'viem';
 import { SupportedChainId } from 'decent-sdk';
 import { CheckResult, ERC1155Requirement } from '../types';
-import { getPublicClient } from '../../../api/utils/publicClient';
-
-const ERC1155_ABI = [
-  {
-    name: 'balanceOf',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'account', type: 'address' },
-      { name: 'id', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'uint256' }],
-  },
-] as const;
+import { getNFTsForOwner } from '@/lib/alchemy';
 
 export async function erc1155Check(
   chainId: SupportedChainId,
@@ -22,13 +9,8 @@ export async function erc1155Check(
   method: ERC1155Requirement,
 ): Promise<CheckResult> {
   try {
-    const client = getPublicClient(chainId);
-    const balance = await client.readContract({
-      address: method.tokenAddress,
-      abi: ERC1155_ABI,
-      functionName: 'balanceOf',
-      args: [address, BigInt(method.tokenId)],
-    });
+    const nfts = await getNFTsForOwner(chainId, address, method.tokenAddress);
+    const balance = nfts.totalCount || 0;
 
     const eligible = balance >= BigInt(method.amount);
 
@@ -36,7 +18,7 @@ export async function erc1155Check(
       eligible,
       ineligibleReason: eligible
         ? undefined
-        : `ERC1155 balance of ${method.amount} token ${method.tokenId} from ${method.tokenAddress}, ${address} has ${balance}`,
+        : `ERC1155 balance of ${method.amount} token from ${method.tokenAddress}, ${address} has ${balance}`,
     };
   } catch (error) {
     return {
