@@ -2,13 +2,13 @@ name: Test API
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/decent-offchain/**'
+      - "packages/decent-offchain/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/decent-offchain/**'
+      - "packages/decent-offchain/**"
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -51,7 +51,10 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - run: bun run test
         env:
-          PONDER_RPC_URL_8453: ${{ secrets.PONDER_RPC_URL_8453 }}
+          ALCHEMY_RPC_ENDPOINT: /v2/
+          ALCHEMY_NFT_ENDPOINT: /nft/v3/
+          ALCHEMY_URL_8453: https://base-mainnet.g.alchemy.com
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           TEST_PRIVATE_KEY_1: ${{ secrets.TEST_PRIVATE_KEY_1 }}
           TEST_PRIVATE_KEY_2: ${{ secrets.TEST_PRIVATE_KEY_2 }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
