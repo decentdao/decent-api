@@ -13,19 +13,19 @@ export const publicClients: Record<SupportedChainId, PublicClient> = {
   }),
   8453: createPublicClient({
     chain: base,
-    transport: http(composeRpcUrl(process.env.PONDER_RPC_URL_8453)),
+    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_8453)),
   }) as PublicClient,
   10: createPublicClient({
     chain: optimism,
-    transport: http(composeRpcUrl(process.env.PONDER_RPC_URL_10)),
+    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_10)),
   }) as PublicClient,
   137: createPublicClient({
     chain: polygon,
-    transport: http(composeRpcUrl(process.env.PONDER_RPC_URL_137)),
+    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_137)),
   }),
   11155111: createPublicClient({
     chain: sepolia,
-    transport: http(composeRpcUrl(process.env.PONDER_RPC_URL_11155111)),
+    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_11155111)),
   }),
 };
 
