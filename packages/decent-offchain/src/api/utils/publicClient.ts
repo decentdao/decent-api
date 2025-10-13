@@ -1,31 +1,28 @@
 import { mainnet, base, optimism, polygon, sepolia } from 'viem/chains';
 import { SupportedChainId } from 'decent-sdk';
 import { createPublicClient, http, PublicClient } from 'viem';
-
-function composeRpcUrl(baseUrl: string | undefined) {
-  return (baseUrl || '') + process.env.ALCHEMY_RPC_ENDPOINT + process.env.ALCHEMY_API_KEY;
-}
+import { getAlchemyApiUrl } from '@/lib/alchemy';
 
 export const publicClients: Record<SupportedChainId, PublicClient> = {
   1: createPublicClient({
     chain: mainnet,
-    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_1)),
+    transport: http(getAlchemyApiUrl(1)),
   }),
-  8453: createPublicClient({
-    chain: base,
-    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_8453)),
-  }) as PublicClient,
   10: createPublicClient({
     chain: optimism,
-    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_10)),
+    transport: http(getAlchemyApiUrl(10)),
   }) as PublicClient,
   137: createPublicClient({
     chain: polygon,
-    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_137)),
+    transport: http(getAlchemyApiUrl(137)),
   }),
+  8453: createPublicClient({
+    chain: base,
+    transport: http(getAlchemyApiUrl(8453)),
+  }) as PublicClient,
   11155111: createPublicClient({
     chain: sepolia,
-    transport: http(composeRpcUrl(process.env.ALCHEMY_URL_11155111)),
+    transport: http(getAlchemyApiUrl(11155111)),
   }),
 };
 

@@ -51,9 +51,6 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       - run: bun run test
         env:
-          ALCHEMY_RPC_ENDPOINT: /v2/
-          ALCHEMY_NFT_ENDPOINT: /nft/v3/
-          ALCHEMY_URL_8453: https://base-mainnet.g.alchemy.com
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           TEST_PRIVATE_KEY_1: ${{ secrets.TEST_PRIVATE_KEY_1 }}
           TEST_PRIVATE_KEY_2: ${{ secrets.TEST_PRIVATE_KEY_2 }}

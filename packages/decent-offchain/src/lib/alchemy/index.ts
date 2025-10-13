@@ -1,25 +1,21 @@
 import { SupportedChainId } from 'decent-sdk';
 import { Address, Hex } from 'viem';
 
-function composeNftUrl(baseUrl: string | undefined) {
-  return (baseUrl || '') + process.env.ALCHEMY_NFT_ENDPOINT + process.env.ALCHEMY_API_KEY;
+const ALCHEMY_BASE_URLS: Record<SupportedChainId, string> = {
+  1: 'https://eth-mainnet.g.alchemy.com',
+  10: 'https://opt-mainnet.g.alchemy.com',
+  137: 'https://polygon-mainnet.g.alchemy.com',
+  8453: 'https://base-mainnet.g.alchemy.com',
+  11155111: 'https://eth-sepolia.g.alchemy.com',
+};
+
+export function getAlchemyApiUrl(chainId: SupportedChainId) {
+  return ALCHEMY_BASE_URLS[chainId] + '/v2/' + process.env.ALCHEMY_API_KEY;
 }
 
-const nftUrls: Record<SupportedChainId, string> = {
-  1: composeNftUrl(process.env.ALCHEMY_URL_1),
-  8453: composeNftUrl(process.env.ALCHEMY_URL_8453),
-  10: composeNftUrl(process.env.ALCHEMY_URL_10),
-  137: composeNftUrl(process.env.ALCHEMY_URL_137),
-  11155111: composeNftUrl(process.env.ALCHEMY_URL_11155111),
-};
-
-const getNftUrl = (chainId: SupportedChainId): string => {
-  const url = nftUrls[chainId];
-  if (!url) {
-    throw new Error(`No NFT API url available for chainId: ${chainId}`);
-  }
-  return url;
-};
+export function getAlchemyNFTApiUrl(chainId: SupportedChainId) {
+  return ALCHEMY_BASE_URLS[chainId] + '/nft/v3/' + process.env.ALCHEMY_API_KEY;
+}
 
 export interface NFTForOwnerResponse {
   ownedNfts: { tokenId: string; contractAddress: Hex; isSpam: boolean }[] | null;
@@ -37,7 +33,7 @@ export async function getNFTsForOwner(
   contract: Address,
   withMetadata: boolean = false,
 ) {
-  const url = `${getNftUrl(chainId)}/getNFTsForOwner?owner=${owner}&contractAddresses%5B%5D=${contract}&withMetadata=${withMetadata}`;
+  const url = `${getAlchemyNFTApiUrl(chainId)}/getNFTsForOwner?owner=${owner}&contractAddresses%5B%5D=${contract}&withMetadata=${withMetadata}`;
   const response = await fetch(url);
 
   return (await response.json()) as NFTForOwnerResponse;
