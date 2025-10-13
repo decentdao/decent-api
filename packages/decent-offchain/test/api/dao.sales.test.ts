@@ -1,10 +1,8 @@
-import { Address } from 'viem';
 import { describe, it, expect } from 'bun:test';
 import app from '@/api/index';
 import { ApiResponse } from 'decent-sdk';
 import { signVerificationData, WALLETS } from 'test/client';
 import { VerificationResponse } from '@/lib/verifier/types';
-import { TokenSaleRequirements } from '@/lib/requirements/types';
 
 const daoChainId = 11155111;
 const daoAddress = '0x7a5555721d6548f2fa54249a19d96b4bc33264ca';
