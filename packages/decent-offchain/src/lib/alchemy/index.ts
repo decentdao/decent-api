@@ -18,7 +18,7 @@ export function getAlchemyNFTApiUrl(chainId: SupportedChainId) {
 }
 
 export interface NFTForOwnerResponse {
-  ownedNfts: { tokenId: string; contractAddress: Hex; isSpam: boolean }[] | null;
+  ownedNfts: { tokenId: string; balance: string; contractAddress: Hex; isSpam: boolean }[] | null;
   totalCount: number | null;
   validAt: {
     blockNumber: number | null;

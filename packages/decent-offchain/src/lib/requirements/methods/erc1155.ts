@@ -10,9 +10,9 @@ export async function erc1155Check(
 ): Promise<CheckResult> {
   try {
     const nfts = await getNFTsForOwner(chainId, address, method.tokenAddress);
-    const balance = nfts.totalCount || 0;
+    const balance = nfts.ownedNfts?.reduce((acc, nft) => acc + parseInt(nft.balance), 0) || 0;
 
-    const eligible = balance >= BigInt(method.amount);
+    const eligible = BigInt(balance) >= BigInt(method.amount);
 
     return {
       eligible,
