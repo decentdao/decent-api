@@ -1,16 +1,19 @@
 import { ponder } from 'ponder:registry';
 import { freezeVotingStrategy } from 'ponder:schema';
 
-// other freeze voting settings are covered by the common
-// event topics in `MultisigFreezeVoting`
-
 ponder.on('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', async ({ event, context }) => {
   try {
     const { freezeVoting } = event.args;
     const address = event.log.address;
+
+    // got freeze voting info so insert it
     await context.db
-      .update(freezeVotingStrategy, { address: freezeVoting })
-      .set({ governanceGuardId: address });
+      .insert(freezeVotingStrategy)
+      .values({
+        address: freezeVoting,
+        governanceGuardId: address,
+      })
+      .onConflictDoUpdate({ governanceGuardId: address });
   } catch (e) {
     // console.error('AzoriusFreezeGuard:AzoriusFreezeGuardSetUp', e);
   }
