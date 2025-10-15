@@ -111,6 +111,8 @@ export const DAO_SELECT_FIELDS = {
   updatedAt: schema.daoTable.updatedAt,
 };
 
+// Note: There will be two governance modules linked to same DAO
+//   if there's subDAO relation created.
 export const DAO_GOVERNANCE_MODULE_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceModuleTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceModuleTable.daoAddress}`;
 export const DAO_GOVERNANCE_GUARD_JOIN_CONDITION = sql`${schema.daoTable.chainId} = ${schema.governanceGuardTable.daoChainId} AND ${schema.daoTable.address} = ${schema.governanceGuardTable.daoAddress}`;
 
