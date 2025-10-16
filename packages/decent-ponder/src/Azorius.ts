@@ -6,9 +6,10 @@ import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
 
 ponder.on('Azorius:ChangedGuard', async ({ event, context }) => {
   try {
-    const address = event.log.address;
+    const { guard } = event.args;
+    const azoriusAddress = event.log.address;
     const daoAddress = await context.client.readContract({
-      address,
+      address: azoriusAddress,
       abi: legacy.abis.Azorius,
       functionName: 'target',
     });
@@ -16,7 +17,7 @@ ponder.on('Azorius:ChangedGuard', async ({ event, context }) => {
     await context.db
       .insert(governanceGuard)
       .values({
-        address,
+        address: guard,
         daoAddress,
         daoChainId,
       })
