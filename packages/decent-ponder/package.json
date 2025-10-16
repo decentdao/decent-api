@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "ponder dev --schema=onchain",
+    "dev:debug": "ponder dev --schema=onchain --disable-ui",
     "start": "npm run ponder:prune && ponder start --schema=${RAILWAY_DEPLOYMENT_ID%%-*} --views-schema=onchain",
     "ponder:list": "ponder db list",
     "ponder:prune": "ponder db prune",
