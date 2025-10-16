@@ -3,8 +3,20 @@ import { freezeVotingStrategy, governanceGuard, safeProposalExecution } from 'po
 
 ponder.on('MultisigFreezeGuard:MultisigFreezeGuardSetup', async ({ event, context }) => {
   try {
-    const { freezeVoting } = event.args;
+    const { childGnosisSafe, freezeVoting } = event.args;
     const address = event.log.address;
+    const daoChainId = context.chain.id;
+    await context.db
+      .insert(governanceGuard)
+      .values({
+        address,
+        daoAddress: childGnosisSafe,
+        daoChainId,
+      })
+      .onConflictDoUpdate({
+        daoAddress: childGnosisSafe,
+        daoChainId,
+      });
 
     // got freeze voting info so insert it
     await context.db

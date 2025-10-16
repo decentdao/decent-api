@@ -1,8 +1,33 @@
 import { replaceBigInts } from 'ponder';
 import { legacy } from '@decentdao/decent-contracts';
 import { ponder } from 'ponder:registry';
-import { dao, governanceModule, proposal, votingStrategy } from 'ponder:schema';
+import { dao, governanceGuard, governanceModule, proposal, votingStrategy } from 'ponder:schema';
 import { deleteProposalEndBlock, getProposalEndBlock } from './utils/endBlock';
+
+ponder.on('Azorius:ChangedGuard', async ({ event, context }) => {
+  try {
+    const address = event.log.address;
+    const daoAddress = await context.client.readContract({
+      address,
+      abi: legacy.abis.Azorius,
+      functionName: 'target',
+    });
+    const daoChainId = context.chain.id;
+    await context.db
+      .insert(governanceGuard)
+      .values({
+        address,
+        daoAddress,
+        daoChainId,
+      })
+      .onConflictDoUpdate({
+        daoAddress,
+        daoChainId,
+      });
+  } catch (e) {
+    // console.error('Azorius:ChangedGuard', e);
+  }
+});
 
 ponder.on('Azorius:EnabledStrategy', async ({ event, context }) => {
   try {
