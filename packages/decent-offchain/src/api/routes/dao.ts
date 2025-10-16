@@ -8,7 +8,7 @@ import { permissionsCheck } from '@/api/middleware/permissions';
 import { getChainId } from '@/api/utils/chains';
 import { decodeTransactionData, getCIDFromSafeTransaction, getSafeTransactions } from '@/lib/safe';
 import { schema } from '@/db/schema';
-import { DAO_SELECT_FIELDS, DAO_GOVERNANCE_MODULE_JOIN_CONDITION } from '@/db/queries';
+import { DAO_SELECT_FIELDS } from '@/db/queries';
 import { fetchMetadata } from '@/api/utils/metadata';
 import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
 import { Hex } from 'viem';
@@ -26,7 +26,6 @@ app.get('/', async c => {
   const daos = await db
     .select(DAO_SELECT_FIELDS)
     .from(schema.daoTable)
-    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
     .where(nameQueryParam ? sql`${schema.daoTable.name} ilike ${`%${nameQueryParam}%`}` : undefined)
     .orderBy(asc(schema.daoTable.chainId));
   return resf(c, daos);
@@ -44,7 +43,6 @@ app.get('/:chainId', async c => {
   const daos = await db
     .select(DAO_SELECT_FIELDS)
     .from(schema.daoTable)
-    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
     .where(sql`${schema.daoTable.chainId} = ${chainIdNumber}`);
 
   return resf(c, daos);

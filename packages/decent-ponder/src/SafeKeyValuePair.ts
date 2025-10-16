@@ -1,3 +1,5 @@
+// This file should be almost same as SafeFractalRegistry.ts
+//   except for contract index name.
 import { ponder } from 'ponder:registry';
 import { dao, safeProposalExecution } from 'ponder:schema';
 

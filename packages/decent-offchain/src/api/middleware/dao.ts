@@ -3,12 +3,7 @@ import { Address, isAddress } from 'viem';
 import { and, eq, inArray } from 'drizzle-orm';
 import { Dao, SupportedChainId } from 'decent-sdk';
 import { db } from '@/db';
-import {
-  CHILD_SELECT_FIELDS,
-  DAO_GOVERNANCE_MODULE_JOIN_CONDITION,
-  DEFAULT_DAO_WITH,
-  SIMPLE_DAO_SELECT_FIELDS,
-} from '@/db/queries';
+import { CHILD_SELECT_FIELDS, DEFAULT_DAO_WITH, SIMPLE_DAO_SELECT_FIELDS } from '@/db/queries';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { formatDao } from '@/api/utils/typeConverter';
 import { DbDao } from '@/db/schema/onchain';
@@ -82,7 +77,6 @@ async function fetchNestedSubDaos(
   const subDaos = await db
     .select(CHILD_SELECT_FIELDS)
     .from(schema.daoTable)
-    .leftJoin(schema.governanceModuleTable, DAO_GOVERNANCE_MODULE_JOIN_CONDITION)
     .where(inArray(schema.daoTable.address, addresses));
 
   const result = await Promise.all(
