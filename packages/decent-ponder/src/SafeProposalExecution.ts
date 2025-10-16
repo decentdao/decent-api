@@ -1,9 +1,10 @@
-// This file should be almost same as SafeFractalRegistry.ts
-//   except for contract index name.
-import { ponder } from 'ponder:registry';
+import { IndexingFunctionArgs, ponder } from 'ponder:registry';
 import { dao, safeProposalExecution } from 'ponder:schema';
 
-ponder.on('SafeKeyValuePair:ExecutionSuccess', async ({ event, context }) => {
+async function executionSuccessHandler({
+  event,
+  context,
+}: IndexingFunctionArgs<'SafeKeyValuePair:ExecutionSuccess'>) {
   const { txHash: safeTxnHash } = event.args;
   const daoAddress = event.log.address;
   const daoChainId = context.chain.id;
@@ -28,4 +29,7 @@ ponder.on('SafeKeyValuePair:ExecutionSuccess', async ({ event, context }) => {
       executedBlock,
     })
     .onConflictDoUpdate({ executedTxHash });
-});
+}
+
+ponder.on('SafeKeyValuePair:ExecutionSuccess', executionSuccessHandler);
+ponder.on('SafeFractalRegistry:ExecutionSuccess', executionSuccessHandler);
