@@ -1,0 +1,248 @@
+import { createConfig, factory } from 'ponder';
+import { getAbiItem, http } from 'viem';
+import { legacy } from '@decentdao/decent-contracts';
+import { FractalRegistryAbi } from './abis/FractalRegistryAbi';
+import { ZodiacModuleProxyFactoryAbi } from './abis/ZodiacModuleProxyFactoryAbi';
+import { SplitV2o2FactoryAbi } from './abis/SplitV2o2FactoryAbi';
+import { SplitV2Abi } from './abis/SplitV2Abi';
+import { HatsAbi } from './abis/HatsAbi';
+import { HatsElectionEligibilityAbi } from './abis/HatsElectionEligibilityAbi';
+import { HatsModuleFactoryAbi } from './abis/HatsModuleFactoryAbi';
+import { GnosisSafeL2Abi } from './abis/GnosisSafeL2Abi';
+
+export default createConfig({
+  chains: {
+    sepolia: {
+      id: 11155111,
+      rpc: http(process.env.PONDER_RPC_URL_11155111),
+    },
+  },
+  contracts: {
+    KeyValuePairs: {
+      abi: legacy.abis.KeyValuePairs,
+      chain: {
+        sepolia: {
+          address: legacy.addresses[11155111].KeyValuePairs.address,
+          startBlock: legacy.addresses[11155111].KeyValuePairs.deploymentBlock,
+        },
+      },
+    },
+    FractalRegistry: {
+      abi: FractalRegistryAbi,
+      chain: {
+        sepolia: {
+          address: '0x4791FF2a6E84F012402c0679C12Cb1d9260450A6',
+          startBlock: 4916634,
+        },
+      },
+    },
+    Azorius: {
+      abi: legacy.abis.Azorius,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    FractalModule: {
+      abi: legacy.abis.FractalModule,
+      chain: {
+        sepolia: {
+          startBlock: 4916633,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    LinearERC20Voting: {
+      abi: legacy.abis.LinearERC20Voting,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    LinearERC721Voting: {
+      abi: legacy.abis.LinearERC721Voting,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    MultisigFreezeGuard: {
+      abi: legacy.abis.MultisigFreezeGuard,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    AzoriusFreezeGuard: {
+      abi: legacy.abis.AzoriusFreezeGuard,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    MultisigFreezeVoting: {
+      abi: legacy.abis.MultisigFreezeVoting,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    ERC20FreezeVoting: {
+      abi: legacy.abis.ERC20FreezeVoting,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    ERC721FreezeVoting: {
+      abi: legacy.abis.ERC721FreezeVoting,
+      chain: {
+        sepolia: {
+          startBlock: 4916642,
+          address: factory({
+            address: [
+              '0x000000000000aDdB49795b0f9bA5BC298cDda236',
+              '0xE93e4B198097C4CB3A6de594c90031CDaC0B88f3',
+            ],
+            event: getAbiItem({ abi: ZodiacModuleProxyFactoryAbi, name: 'ModuleProxyCreation' }),
+            parameter: 'proxy',
+          }),
+        },
+      },
+    },
+    SplitV2: {
+      abi: SplitV2Abi,
+      chain: {
+        sepolia: {
+          startBlock: 8715311,
+          address: factory({
+            address: '0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4',
+            event: getAbiItem({ abi: SplitV2o2FactoryAbi, name: 'SplitCreated' }),
+            parameter: 'split',
+          }),
+        },
+      },
+    },
+    Hats: {
+      abi: HatsAbi,
+      chain: {
+        sepolia: {
+          startBlock: 7129765,
+          address: '0x3bc1A0Ad72417f2d411118085256fC53CBdDd137',
+        },
+      },
+    },
+    HatsElectionEligibility: {
+      abi: HatsElectionEligibilityAbi,
+      chain: {
+        sepolia: {
+          startBlock: 5516083,
+          address: factory({
+            address: '0x0a3f85fa597B6a967271286aA0724811acDF5CD9',
+            event: getAbiItem({
+              abi: HatsModuleFactoryAbi,
+              name: 'HatsModuleFactory_ModuleDeployed',
+            }),
+            parameter: 'instance',
+          }),
+        },
+      },
+    },
+    SafeKeyValuePair: {
+      abi: GnosisSafeL2Abi,
+      chain: {
+        sepolia: {
+          startBlock: 4916643,
+          address: factory({
+            address: legacy.addresses[11155111].KeyValuePairs.address,
+            event: getAbiItem({ abi: legacy.abis.KeyValuePairs, name: 'ValueUpdated' }),
+            parameter: 'theAddress',
+          }),
+        },
+      },
+    },
+    SafeFractalRegistry: {
+      abi: GnosisSafeL2Abi,
+      chain: {
+        sepolia: {
+          startBlock: 4916634,
+          address: factory({
+            address: '0x4791FF2a6E84F012402c0679C12Cb1d9260450A6',
+            event: getAbiItem({ abi: FractalRegistryAbi, name: 'FractalNameUpdated' }),
+            parameter: 'daoAddress',
+          }),
+        },
+      },
+    },
+  },
+});

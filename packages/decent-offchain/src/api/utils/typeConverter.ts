@@ -179,8 +179,6 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
       args: [proposal.id],
     });
   } else {
-    // TODO: we could fetch from DB
-    //  today we send a RPC for quick implmentation
     const client = getPublicClient(proposal.daoChainId);
     quorum = await client.readContract({
       address: proposal.votingStrategyAddress,
@@ -222,7 +220,7 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
   };
 
   // Must convert to string to be able to return as JSON
-  const votesString = votes.map(v => ({ ...v, weight: v.weight.toString() }))
+  const votesString = votes.map(v => ({ ...v, weight: v.weight.toString() }));
 
   // Decode
   const decodedTransactions = proposal.transactions
