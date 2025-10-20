@@ -36,7 +36,7 @@ export type BasicDaoInfo = {
   isAzorius: boolean;
 };
 
-export type GovernanceType = 'multisig' | 'erc20' | 'erc721';
+export type GovernanceType = 'multisig' | 'erc20' | 'erc721' | 'unknown';
 
 export type SubDaoInfo = {
   address: Address;
@@ -96,11 +96,19 @@ async function fetchNestedSubDaos(
           ? await fetchNestedSubDaos(dao.subDaoAddresses, chainId, depth + 1)
           : [];
       const azoriusModule = dao.governanceModules.find(mod => mod.moduleType === 'AZORIUS');
-      const governanceType = (
-        dao.isAzorius
-          ? (azoriusModule?.votingStrategies?.[0]?.votingTokens?.[0]?.type?.toLowerCase() ?? null)
-          : 'multisig'
-      ) as GovernanceType;
+      let governanceType: GovernanceType;
+
+      if (!dao.isAzorius) {
+        governanceType = 'multisig';
+      } else if (azoriusModule?.votingStrategies.some(vs => vs.votingTokens[0]?.type === 'ERC20')) {
+        governanceType = 'erc20';
+      } else if (
+        azoriusModule?.votingStrategies.some(vs => vs.votingTokens[0]?.type === 'ERC721')
+      ) {
+        governanceType = 'erc721';
+      } else {
+        governanceType = 'unknown';
+      }
 
       return {
         address: dao.address as Address,
