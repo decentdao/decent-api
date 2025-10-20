@@ -1,9 +1,9 @@
 import { Context, Next } from 'hono';
 import { Address, isAddress } from 'viem';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Dao, SupportedChainId } from 'decent-sdk';
 import { db } from '@/db';
-import { CHILD_SELECT_FIELDS, DEFAULT_DAO_WITH, SIMPLE_DAO_SELECT_FIELDS } from '@/db/queries';
+import { DEFAULT_DAO_WITH, SIMPLE_DAO_SELECT_FIELDS, SUB_DAO_WITH } from '@/db/queries';
 import { ApiError } from '@/api/utils/responseFormatter';
 import { formatDao } from '@/api/utils/typeConverter';
 import { DbDao } from '@/db/schema/onchain';
@@ -36,10 +36,13 @@ export type BasicDaoInfo = {
   isAzorius: boolean;
 };
 
+export type GovernanceType = 'multisig' | 'erc20' | 'erc721';
+
 export type SubDaoInfo = {
   address: Address;
   name: string | null;
   isAzorius: boolean;
+  governanceType: GovernanceType;
   subDaos?: SubDaoInfo[];
 };
 
@@ -74,10 +77,17 @@ async function fetchNestedSubDaos(
 ): Promise<SubDaoInfo[]> {
   if (depth > MAX_SUB_DAO_DEPTH || addresses.length === 0) return [];
 
-  const subDaos = await db
-    .select(CHILD_SELECT_FIELDS)
-    .from(schema.daoTable)
-    .where(inArray(schema.daoTable.address, addresses));
+  const subDaos = await db.query.daoTable.findMany({
+    columns: {
+      chainId: true,
+      address: true,
+      name: true,
+      isAzorius: true,
+      subDaoAddresses: true,
+    },
+    where: (dao, { inArray }) => inArray(dao.address, addresses),
+    with: SUB_DAO_WITH,
+  });
 
   const result = await Promise.all(
     subDaos.map(async dao => {
@@ -85,11 +95,18 @@ async function fetchNestedSubDaos(
         dao.subDaoAddresses && dao.subDaoAddresses.length > 0
           ? await fetchNestedSubDaos(dao.subDaoAddresses, chainId, depth + 1)
           : [];
+      const azoriusModule = dao.governanceModules.find(mod => mod.moduleType === 'AZORIUS');
+      const governanceType = (
+        dao.isAzorius
+          ? (azoriusModule?.votingStrategies?.[0]?.votingTokens?.[0]?.type?.toLowerCase() ?? null)
+          : 'multisig'
+      ) as GovernanceType;
 
       return {
         address: dao.address as Address,
         name: dao.name,
         isAzorius: dao.isAzorius,
+        governanceType,
         ...(nestedSubDaos.length > 0 && { subDaos: nestedSubDaos }),
       };
     }),

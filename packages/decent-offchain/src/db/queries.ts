@@ -90,6 +90,30 @@ export const DEFAULT_DAO_WITH = {
   },
 };
 
+export const SUB_DAO_WITH = {
+  governanceModules: {
+    columns: {
+      address: true,
+      moduleType: true,
+    },
+    with: {
+      votingStrategies: {
+        columns: {
+          address: true,
+        },
+        with: {
+          votingTokens: {
+            columns: {
+              address: true,
+              type: true,
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 export const SIMPLE_DAO_SELECT_FIELDS = {
   chainId: schema.daoTable.chainId,
   address: schema.daoTable.address,
