@@ -68,7 +68,7 @@ ponder.on('LinearERC721Voting:QuorumThresholdUpdated', async ({ event, context }
 
 ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
   try {
-    const { voter, proposalId, voteType, tokenAddresses } = event.args;
+    const { voter, proposalId, voteType, tokenAddresses, tokenIds } = event.args;
     const votingStrategyAddress = event.log.address;
     const votedAt = event.block.timestamp;
 
@@ -85,6 +85,8 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
         voteType,
         weight: BigInt(calculatedWeight),
         votedAt,
+        tokenIds: [...tokenIds],
+        tokenAddresses: [...tokenAddresses],
       })
       .onConflictDoNothing();
   } catch (e) {

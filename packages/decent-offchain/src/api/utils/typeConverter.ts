@@ -187,12 +187,13 @@ export async function formatAzoriusProposal(proposal: DbProposal): Promise<Azori
     });
   }
 
-  // TODO: handle ERC721? tokenIds in votes type
   const votes =
     proposal.votes?.map(v => ({
       voter: v.voter,
       choice: VOTE_CHOICES_INDEX_MAP[v.voteType]!,
       weight: BigInt(v.weight || 0),
+      tokenIds: v.tokenIds,
+      tokenAddresses: v.tokenAddresses,
     })) || [];
   const votesSummary: ProposalVotesSummary = {
     yes: 0n,

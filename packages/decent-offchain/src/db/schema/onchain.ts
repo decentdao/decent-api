@@ -181,6 +181,8 @@ export const voteTable = onchainSchema.table(
     voteType: integer().notNull(), // ['NO', 'YES', 'ABSTAIN']
     weight: bigint({ mode: 'number' }),
     votedAt: bigint({ mode: 'number' }),
+    tokenIds: bigint({ mode: 'number' }).array(),
+    tokenAddresses: hex().array(),
   },
   t => [primaryKey({ columns: [t.voter, t.proposalId, t.votingStrategyAddress] })],
 );
