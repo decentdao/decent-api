@@ -11,7 +11,9 @@ import { schema } from '@/db/schema';
 import { DAO_SELECT_FIELDS } from '@/db/queries';
 import { fetchMetadata } from '@/api/utils/metadata';
 import { DbSafeProposal } from '@/db/schema/offchain/safeProposals';
-import { Hex } from 'viem';
+import { erc721Abi, getContract, Hex, zeroAddress } from 'viem';
+import { duneFetchToken } from '@/lib/dune';
+import { getPublicClient } from '../utils/publicClient';
 
 const app = new Hono();
 
@@ -58,6 +60,61 @@ app.get('/:chainId', async c => {
 app.get('/:chainId/:address', daoFetch, async c => {
   const dao = c.get('dao');
   return resf(c, dao);
+});
+
+/**
+ * @title Get a DAO token metadata by chain ID and address
+ * @route GET /d/{chainId}/{address}/token-metadata
+ * @param {string} chainId - Chain ID parameter
+ * @param {string} address - Address parameter
+ * @returns {TokenMetadata} Token metadata object
+ */
+app.get('/:chainId/:address/token-metadata', daoFetch, async c => {
+  const { chainId } = c.req.param();
+  const chainIdNumber = getChainId(chainId);
+  const dao = c.get('dao');
+
+  const tokens =
+    dao.governanceModules?.flatMap(mod => mod.strategies)?.flatMap(vs => vs.votingTokens) || [];
+
+  const client = getPublicClient(chainIdNumber);
+  const tokensWithMetadata = await Promise.all(
+    tokens.map(async token => {
+      const tokenQueryResponse = await duneFetchToken(token.address, {
+        chainIds: chainIdNumber.toString(),
+      });
+      const tokenInfo = tokenQueryResponse.tokens[0];
+      const metadata =
+        tokenInfo !== undefined
+          ? {
+              name: tokenInfo.name,
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.decimals,
+              totalSupply: tokenInfo.total_supply,
+            }
+          : undefined;
+
+      if (metadata !== undefined && token.type !== 'ERC20') {
+        if (metadata.totalSupply === undefined || metadata.totalSupply === '0') {
+          // No totalSupply, let's calculate it by index all Mint and Burn events
+          //   like frontend has been doing so far.
+          const tokenContract = getContract({
+            abi: erc721Abi,
+            address: token.address,
+            client,
+          });
+          const [tokenMintEvents, tokenBurnEvents] = await Promise.all([
+            tokenContract.getEvents.Transfer({ from: zeroAddress }, { fromBlock: 0n }),
+            tokenContract.getEvents.Transfer({ to: zeroAddress }, { fromBlock: 0n }),
+          ]);
+          metadata.totalSupply = (tokenMintEvents.length - tokenBurnEvents.length).toString();
+        }
+      }
+
+      return { ...token, metadata };
+    }),
+  );
+  return resf(c, tokensWithMetadata);
 });
 
 /**
