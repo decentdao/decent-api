@@ -1,6 +1,8 @@
+import { and, eq, inArray } from 'ponder';
 import { ponder } from 'ponder:registry';
 import { votingStrategy, votingToken, vote } from 'ponder:schema';
 import { setProposalEndBlock } from './utils/endBlock';
+import { Address } from 'viem';
 
 ponder.on('LinearERC721Voting:ProposalInitialized', async ({ event }) => {
   setProposalEndBlock(event); // cache votingEndBlock
@@ -72,10 +74,24 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
     const votingStrategyAddress = event.log.address;
     const votedAt = event.block.timestamp;
 
-    // app has weight hardcoded as 1 even though this is not correct
-    // TODO: ENG-1385 proper vote calculation
-    const tokenWeight = 1;
-    const calculatedWeight = tokenWeight * tokenAddresses.length;
+    // Get all token weights for the NFT collections used in this vote
+    const tokens = await context.db.sql
+      .select()
+      .from(votingToken)
+      .where(
+        and(
+          eq(votingToken.votingStrategyId, votingStrategyAddress),
+          inArray(votingToken.address, [...tokenAddresses]),
+        ),
+      );
+
+    // Calculate total weight from all NFTs voted with
+    // Build a map for O(1) lookups, then sum weights for each NFT
+    const tokenWeightMap = new Map(tokens.map(t => [t.address, t.weight || 0n]));
+    const weight = tokenAddresses
+      .map(addr => addr.toLowerCase())
+      .reduce((sum, address) => sum + (tokenWeightMap.get(address as Address) || 0n), 0n);
+
     await context.db
       .insert(vote)
       .values({
@@ -83,12 +99,12 @@ ponder.on('LinearERC721Voting:Voted', async ({ event, context }) => {
         proposalId: BigInt(proposalId),
         votingStrategyAddress,
         voteType,
-        weight: BigInt(calculatedWeight),
+        weight,
         votedAt,
         tokenIds: [...tokenIds],
         tokenAddresses: [...tokenAddresses],
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({ weight });
   } catch (e) {
     // console.error('LinearERC721Voting:Voted');
   }
